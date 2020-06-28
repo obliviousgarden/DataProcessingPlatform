@@ -62,9 +62,9 @@ class DataSet2TFRecord:
                                 'label': tf.train.Feature(int64_list=tf.train.Int64List(
                                     value=[int(file_name.split('-')[2].replace('.dm3', ''))])),
                                 'shape': tf.train.Feature(
-                                    int64_list=tf.train.Int64List(value=[imgd.shape[0], imgd.shape[1], 1])),
-                                # 最后一个1是代表色彩通道为1 是一个灰度图
-                                'data': tf.train.Feature(float_list=tf.train.FloatList(value=imgd.reshape(-1)))
+                                    int64_list=tf.train.Int64List(value=[imgd.shape[0], imgd.shape[1]])),
+                                'data': tf.train.Feature(
+                                    float_list=tf.train.FloatList(value=imgd.reshape(-1)))
                             }
                         )
                     )

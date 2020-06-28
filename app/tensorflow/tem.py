@@ -5,13 +5,15 @@ from django.core import serializers
 import tensorflow as tf
 import numpy as np
 import cv2 as cv
+import os
+import matplotlib.pyplot as plt
 
 
 @require_http_methods(["GET"])
 def tf_tem(request):
     response = {}
     print(request.GET)
-    # TODO：调取数据库信息对图片进行分析处理
+    # TODO：调取数据库信息对图片进行迁移分析
     response['code'] = 738
     response['data'] = {'data': ''}
     response['msg'] = '分析成功'
@@ -20,21 +22,46 @@ def tf_tem(request):
 
 # 下面是神经网络相关代码
 # 1 数据
-class TrainDataLoader():
+class DataLoader():
     def __init__(self):
+        print('初始化DataLoader，载入数据中...')
+        self.curDir = os.path.abspath(os.path.dirname(__file__))
+        self.rootDir = self.curDir[:self.curDir.find("app\\") + len("app\\")]
+        self.datasetDir = self.rootDir + 'dataset\\tem\\tfrecords\\'
+        self.train_dataset = tf.data.TFRecordDataset(self.datasetDir+'train.tfrecords')
+        self.valid_dataset = tf.data.TFRecordDataset(self.datasetDir+'valid.tfrecords')
+        self.test_dataset = tf.data.TFRecordDataset(self.datasetDir + 'test.tfrecords')
 
-    # 1 载入图片训练数据
-    # 2 展开数据成[样本数，像素长，像素宽，色彩通道数]的张量，通道默认为1因为是灰度图
+        for element in self.test_dataset.as_numpy_iterator():
+            features = tf.io.parse_single_example(element,
+                                                  features={'name': tf.io.FixedLenFeature([], tf.string),
+                                                            'label': tf.io.FixedLenFeature([], tf.int64),
+                                                            'shape': tf.io.FixedLenFeature([2], tf.int64),
+                                                            'data': tf.io.FixedLenFeature([2048,2048], tf.float32)})
+            print(features['name'], features['label'], features['shape'], features['data'])
+            img_data = np.fromstring(features['data'], dtype=np.float32)
+            image_data = np.reshape(img_data, features['shape'])
+            image_std_data = (image_data-np.mean(image_data,axis=0))/np.std(image_data,axis=0)
+            plt.figure()
+            img = plt.imshow(image_std_data,vmin=-1.0,vmax=1.0, interpolation='nearest')
+            img.set_cmap('gray')
+            plt.axis('off')
+            plt.margins(0, 0)
+            plt.show()
+            print('a')
+
 
     def get_batch(self, batch_size):
-        return
+        return batch_size
 
 
 # 2 模型
 class CNN(tf.keras.Model):
     def __init__(self):
+        super().__init()
 
     def call(self, inputs):
+        print(inputs)
         output = {}
         return output
 
@@ -44,30 +71,4 @@ class CNN(tf.keras.Model):
 # 4 评价
 
 if __name__ == '__main__':
-    # 定义一个随机数（标量）
-    random_float = tf.random.uniform(shape=())
-
-    # 定义一个有2个元素的零向量
-    zero_vector = tf.zeros(shape=(2))
-
-    # 定义两个2×2的常量矩阵
-    A = tf.constant([[1., 2.], [3., 4.]])
-    B = tf.constant([[5., 6.], [7., 8.]])
-    # 查看矩阵A的形状、类型和值
-    print(A.__str__())
-
-    # 计算矩阵A和B的和
-    C = tf.add(A, B)
-    # 计算矩阵A和B的乘积
-    D = tf.matmul(A, B)
-
-    print(C.__str__())
-    print(D.__str__())
-
-    x = tf.Variable(initial_value=3.)
-    # 在 tf.GradientTape() 的上下文内，所有计算步骤都会被记录以用于求导
-    with tf.GradientTape() as tape:
-        y = tf.square(x)
-    # 计算y关于x的导数
-    y_grad = tape.gradient(y, x)
-    print(y, y_grad)
+    data_loader = DataLoader()
