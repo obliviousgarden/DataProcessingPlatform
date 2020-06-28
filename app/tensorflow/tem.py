@@ -18,6 +18,31 @@ def tf_tem(request):
     return JsonResponse(response)
 
 
+# 下面是神经网络相关代码
+# 1 数据
+class TrainDataLoader():
+    def __init__(self):
+
+    # 1 载入图片训练数据
+    # 2 展开数据成[样本数，像素长，像素宽，色彩通道数]的张量，通道默认为1因为是灰度图
+
+    def get_batch(self, batch_size):
+        return
+
+
+# 2 模型
+class CNN(tf.keras.Model):
+    def __init__(self):
+
+    def call(self, inputs):
+        output = {}
+        return output
+
+
+# 3 训练
+
+# 4 评价
+
 if __name__ == '__main__':
     # 定义一个随机数（标量）
     random_float = tf.random.uniform(shape=())
