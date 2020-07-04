@@ -22,43 +22,57 @@ def tf_tem(request):
 
 # 下面是神经网络相关代码
 # 1 数据
+def parse_example(example):
+    features = tf.io.parse_single_example(example,
+                                          features={'name': tf.io.FixedLenFeature([], tf.string),
+                                                    'label': tf.io.FixedLenFeature([], tf.int64),
+                                                    'shape': tf.io.FixedLenFeature([2], tf.int64),
+                                                    'data': tf.io.FixedLenFeature([2048, 2048], tf.float32)})
+    name = features['name']
+    label = features['label']
+    shape = features['shape']
+    data = features['data']
+    # data_raw = np.fromstring(features['data'], dtype=np.float32)
+    # reshaped_data = np.reshape(data_raw, features['shape'])
+    # data = (reshaped_data - np.mean(reshaped_data, axis=0)) / np.std(reshaped_data, axis=0)
+    return name, label, shape, data
+
+
 class DataLoader():
     def __init__(self):
         print('初始化DataLoader，载入数据中...')
         self.curDir = os.path.abspath(os.path.dirname(__file__))
         self.rootDir = self.curDir[:self.curDir.find("app\\") + len("app\\")]
         self.datasetDir = self.rootDir + 'dataset\\tem\\tfrecords\\'
-        self.train_dataset = tf.data.TFRecordDataset(self.datasetDir+'train.tfrecords')
-        self.valid_dataset = tf.data.TFRecordDataset(self.datasetDir+'valid.tfrecords')
+        self.train_dataset = tf.data.TFRecordDataset(self.datasetDir + 'train.tfrecords')
+        self.valid_dataset = tf.data.TFRecordDataset(self.datasetDir + 'valid.tfrecords')
         self.test_dataset = tf.data.TFRecordDataset(self.datasetDir + 'test.tfrecords')
 
-        for element in self.test_dataset.as_numpy_iterator():
-            features = tf.io.parse_single_example(element,
-                                                  features={'name': tf.io.FixedLenFeature([], tf.string),
-                                                            'label': tf.io.FixedLenFeature([], tf.int64),
-                                                            'shape': tf.io.FixedLenFeature([2], tf.int64),
-                                                            'data': tf.io.FixedLenFeature([2048,2048], tf.float32)})
-            print(features['name'], features['label'], features['shape'], features['data'])
-            img_data = np.fromstring(features['data'], dtype=np.float32)
-            image_data = np.reshape(img_data, features['shape'])
-            image_std_data = (image_data-np.mean(image_data,axis=0))/np.std(image_data,axis=0)
-            plt.figure()
-            img = plt.imshow(image_std_data,vmin=-1.0,vmax=1.0, interpolation='nearest')
-            img.set_cmap('gray')
-            plt.axis('off')
-            plt.margins(0, 0)
-            plt.show()
-            print('a')
+    def get_dataset(self, filename):
+        if filename is 'train':
+            return self.train_dataset.map(parse_example)
+        elif filename is 'valid':
+            return self.valid_dataset.map(parse_example)
+        else:
+            return self.test_dataset.map(parse_example)
 
-
-    def get_batch(self, batch_size):
-        return batch_size
+    def get_batch(self, filename, epochs, shuffle, batch_size):
+        return self.get_dataset(filename).repeat(epochs).shuffle(shuffle).batch(batch_size)
 
 
 # 2 模型
-class CNN(tf.keras.Model):
-    def __init__(self):
-        super().__init()
+class UNet(tf.keras.Model):
+    def __init__(self, input_size=(2048, 2048, 1), pretrained_weights=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        print(pretrained_weights, input_size)
+        self.conv1 = tf.keras.layers.Conv2D(
+            filters=64,
+            kernel_size=3,
+            activation='relu',
+            padding='same',
+            kernel_initializer='he_normal',
+            name='encoder_conv1_1'
+        )
 
     def call(self, inputs):
         print(inputs)
@@ -67,8 +81,15 @@ class CNN(tf.keras.Model):
 
 
 # 3 训练
+num_epochs = 10  # 1个epoch表示过了 1遍训练集中的所有样本
+batch_size = 20  # 1次迭代中的样本数量
+learning_rate = 0.001  # 学习速率
 
 # 4 评价
 
 if __name__ == '__main__':
     data_loader = DataLoader()
+    batch = data_loader.get_batch('train', num_epochs, 1000, batch_size)
+    # TODO：设法取出迭代器开始迭代，不过需要提前把MODEL设计好
+    print(batch)
+    # <BatchDataset shapes: ((None,), (None,), (None, 2), (None, 2048, 2048)), types: (tf.string, tf.int64, tf.int64, tf.float32)>

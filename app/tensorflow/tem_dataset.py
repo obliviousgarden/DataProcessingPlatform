@@ -23,7 +23,7 @@ class DataSet2TFRecord:
             valid_tfrecords_path = self.desDir + 'valid.tfrecords'
             test_tfrecords_path = self.desDir + 'test.tfrecords'
             file_name_list = os.listdir(self.rawDir)
-            # 遍历文件夹内部所有文件名并通过随机数按照6:2:2的比例分别存入3个列表当中
+            # 遍历文件夹不能内部所有文件名并通过随机数按照6:2:2的比例分别存入3个列表当中
             train_file_name_list = []
             valid_file_name_list = []
             test_file_name_list = []
@@ -59,8 +59,8 @@ class DataSet2TFRecord:
                             feature={
                                 'name': tf.train.Feature(
                                     bytes_list=tf.train.BytesList(value=[file_name.encode('utf-8')])),
-                                'label': tf.train.Feature(int64_list=tf.train.Int64List(
-                                    value=[int(file_name.split('-')[2].replace('.dm3', ''))])),
+                                'label': tf.train.Feature(
+                                    int64_list=tf.train.Int64List(value=[int(file_name.split('-')[0][1:2])])),
                                 'shape': tf.train.Feature(
                                     int64_list=tf.train.Int64List(value=[imgd.shape[0], imgd.shape[1]])),
                                 'data': tf.train.Feature(
