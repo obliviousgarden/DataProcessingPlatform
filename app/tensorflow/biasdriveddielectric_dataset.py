@@ -4,16 +4,10 @@ import tensorflow as tf
 
 class DataSet2TFRecord:
     def __init__(self):
-        self.sampleInfo = {
-            '440-3': {
-                'thickness': 9.16,
-                'electrode_area': 16.55
-            }
-        }
         self.curDir = os.path.abspath(os.path.dirname(__file__))
         self.rootDir = self.curDir[:self.curDir.find("app\\") + len("app\\")]
-        self.rawDir = self.rootDir + 'dataset\\biasdrivedielectric\\raw\\'
-        self.desPath = self.rootDir + 'dataset\\biasdrivedielectric\\tfrecords\\train.tfrecords'
+        self.rawDir = self.rootDir + 'dataset\\biasdrivendielectric\\raw\\'
+        self.desPath = self.rootDir + 'dataset\\biasdrivendielectric\\tfrecords\\train.tfrecords'
 
     def raw_to_tfrecords(self):
         file_name_list = os.listdir(self.rawDir)
