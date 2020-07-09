@@ -90,4 +90,4 @@ def func(freq, alpha, beta, tau, epsilon_inf, delta_epsilon):
 
 
 if __name__ == '__main__':
-    main(0.0)
+    main(1.4)
