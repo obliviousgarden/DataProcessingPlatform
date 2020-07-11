@@ -2,4 +2,7 @@
   <qresource prefix="Formula">
     <file>source/formula.png</file>
   </qresource>
+  <qresource prefix="Icon">
+    <file>simulator.ico</file>
+  </qresource>
 </RCC>
