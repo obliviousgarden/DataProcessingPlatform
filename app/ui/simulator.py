@@ -95,6 +95,8 @@ class Simulator(Ui_MainWindow):
         self.actionQuit.triggered.connect(self.on_Action_quit)
         self.actionSaveResultsAs.triggered.connect(self.on_Action_save_results_as)
         self.actionParameters_Range.triggered.connect(self.on_Action_parameters_range)
+        # 全选Checkbox
+        self.CheckBox_All.clicked.connect(self.on_CheckBox_All_clicked)
 
     def on_RadioButton_clicked(self):
         if self.RadioButton_hnmodel.isChecked():
@@ -119,9 +121,11 @@ class Simulator(Ui_MainWindow):
             self.Slider_beta.setValue(100)
 
     def on_PushButton_file_clicked(self):
-        file_name, file_type = QtWidgets.QFileDialog.getOpenFileNames()
-        self.file_path = file_name
         self.file_name = []
+        self.file_path = []
+        file_name, file_type = QtWidgets.QFileDialog.getOpenFileNames()
+        print('file:',file_name)
+        self.file_path = file_name
         for i in range(file_name.__len__()):
             self.file_name.append(file_name[i].split('/')[-1])
         self.list_view_file_model.setStringList(self.file_name)
@@ -129,14 +133,17 @@ class Simulator(Ui_MainWindow):
         print(self.file_name)
 
     def on_PushButton_dir_clicked(self):
-        dir = QtWidgets.QFileDialog.getExistingDirectory()
-        self.file_name = os.listdir(dir)
+        self.file_name = []
         self.file_path = []
-        for i in range(self.file_name.__len__()):
-            self.file_path.append(dir + '/' + self.file_name[i])
-        self.list_view_file_model.setStringList(self.file_name)
-        print(self.file_path)
-        print(self.file_name)
+        dir = QtWidgets.QFileDialog.getExistingDirectory()
+        print('dir:',dir)
+        if dir is not '':
+            self.file_name = os.listdir(dir)
+            for i in range(self.file_name.__len__()):
+                self.file_path.append(dir + '/' + self.file_name[i])
+            self.list_view_file_model.setStringList(self.file_name)
+            print(self.file_path)
+            print(self.file_name)
 
     def on_Slider_alpha_valueChanged(self):
         self.alpha = self.alpha_min + (self.alpha_max - self.alpha_min) * self.Slider_alpha.value() / 100.0
@@ -162,6 +169,10 @@ class Simulator(Ui_MainWindow):
         self.lcdNumber_deltaepsilon.display(str(self.deltaepsilon))
 
     def on_PushButton_simulate_clicked(self):
+        # 记得清空一下结果字典
+        self.result_dict = {}
+        # 全选取消
+        self.CheckBox_All.setCheckState(QtCore.Qt.Unchecked)
         # 这里需要根据model构造p0和bounds参数
         p0 = []
         bounds = ([], [])
@@ -203,6 +214,11 @@ class Simulator(Ui_MainWindow):
             item.setCheckable(True)
             self.list_view_results_model.appendRow(item)
         print('结果', self.result_dict)
+
+    def on_CheckBox_All_clicked(self):
+        check_state = QtCore.Qt.Checked if self.CheckBox_All.isChecked() else QtCore.Qt.Unchecked
+        for i in range(self.list_view_results_model.rowCount()):
+            self.list_view_results_model.item(i).setCheckState(check_state)
 
     def on_PushButton_plot_clicked(self):
         plot_data_dict = {}
@@ -251,7 +267,7 @@ class Simulator(Ui_MainWindow):
                        label='#' + key + '_epsilon_raw')
             ax.plot(plot_data_dict[key]['freq'], plot_data_dict[key]['epsilon'], c=color_plot,
                     label='#' + key + '_epsilon')
-        ax.legend()
+        ax.legend(loc='upper right')
         self.canvas.draw()
         self.dialog_plot.open()
 

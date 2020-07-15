@@ -20,12 +20,16 @@ class DielectricRelaxationSimulator():
             electrode_area = float(lines[5])
             for line_index in range(19, lines.__len__()):
                 freq, loss, c = map(float, lines[line_index].replace('\n', '').split('\t'))
-                # FIXME:暂时把第一个介电弛豫阶段排除!!!
-                if freq >= 1000.0:
-                    freq_list.append(freq)
-                    epsilon_list.append(c * thickness * 10000000000 / (8.854 * electrode_area))
-
-        return freq_list, epsilon_list
+                freq_list.append(freq)
+                epsilon_list.append(c * thickness * 10000000000 / (8.854 * electrode_area))
+        # 接下来用这种方法来切割掉曲线前端可能会出现的噪声，噪声的判断是数据二阶导数大于0的情况
+        d2_epsilon_list = np.gradient(np.gradient(epsilon_list))
+        start_pos = 0
+        for i in range(d2_epsilon_list.size):
+            if d2_epsilon_list[i] >= 1:
+                start_pos = i
+        print('横轴切割完毕开始点是{}'.format(start_pos))
+        return freq_list[start_pos:], epsilon_list[start_pos:]
 
     def simulate(self):
         print('开始模拟')

@@ -2,7 +2,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import curve_fit
-
+from scipy.misc import derivative
 
 class DataLoader():
     def __init__(self):
@@ -23,11 +23,35 @@ class DataLoader():
                     electrode_area = float(lines[5])
                     for line_index in range(19, lines.__len__()):
                         freq, loss, c = map(float, lines[line_index].replace('\n', '').split('\t'))
-                        # FIXME:暂时把第一个介电弛豫阶段排除
-                        if freq >= 1000.0:
-                            freq_list.append(freq)
-                            epsilon_list.append(c * thickness * 10000000000 / (8.854 * electrode_area))
+                        freq_list.append(freq)
+                        epsilon_list.append(c * thickness * 10000000000 / (8.854 * electrode_area))
                 break
+        # # START 排除可能出现的第一个弛豫的代码
+        # log_freq_list = np.log10(freq_list)
+        # fig = plt.figure()
+        # plt.ion()
+        # plt.show()
+        # ax = fig.add_subplot(2, 2, 1)
+        # ax.scatter(log_freq_list, epsilon_list, label='epsilon(Log_freq)')
+        # ax.legend()
+        # d_epsilon_list = np.gradient(epsilon_list)
+        # ax2 = fig.add_subplot(2, 2, 2)
+        # ax2.plot(log_freq_list,d_epsilon_list,label='D_epsilon(Log_freq)')
+        # ax2.legend()
+        # print('d',d_epsilon_list)
+        # d2_epsilon_list= np.gradient(d_epsilon_list)
+        # ax3 = fig.add_subplot(2, 2, 3)
+        # ax3.plot(log_freq_list, d2_epsilon_list, label='D2_epsilon(Log_freq)')
+        # print('d2',d2_epsilon_list)
+        # start_pos = 0
+        # for i in range(d2_epsilon_list.size):
+        #     if d2_epsilon_list[i] >= 1:
+        #         start_pos = i
+        # ax4 = fig.add_subplot(2, 2, 4)
+        # ax4.plot(log_freq_list[start_pos:], epsilon_list[start_pos:], label='D_epsilon(Log_freq)_Cut')
+        # # END
+
+
         return freq_list, epsilon_list
 
 
@@ -42,7 +66,6 @@ def main(dc_bias):
     ax.set_xscale('log')
     ax.scatter(freq_raw, epsilon_raw, label='epsilon(freq)_Raw')
     ax.legend()
-
     alpha_est = 0.95
     beta_est = 0.85
     tau_est = 1e-6
