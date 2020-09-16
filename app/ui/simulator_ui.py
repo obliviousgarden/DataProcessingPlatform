@@ -29,6 +29,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowIcon(icon)
         MainWindow.setLayoutDirection(QtCore.Qt.LeftToRight)
         MainWindow.setAutoFillBackground(True)
+
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.GroupBox_step1 = QtWidgets.QGroupBox(self.centralwidget)
@@ -352,7 +353,6 @@ class Ui_MainWindow(object):
         self.menuSetting.addAction(self.actionParameters_Range)
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuSetting.menuAction())
-
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
         MainWindow.setTabOrder(self.RadioButton_hnmodel, self.RadioButton_ccmodel)
@@ -372,7 +372,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Simulator v1.0.0.20200711_alpha by Cheng WANG, Masumoto Lab."))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Simulator by Cheng WANG, Masumoto Lab."))
         self.GroupBox_step1.setTitle(_translate("MainWindow", "STEP.1 Raw Data"))
         self.PushButton_file.setText(_translate("MainWindow", "File..."))
         self.PushButton_dir.setText(_translate("MainWindow", "Dir..."))
