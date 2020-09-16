@@ -10,12 +10,6 @@
     <height>720</height>
    </rect>
   </property>
-  <property name="sizePolicy">
-   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-    <horstretch>0</horstretch>
-    <verstretch>0</verstretch>
-   </sizepolicy>
-  </property>
   <property name="font">
    <font>
     <weight>50</weight>
@@ -44,7 +38,7 @@
       <x>10</x>
       <y>0</y>
       <width>1061</width>
-      <height>681</height>
+      <height>678</height>
      </rect>
     </property>
     <property name="font">
@@ -64,7 +58,7 @@
       <property name="geometry">
        <rect>
         <x>540</x>
-        <y>150</y>
+        <y>160</y>
         <width>511</width>
         <height>51</height>
        </rect>
@@ -100,7 +94,7 @@
         <x>10</x>
         <y>450</y>
         <width>521</width>
-        <height>201</height>
+        <height>191</height>
        </rect>
       </property>
       <property name="font">
@@ -504,7 +498,7 @@
         <x>540</x>
         <y>210</y>
         <width>511</width>
-        <height>441</height>
+        <height>431</height>
        </rect>
       </property>
       <property name="font">
@@ -525,24 +519,36 @@
          <x>10</x>
          <y>20</y>
          <width>491</width>
-         <height>361</height>
+         <height>331</height>
         </rect>
        </property>
       </widget>
-      <widget class="QWidget" name="formLayoutWidget_2">
+      <widget class="QWidget" name="">
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>390</y>
+         <y>360</y>
          <width>491</width>
-         <height>41</height>
+         <height>68</height>
         </rect>
        </property>
        <layout class="QFormLayout" name="formLayout">
-        <property name="formAlignment">
-         <set>Qt::AlignCenter</set>
-        </property>
         <item row="0" column="0">
+         <widget class="QCheckBox" name="CheckBox_reference">
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Ref.</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QComboBox" name="ComboBox_reference"/>
+        </item>
+        <item row="1" column="0">
          <widget class="QCheckBox" name="CheckBox_All">
           <property name="font">
            <font>
@@ -555,7 +561,7 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="1">
+        <item row="1" column="1">
          <widget class="QPushButton" name="PushButton_plot">
           <property name="font">
            <font>
@@ -825,7 +831,6 @@
   <tabstop>Slider_deltaepsilon</tabstop>
   <tabstop>PushButton_simulate</tabstop>
   <tabstop>ListView_results</tabstop>
-  <tabstop>PushButton_plot</tabstop>
  </tabstops>
  <resources>
   <include location="simulator.qrc"/>

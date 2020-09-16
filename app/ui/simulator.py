@@ -53,7 +53,8 @@ if __name__ == "__main__":
     # 主窗口
     mainWindow = QtWidgets.QMainWindow()
     # 固定主窗口尺寸
-    mainWindow.setFixedSize(mainWindow.width(), mainWindow.height())
+    # mainWindow.setFixedSize(mainWindow.width(), mainWindow.height())
+    mainWindow.setFixedSize(1080, 720)
     ui = Simulator()
     ui.setupUi(mainWindow)
     mainWindow.show()  # show（）显示主窗口

@@ -44,11 +44,24 @@ class ModalDielectric(object):
         self.list_view_results_model = QtGui.QStandardItemModel()
         # file_name为键
         self.result_dict = {}
-        # plot相关
+        # plot相关(需要考虑下修改，这里实际上是对UI的初始化)
         self.dialog_plot = QtWidgets.QDialog()
-        self.layout_plot = QtWidgets.QVBoxLayout()
-        self.fig = plt.Figure()
-        self.canvas = FigureCanvas(self.fig)
+        self.tab_plot = QtWidgets.QTabWidget(self.dialog_plot)
+        self.tab_plot.setGeometry(QtCore.QRect(10, 0, 1061, 678))
+        self.tab_plot_epsilon = QtWidgets.QWidget()
+        self.tab_plot_delta_epsilon = QtWidgets.QWidget()
+        self.tab_plot.addTab(self.tab_plot_epsilon,"")
+        self.tab_plot.addTab(self.tab_plot_delta_epsilon,"")
+        _translate = QtCore.QCoreApplication.translate
+        self.tab_plot.setTabText(self.tab_plot.indexOf(self.tab_plot_epsilon), _translate("MainWindow", "Epsilon"))
+        self.tab_plot.setTabText(self.tab_plot.indexOf(self.tab_plot_delta_epsilon), _translate("MainWindow", "Delta_Epsilon"))
+
+        self.layout_plot_epsilon = QtWidgets.QVBoxLayout()
+        self.layout_plot_delta_epsilon = QtWidgets.QVBoxLayout()
+        self.fig_epsilon = plt.Figure()
+        self.canvas_epsilon = FigureCanvas(self.fig_epsilon)
+        self.fig_delta_epsilon = plt.Figure()
+        self.canvas_delta_epsilon = FigureCanvas(self.fig_delta_epsilon)
 
     def setupUi(self):
         # 初始化参数UI
@@ -88,13 +101,21 @@ class ModalDielectric(object):
         self.parent.Slider_tau.valueChanged.connect(self.on_Slider_tau_valueChanged)
         self.parent.Slider_epsiloninf.valueChanged.connect(self.on_Slider_epsiloninf_valueChanged)
         self.parent.Slider_deltaepsilon.valueChanged.connect(self.on_Slider_deltaepsilon_valueChanged)
-        #初始化figure和cavas
+        # 初始化figure和cavas
         self.dialog_plot.setWindowTitle('Plot results')
-        self.layout_plot.addWidget(self.canvas)
-        self.dialog_plot.setLayout(self.layout_plot)
-
-        # 全选Checkbox
+        self.layout_plot_epsilon.addWidget(self.canvas_epsilon)
+        self.tab_plot_epsilon.setLayout(self.layout_plot_epsilon)
+        self.layout_plot_delta_epsilon.addWidget(self.canvas_delta_epsilon)
+        self.tab_plot_delta_epsilon.setLayout(self.layout_plot_delta_epsilon)
+        # Checkbox
         self.parent.CheckBox_All.clicked.connect(self.on_CheckBox_All_clicked)
+        self.parent.CheckBox_reference.clicked.connect(self.on_CheckBox_reference_clicked)
+
+        # 初始化没有数据所以直接禁用
+        self.parent.CheckBox_All.setEnabled(False)
+        self.parent.PushButton_plot.setEnabled(False)
+        self.parent.CheckBox_reference.setEnabled(False)
+        self.parent.ComboBox_reference.setEnabled(False)
 
     def on_RadioButton_clicked(self):
         if self.parent.RadioButton_hnmodel.isChecked():
@@ -212,11 +233,23 @@ class ModalDielectric(object):
             item.setCheckable(True)
             self.list_view_results_model.appendRow(item)
         print('结果', self.result_dict)
+        # 拟合完成，可以选择背底，以及绘图了
+        self.parent.CheckBox_All.setEnabled(True)
+        self.parent.PushButton_plot.setEnabled(True)
+        if self.list_view_results_model.rowCount() > 1:
+            self.parent.CheckBox_reference.setEnabled(True)
+            # 加入combobox的每一项
+            for key in self.result_dict:
+                self.parent.ComboBox_reference.addItem(key)
 
     def on_CheckBox_All_clicked(self):
         check_state = QtCore.Qt.Checked if self.parent.CheckBox_All.isChecked() else QtCore.Qt.Unchecked
+
         for i in range(self.list_view_results_model.rowCount()):
             self.list_view_results_model.item(i).setCheckState(check_state)
+
+    def on_CheckBox_reference_clicked(self):
+        self.parent.ComboBox_reference.setEnabled(True if self.parent.CheckBox_reference.isChecked() else False)
 
     def on_PushButton_plot_clicked(self):
         plot_data_dict = {}
@@ -246,12 +279,13 @@ class ModalDielectric(object):
                                                       delta_epsilon=param_list[2])
                 else:
                     pass
+                # TODO:判断是否需要delta图并且画出
         print('PLOT数据', plot_data_dict)
         # 数据组装获取完成，开始绘图
-        self.fig.clear()
-        ax = self.fig.add_subplot(111)
-        ax.cla()
-        ax.set_xscale('log')
+        self.fig_epsilon.clear()
+        ax_epsilon = self.fig_epsilon.add_subplot(111)
+        ax_epsilon.cla()
+        ax_epsilon.set_xscale('log')
         for key in plot_data_dict.keys():
             color_scatter = '#'
             color_plot = '#'
@@ -261,12 +295,12 @@ class ModalDielectric(object):
                     random_num * 2]
                 color_plot += ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'][random_num]
             print(color_scatter, color_plot)
-            ax.scatter(plot_data_dict[key]['freq'], plot_data_dict[key]['epsilon_raw'], c=color_scatter,
-                       label='#' + key + '_epsilon_raw')
-            ax.plot(plot_data_dict[key]['freq'], plot_data_dict[key]['epsilon'], c=color_plot,
-                    label='#' + key + '_epsilon')
-        ax.legend(loc='upper right')
-        self.canvas.draw()
+            ax_epsilon.scatter(plot_data_dict[key]['freq'], plot_data_dict[key]['epsilon_raw'], c=color_scatter,
+                               label='#' + key + '_epsilon_raw')
+            ax_epsilon.plot(plot_data_dict[key]['freq'], plot_data_dict[key]['epsilon'], c=color_plot,
+                            label='#' + key + '_epsilon')
+        ax_epsilon.legend(loc='upper right')
+        self.canvas_epsilon.draw()
         self.dialog_plot.open()
 
     def on_Action_save_results_as(self):
