@@ -279,13 +279,22 @@ class ModalDielectric(object):
                                                       delta_epsilon=param_list[2])
                 else:
                     pass
-                # TODO:判断是否需要delta图并且画出
         print('PLOT数据', plot_data_dict)
+        # 判断是否有delta图
+        delta_epsilon_exist = True if self.parent.CheckBox_reference.isChecked() else False
+        delta_epsilon_ref_file_name = self.parent.ComboBox_reference.currentText() if delta_epsilon_exist else ''
         # 数据组装获取完成，开始绘图
         self.fig_epsilon.clear()
         ax_epsilon = self.fig_epsilon.add_subplot(111)
         ax_epsilon.cla()
         ax_epsilon.set_xscale('log')
+
+        self.fig_delta_epsilon.clear()
+        ax_delta_epsilon = self.fig_delta_epsilon.add_subplot(111)
+        ax_delta_epsilon.cla()
+        ax_delta_epsilon.set_xscale('log')
+
+        # 循环取出数据绘图
         for key in plot_data_dict.keys():
             color_scatter = '#'
             color_plot = '#'
@@ -299,8 +308,42 @@ class ModalDielectric(object):
                                label='#' + key + '_epsilon_raw')
             ax_epsilon.plot(plot_data_dict[key]['freq'], plot_data_dict[key]['epsilon'], c=color_plot,
                             label='#' + key + '_epsilon')
+            # 判断是否有ref,踢出ref自身
+            if delta_epsilon_exist:
+                print('Test!',key,delta_epsilon_ref_file_name,key==delta_epsilon_ref_file_name,key is delta_epsilon_ref_file_name)
+                if key != delta_epsilon_ref_file_name:
+                    # 注意: 这里有一个非常关键的问题之前由于epsilon被剪切过，这里会大小不一，那么同样需要切除ref的对应部分，否则矩阵不能相减
+                    # 注意：数据剪切部分一定在前端低频部分
+                    plot_data_delta_epsilon_raw = np.multiply(
+                        np.divide(
+                            np.subtract(
+                                plot_data_dict[key]['epsilon_raw'],
+                                plot_data_dict[delta_epsilon_ref_file_name]['epsilon_raw'][-len(plot_data_dict[key]['epsilon_raw']):]
+                            ),
+                            plot_data_dict[delta_epsilon_ref_file_name]['epsilon_raw'][-len(plot_data_dict[key]['epsilon_raw']):]
+                        ),
+                        100)
+                    plot_data_delta_epsilon = np.multiply(
+                        np.divide(
+                            np.subtract(
+                                plot_data_dict[key]['epsilon'],
+                                plot_data_dict[delta_epsilon_ref_file_name]['epsilon'][-len(plot_data_dict[key]['epsilon']):]
+                            ),
+                            plot_data_dict[delta_epsilon_ref_file_name]['epsilon'][-len(plot_data_dict[key]['epsilon_raw']):]
+                        ),
+                        100)
+                    ax_delta_epsilon.scatter(plot_data_dict[key]['freq'],
+                                             plot_data_delta_epsilon_raw,
+                                             c=color_scatter,label='#' + key + '_delta_epsilon_raw')
+                    ax_delta_epsilon.plot(plot_data_dict[key]['freq'], plot_data_delta_epsilon, c=color_plot,
+                                    label='#' + key + '_delta_epsilon')
+                    print('TEST!!!!',key)
+
         ax_epsilon.legend(loc='upper right')
         self.canvas_epsilon.draw()
+        if delta_epsilon_exist:
+            ax_delta_epsilon.legend(loc='upper right')
+            self.canvas_delta_epsilon.draw()
         self.dialog_plot.open()
 
     def on_Action_save_results_as(self):
