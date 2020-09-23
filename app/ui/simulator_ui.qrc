@@ -1,6 +1,8 @@
 <RCC>
   <qresource prefix="Formula">
     <file>source/formula.png</file>
+    <file>source/formula_faraday.png</file>
+    <file>source/formula_m.png</file>
   </qresource>
   <qresource prefix="Icon">
     <file>simulator.ico</file>
