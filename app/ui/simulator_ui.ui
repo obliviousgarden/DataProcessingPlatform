@@ -22,7 +22,7 @@
    <string>Simulator by Cheng WANG, Masumoto Lab.</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="simulator.qrc">
+   <iconset resource="simulator_ui.qrc">
     <normaloff>:/Icon/simulator.ico</normaloff>:/Icon/simulator.ico</iconset>
   </property>
   <property name="layoutDirection">
@@ -48,7 +48,7 @@
      </font>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="tabDielectric">
      <attribute name="title">
@@ -860,7 +860,7 @@
         <x>10</x>
         <y>110</y>
         <width>521</width>
-        <height>291</height>
+        <height>271</height>
        </rect>
       </property>
       <property name="font">
@@ -881,7 +881,7 @@
          <x>0</x>
          <y>20</y>
          <width>511</width>
-         <height>261</height>
+         <height>241</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="Layout_step1_M">
@@ -994,9 +994,9 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>410</y>
+        <y>390</y>
         <width>521</width>
-        <height>231</height>
+        <height>251</height>
        </rect>
       </property>
       <property name="font">
@@ -1017,7 +1017,7 @@
          <x>10</x>
          <y>20</y>
          <width>511</width>
-         <height>201</height>
+         <height>231</height>
         </rect>
        </property>
        <layout class="QFormLayout" name="Layout_step2_M">
@@ -1085,6 +1085,25 @@
                </property>
                <property name="text">
                 <string>a: </string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="Label_k">
+               <property name="font">
+                <font>
+                 <pointsize>18</pointsize>
+                 <weight>50</weight>
+                 <italic>false</italic>
+                 <bold>false</bold>
+                 <stylestrategy>PreferDefault</stylestrategy>
+                </font>
+               </property>
+               <property name="text">
+                <string>k: </string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1282,7 +1301,7 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
+          <item row="3" column="0">
            <widget class="QLCDNumber" name="lcdNumber_alpha_2">
             <property name="font">
              <font>
@@ -1304,7 +1323,7 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
+          <item row="3" column="1">
            <widget class="QSlider" name="Slider_alpha_2">
             <property name="cursor">
              <cursorShape>ArrowCursor</cursorShape>
@@ -1332,7 +1351,7 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
+          <item row="4" column="0">
            <widget class="QLCDNumber" name="lcdNumber_c">
             <property name="font">
              <font>
@@ -1348,7 +1367,7 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="1">
+          <item row="4" column="1">
            <widget class="QSlider" name="Slider_c">
             <property name="cursor">
              <cursorShape>ArrowCursor</cursorShape>
@@ -1370,7 +1389,7 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="0">
+          <item row="5" column="0">
            <widget class="QLCDNumber" name="lcdNumber_J">
             <property name="font">
              <font>
@@ -1386,7 +1405,7 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="1">
+          <item row="5" column="1">
            <widget class="QSlider" name="Slider_J">
             <property name="cursor">
              <cursorShape>ArrowCursor</cursorShape>
@@ -1408,7 +1427,7 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="0">
+          <item row="6" column="0">
            <widget class="QLCDNumber" name="lcdNumber_g_J">
             <property name="font">
              <font>
@@ -1424,7 +1443,7 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="1">
+          <item row="6" column="1">
            <widget class="QSlider" name="Slider_g_J">
             <property name="cursor">
              <cursorShape>ArrowCursor</cursorShape>
@@ -1440,6 +1459,53 @@
             </property>
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="tickPosition">
+             <enum>QSlider::TicksAbove</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLCDNumber" name="lcdNumber_k">
+            <property name="font">
+             <font>
+              <pointsize>9</pointsize>
+              <stylestrategy>PreferDefault</stylestrategy>
+             </font>
+            </property>
+            <property name="digitCount">
+             <number>7</number>
+            </property>
+            <property name="segmentStyle">
+             <enum>QLCDNumber::Flat</enum>
+            </property>
+            <property name="value" stdset="0">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QSlider" name="Slider_k">
+            <property name="cursor">
+             <cursorShape>ArrowCursor</cursorShape>
+            </property>
+            <property name="maximum">
+             <number>100</number>
+            </property>
+            <property name="singleStep">
+             <number>1</number>
+            </property>
+            <property name="pageStep">
+             <number>5</number>
+            </property>
+            <property name="value">
+             <number>100</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="invertedControls">
+             <bool>false</bool>
             </property>
             <property name="tickPosition">
              <enum>QSlider::TicksAbove</enum>
@@ -2415,7 +2481,7 @@
   <tabstop>ListView_results</tabstop>
  </tabstops>
  <resources>
-  <include location="simulator.qrc"/>
+  <include location="simulator_ui.qrc"/>
  </resources>
  <connections/>
 </ui>

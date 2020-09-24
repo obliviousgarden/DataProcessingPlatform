@@ -1,14 +1,13 @@
 import matplotlib
 from PyQt5 import QtCore, QtGui, QtWidgets
-from simulator_ui import Ui_MainWindow
 import numpy as np
-import os, sys
+import os
 import matplotlib.pyplot as plt
 import random
 
 matplotlib.use("Qt5Agg")  # 声明使用QT5
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from dielectricrelaxationsimulator import DielectricRelaxationSimulator, func_Havriliak_Negami, \
+from dielectric_simulator import DielectricSimulator, func_Havriliak_Negami, \
     func_Cole_Cole, func_Cole_Davidson, func_Debye
 
 
@@ -17,7 +16,7 @@ class ModalDielectric(object):
     def __init__(self,parent):
         self.parent = parent
         # 模型 1:Havriliak–Negami,模型 2:Cole-Cole,模型 3:Cole–Davidson,模型 4:Debye
-
+        # 默认模型为1:Havriliak–Negami
         self.model = 1
 
         self.alpha_min = 0.0
@@ -220,9 +219,9 @@ class ModalDielectric(object):
         self.list_view_results_model.clear()
         for i in range(self.file_path.__len__()):
             print(i, self.file_name[i])
-            self.result_dict[self.file_name[i]] = DielectricRelaxationSimulator(self.model, self.file_path[i],
-                                                                                p0=p0,
-                                                                                bounds=bounds).simulate()
+            self.result_dict[self.file_name[i]] = DielectricSimulator(self.model, self.file_path[i],
+                                                                      p0=p0,
+                                                                      bounds=bounds).simulate()
             result = self.result_dict[self.file_name[i]]['popt']
 
             item = QtGui.QStandardItem(" #{}\nAlpha={},Beta={}Tau={}\nEpsilon_Inf={}Delta_Epsilon={}"
@@ -259,7 +258,7 @@ class ModalDielectric(object):
                 plot_data_dict[item.text().split('\n')[0].replace(' #', '')] = {}
         for i in range(self.file_name.__len__()):
             if self.file_name[i] in plot_data_dict.keys():
-                freq_list, epsilon_raw_list = DielectricRelaxationSimulator(self.model, self.file_path[i]).get_data()
+                freq_list, epsilon_raw_list = DielectricSimulator(self.model, self.file_path[i]).get_data()
                 plot_data = plot_data_dict[self.file_name[i]]
                 param_list = self.result_dict[self.file_name[i]]['popt']
                 plot_data['freq'] = freq_list

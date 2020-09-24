@@ -7,10 +7,12 @@ import os, sys
 import matplotlib.pyplot as plt
 import random
 from modal_dielectric import ModalDielectric
+from modal_faraday import ModalFaraday
+from modal_magnetization import ModalMagnetization
 
 matplotlib.use("Qt5Agg")  # 声明使用QT5
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from dielectricrelaxationsimulator import DielectricRelaxationSimulator, func_Havriliak_Negami, \
+from dielectric_simulator import DielectricSimulator, func_Havriliak_Negami, \
     func_Cole_Cole, func_Cole_Davidson, func_Debye
 
 
@@ -26,9 +28,8 @@ class Simulator(Ui_MainWindow):
         super(Simulator, self).__init__()
         # 注意：这里会把自己作为模块连接这个主类的引用传过去
         self.modal_dielectric = ModalDielectric(parent=self)
-
-        # TODO:初始化磁化模块
-        # TODO:初始化法拉第模块
+        self.modal_magnetization = ModalMagnetization(parent=self)
+        self.modal_faraday = ModalFaraday(parent=self)
 
     def setupUi(self, MainWindow):
         # 继承调用父类的
