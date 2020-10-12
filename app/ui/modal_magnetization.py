@@ -56,8 +56,21 @@ class ModalMagnetization(object):
         self.list_view_results_model = QtGui.QStandardItemModel()
         # 结果字典，键是文件名
         self.result_dict = {}
-        # plot相关的弹窗的UI及其初始化
+        # plot相关的弹窗的UI及其初始化,用tabUI预留出可能出现的多张图片
         self.dialog_plot = QtWidgets.QDialog()
+        self.tab_plot = QtWidgets.QTabWidget(self.dialog_plot)
+        self.tab_plot.setGeometry(QtCore.QRect(10, 0, 1061, 678))
+        self.tab_plot_magnetization = QtWidgets.QWidget()
+        self.tab_plot.addTab(self.tab_plot_magnetization, "")
+        _translate = QtCore.QCoreApplication.translate
+        self.tab_plot.setTabText(self.tab_plot.indexOf(self.tab_plot_magnetization), _translate("MainWindow", "Magnetization Curves"))
 
+        self.layout_plot_magnetization = QtWidgets.QVBoxLayout()
+        self.fig_magnetization = plt.Figure()
+        self.canvas_magnetization = FigureCanvas(self.fig_magnetization)
 
+    def setupUi(self):
+        # 初始化参数UI
+
+        pass
 
