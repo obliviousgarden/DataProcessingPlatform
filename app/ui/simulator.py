@@ -1,6 +1,10 @@
 import matplotlib
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtGui import QDoubleValidator
+from PyQt5.QtWidgets import QMessageBox
+
 from simulator_ui import Ui_MainWindow
+from params_range_setting_ui import Ui_ParametersRangeSettingDialog
 import numpy as np
 import os, sys
 
@@ -24,12 +28,14 @@ def on_Action_quit():
 class Simulator(Ui_MainWindow):
 
     def __init__(self, parent=None):
-
         super(Simulator, self).__init__()
         # 注意：这里会把自己作为模块连接这个主类的引用传过去
         self.modal_dielectric = ModalDielectric(parent=self)
         self.modal_magnetization = ModalMagnetization(parent=self)
         self.modal_faraday = ModalFaraday(parent=self)
+
+    def get_modal_dielectric(self):
+        return self.modal_dielectric
 
     def setupUi(self, MainWindow):
         # 继承调用父类的
@@ -37,27 +43,103 @@ class Simulator(Ui_MainWindow):
         # 菜单功能
         self.actionQuit.triggered.connect(on_Action_quit)
         self.actionSaveResultsAs.triggered.connect(self.on_Action_save_results_as)
-        self.actionParameters_Range.triggered.connect(self.on_Action_parameters_range)
         self.modal_dielectric.setupUi()
 
     def on_Action_save_results_as(self):
         self.modal_dielectric.on_Action_save_results_as()
 
-    def on_Action_parameters_range(self):
-        # TODO:设置参数的上下限
-        pass
+    # @staticmethod
+    # def update_parameters_range(self, param_name,range_min,range_max):
+    #     print("gengxin")
+    #     if param_name == "tau":
+    #         print("TAU")
+    #         self.modal_dielectric.update_tau_range(range_min,range_max)
+
+
+class ParametersRangeSettingDialog(Ui_ParametersRangeSettingDialog):
+    def __init__(self, parent=None, simulator = None):
+        super(ParametersRangeSettingDialog, self).__init__()
+        self.simulator = simulator
+        self.tau_double_validator = QDoubleValidator()
+        self.tau_double_validator.setRange(0.0, 1.0)
+        self.tau_double_validator.setNotation(QDoubleValidator.ScientificNotation)
+        self.tau_double_validator.setDecimals(2)
+
+        self.epsiloninf_double_validator = QDoubleValidator()
+        self.epsiloninf_double_validator.setRange(0.0, 1000.0)
+        self.epsiloninf_double_validator.setNotation(QDoubleValidator.StandardNotation)
+        self.epsiloninf_double_validator.setDecimals(2)
+
+        self.deltaepsilon_double_validator = QDoubleValidator()
+        self.deltaepsilon_double_validator.setRange(0.0, 10000.0)
+        self.deltaepsilon_double_validator.setNotation(QDoubleValidator.StandardNotation)
+        self.deltaepsilon_double_validator.setDecimals(2)
+
+        self.warning_box = QMessageBox(QMessageBox.Warning, 'WARNING', 'Check your inputs!!!')
+
+    def setupUi(self, ParametersRangeSettingDialog):
+        Ui_ParametersRangeSettingDialog.setupUi(self, ParametersRangeSettingDialog)
+        self.pushButton_d_apply.clicked.connect(self.on_pushButton_d_apply)
+        self.lineEdit_tau_from.setValidator(self.tau_double_validator)
+        self.lineEdit_tau_to.setValidator(self.tau_double_validator)
+        self.lineEdit_epsilon_inf_from.setValidator(self.epsiloninf_double_validator)
+        self.lineEdit_epsilon_inf_to.setValidator(self.epsiloninf_double_validator)
+        self.lineEdit_delta_epsilon_from.setValidator(self.deltaepsilon_double_validator)
+        self.lineEdit_delta_epsilon_to.setValidator(self.deltaepsilon_double_validator)
+
+    def on_pushButton_d_apply(self):
+        # TODO:!!!!!!!!!!!!!!
+        error_flag = False
+        if self.lineEdit_tau_from.text() is "" and self.lineEdit_tau_to.text() is "":
+            pass
+        elif 0.0 < float(self.lineEdit_tau_from.text()) < 1.0 and \
+                0.0 < float(self.lineEdit_tau_to.text()) <= 1.0 and \
+                float(self.lineEdit_tau_from.text()) < float(self.lineEdit_tau_to.text()):
+            print("更新Tau范围,开始")
+            self.simulator.get_modal_dielectric().update_tau_range(float(self.lineEdit_tau_from.text()),float(self.lineEdit_tau_to.text()))
+        else:
+            error_flag = True
+
+        if self.lineEdit_epsilon_inf_from.text() is "" and self.lineEdit_epsilon_inf_to.text() is "":
+            pass
+        elif float(self.lineEdit_epsilon_inf_from.text()) < float(self.lineEdit_epsilon_inf_to.text()):
+            print("更新epsilon_inf范围,开始")
+            self.simulator.get_modal_dielectric().update_epsilon_inf_range(float(self.lineEdit_epsilon_inf_from.text()), float(self.lineEdit_tau_to.text()))
+
+        else:
+            error_flag = True
+
+        if self.lineEdit_delta_epsilon_from.text() is "" and self.lineEdit_delta_epsilon_to.text() is "":
+            pass
+        elif float(self.lineEdit_delta_epsilon_from.text()) < float(self.lineEdit_delta_epsilon_to.text()):
+            print("更新delta_epsilon范围,开始")
+            self.simulator.get_modal_dielectric().update_delta_epsilon_range(float(self.lineEdit_delta_epsilon_from.text()), float(self.lineEdit_delta_epsilon_to.text()))
+
+        else:
+            error_flag = True
+
+        if error_flag:
+            self.warning_box.show()
 
 
 if __name__ == "__main__":
     # 必须添加应用程序，同时不要忘了sys.argv参数
     app = QtWidgets.QApplication(sys.argv)
-    # 主窗口
+    # 分别对窗体进行实例化
     mainWindow = QtWidgets.QMainWindow()
+    parametersRangeSettingDialog = QtWidgets.QDialog()
     # 固定主窗口尺寸
     # mainWindow.setFixedSize(mainWindow.width(), mainWindow.height())
     mainWindow.setFixedSize(1080, 720)
-    ui = Simulator()
-    ui.setupUi(mainWindow)
+    # 包装
+    simulator = Simulator()
+    parametersRangeSettingDialogWindow = ParametersRangeSettingDialog(simulator=simulator)
+    # 分别初始化UI
+    simulator.setupUi(mainWindow)
+    parametersRangeSettingDialogWindow.setupUi(parametersRangeSettingDialog)
+    # 连接窗体
+    simulator.actionParameters_Range.triggered.connect(parametersRangeSettingDialog.show)
+
     mainWindow.show()  # show（）显示主窗口
 
     # 软件正常退出

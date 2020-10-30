@@ -5,6 +5,8 @@ import os
 import matplotlib.pyplot as plt
 import random
 
+from PyQt5.QtWidgets import QApplication
+
 matplotlib.use("Qt5Agg")  # 声明使用QT5
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from dielectric_simulator import DielectricSimulator, func_Havriliak_Negami, \
@@ -23,8 +25,8 @@ class ModalDielectric(object):
         self.alpha_max = 1.0
         self.beta_min = 0.0
         self.beta_max = 1.0
-        self.tau_min = 1e-10
-        self.tau_max = 1e-5
+        self.tau_min = 1e-9
+        self.tau_max = 1e-3
         self.epsiloninf_min = 0.0
         self.epsiloninf_max = 50.0
         self.deltaepsilon_min = 100.0
@@ -88,6 +90,7 @@ class ModalDielectric(object):
         self.parent.PushButton_dir.clicked.connect(self.on_PushButton_dir_clicked)
         self.parent.PushButton_simulate.clicked.connect(self.on_PushButton_simulate_clicked)
         self.parent.PushButton_plot.clicked.connect(self.on_PushButton_plot_clicked)
+        self.parent.PushButton_clearAll.clicked.connect(self.on_PushButton_clearAll_clicked)
         # 设定ListView内的Model
         self.parent.ListView_file.setModel(self.list_view_file_model)
         self.parent.ListView_results.setModel(self.list_view_results_model)
@@ -115,6 +118,33 @@ class ModalDielectric(object):
         self.parent.PushButton_plot.setEnabled(False)
         self.parent.CheckBox_reference.setEnabled(False)
         self.parent.ComboBox_reference.setEnabled(False)
+
+    def update_tau_range(self, tau_min, tau_max):
+        print("更新Tau范围,结束")
+        self.tau_min = tau_min
+        self.tau_max = tau_max
+        self.tau = self.tau_min
+        self.parent.Slider_tau.setValue(
+            (np.log10(self.tau) - np.log10(self.tau_min)) / (np.log10(self.tau_max / self.tau_min)) * 100.0)
+        self.parent.lcdNumber_tau.display('%.1e' % self.tau)
+
+    def update_epsilon_inf_range(self, epsilon_inf_min, epsilon_inf_max):
+        print("更新epsilon_inf范围,结束")
+        self.epsiloninf_min = epsilon_inf_min
+        self.epsiloninf_max = epsilon_inf_max
+        self.epsiloninf = self.epsiloninf_min
+        self.parent.Slider_epsiloninf.setValue(
+            (self.epsiloninf - self.epsiloninf_min) / (self.epsiloninf_max - self.epsiloninf_min) * 100.0)
+        self.parent.lcdNumber_epsiloninf.display(str(self.epsiloninf))
+
+    def update_delta_epsilon_range(self, delta_epsilon_min, delta_epsilon_max):
+        print("更新delta_epsilon范围,结束")
+        self.deltaepsilon_min = delta_epsilon_min
+        self.deltaepsilon_max = delta_epsilon_max
+        self.deltaepsilon = self.deltaepsilon_min
+        self.parent.Slider_deltaepsilon.setValue(
+            (self.deltaepsilon - self.deltaepsilon_min) / (self.deltaepsilon_max - self.deltaepsilon_min) * 100.0)
+        self.parent.lcdNumber_deltaepsilon.display(str(self.deltaepsilon))
 
     def on_RadioButton_clicked(self):
         if self.parent.RadioButton_hnmodel.isChecked():
@@ -374,3 +404,12 @@ class ModalDielectric(object):
             print(file_path, file_type)
         else:
             pass
+
+    def on_PushButton_clearAll_clicked(self):
+        self.result_dict = {}
+        self.list_view_results_model.clear()
+        self.parent.ComboBox_reference.clear()
+        self.parent.CheckBox_reference.setCheckState(QtCore.Qt.Unchecked)
+        self.parent.ComboBox_reference.setEnabled(False)
+        print('结果已被清空')
+
