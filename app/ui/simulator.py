@@ -48,13 +48,6 @@ class Simulator(Ui_MainWindow):
     def on_Action_save_results_as(self):
         self.modal_dielectric.on_Action_save_results_as()
 
-    # @staticmethod
-    # def update_parameters_range(self, param_name,range_min,range_max):
-    #     print("gengxin")
-    #     if param_name == "tau":
-    #         print("TAU")
-    #         self.modal_dielectric.update_tau_range(range_min,range_max)
-
 
 class ParametersRangeSettingDialog(Ui_ParametersRangeSettingDialog):
     def __init__(self, parent=None, simulator = None):
@@ -88,7 +81,6 @@ class ParametersRangeSettingDialog(Ui_ParametersRangeSettingDialog):
         self.lineEdit_delta_epsilon_to.setValidator(self.deltaepsilon_double_validator)
 
     def on_pushButton_d_apply(self):
-        # TODO:!!!!!!!!!!!!!!
         error_flag = False
         if self.lineEdit_tau_from.text() is "" and self.lineEdit_tau_to.text() is "":
             pass
