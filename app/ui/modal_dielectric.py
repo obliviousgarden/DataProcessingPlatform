@@ -217,6 +217,8 @@ class ModalDielectric(object):
         self.parent.lcdNumber_deltaepsilon.display(str(self.deltaepsilon))
 
     def on_PushButton_simulate_clicked(self):
+        # 清空列表
+        self.on_PushButton_clearAll_clicked()
         # 记得清空一下结果字典
         self.result_dict = {}
         # 全选取消
@@ -406,7 +408,6 @@ class ModalDielectric(object):
             pass
 
     def on_PushButton_clearAll_clicked(self):
-        self.result_dict = {}
         self.list_view_results_model.clear()
         self.parent.ComboBox_reference.clear()
         self.parent.CheckBox_reference.setCheckState(QtCore.Qt.Unchecked)
