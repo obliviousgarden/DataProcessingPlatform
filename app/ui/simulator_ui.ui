@@ -1,21 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
+ <author>Cheng WANG</author>
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1080</width>
+    <width>1079</width>
     <height>720</height>
    </rect>
   </property>
   <property name="font">
    <font>
+    <family>Times New Roman</family>
+    <pointsize>12</pointsize>
     <weight>50</weight>
     <italic>false</italic>
     <bold>false</bold>
     <stylestrategy>PreferDefault</stylestrategy>
+    <kerning>true</kerning>
    </font>
   </property>
   <property name="windowTitle">
@@ -38,14 +42,18 @@
       <x>10</x>
       <y>0</y>
       <width>1061</width>
-      <height>678</height>
+      <height>671</height>
      </rect>
     </property>
     <property name="font">
      <font>
+      <family>Times New Roman</family>
       <pointsize>15</pointsize>
       <stylestrategy>PreferDefault</stylestrategy>
      </font>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
     </property>
     <property name="currentIndex">
      <number>0</number>
@@ -58,13 +66,14 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>450</y>
+        <y>430</y>
         <width>521</width>
         <height>191</height>
        </rect>
       </property>
       <property name="font">
        <font>
+        <family>Times New Roman</family>
         <pointsize>15</pointsize>
         <stylestrategy>PreferDefault</stylestrategy>
        </font>
@@ -79,16 +88,31 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>20</y>
-         <width>511</width>
-         <height>171</height>
+         <y>27</y>
+         <width>501</width>
+         <height>153</height>
         </rect>
        </property>
        <layout class="QFormLayout" name="Layout_step2">
+        <property name="sizeConstraint">
+         <enum>QLayout::SetNoConstraint</enum>
+        </property>
+        <property name="fieldGrowthPolicy">
+         <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+        </property>
+        <property name="rowWrapPolicy">
+         <enum>QFormLayout::WrapLongRows</enum>
+        </property>
+        <property name="verticalSpacing">
+         <number>7</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
         <item row="0" column="0">
          <widget class="QGroupBox" name="groupBox_4">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -112,8 +136,26 @@
            <bool>false</bool>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout">
+           <property name="spacing">
+            <number>7</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
            <item>
             <layout class="QVBoxLayout" name="Layout_step2_left">
+             <property name="spacing">
+              <number>0</number>
+             </property>
              <property name="sizeConstraint">
               <enum>QLayout::SetDefaultConstraint</enum>
              </property>
@@ -121,11 +163,7 @@
               <widget class="QLabel" name="Label_alpha">
                <property name="font">
                 <font>
-                 <pointsize>18</pointsize>
-                 <weight>50</weight>
-                 <italic>false</italic>
-                 <bold>false</bold>
-                 <stylestrategy>PreferDefault</stylestrategy>
+                 <pointsize>16</pointsize>
                 </font>
                </property>
                <property name="text">
@@ -140,11 +178,7 @@
               <widget class="QLabel" name="Label_beta">
                <property name="font">
                 <font>
-                 <pointsize>18</pointsize>
-                 <weight>50</weight>
-                 <italic>false</italic>
-                 <bold>false</bold>
-                 <stylestrategy>PreferDefault</stylestrategy>
+                 <pointsize>16</pointsize>
                 </font>
                </property>
                <property name="text">
@@ -159,7 +193,7 @@
               <widget class="QLabel" name="Label_tau">
                <property name="font">
                 <font>
-                 <pointsize>18</pointsize>
+                 <pointsize>16</pointsize>
                  <weight>50</weight>
                  <italic>false</italic>
                  <bold>false</bold>
@@ -178,7 +212,7 @@
               <widget class="QLabel" name="Label_epsiloninf">
                <property name="font">
                 <font>
-                 <pointsize>18</pointsize>
+                 <pointsize>16</pointsize>
                  <weight>50</weight>
                  <italic>false</italic>
                  <bold>false</bold>
@@ -197,7 +231,7 @@
               <widget class="QLabel" name="Label_deltaepsilon">
                <property name="font">
                 <font>
-                 <pointsize>18</pointsize>
+                 <pointsize>16</pointsize>
                  <weight>50</weight>
                  <italic>false</italic>
                  <bold>false</bold>
@@ -224,6 +258,9 @@
           </property>
           <property name="rowWrapPolicy">
            <enum>QFormLayout::DontWrapRows</enum>
+          </property>
+          <property name="verticalSpacing">
+           <number>3</number>
           </property>
           <item row="0" column="0">
            <widget class="QLCDNumber" name="lcdNumber_alpha">
@@ -462,7 +499,7 @@
       <property name="geometry">
        <rect>
         <x>540</x>
-        <y>210</y>
+        <y>190</y>
         <width>511</width>
         <height>431</height>
        </rect>
@@ -483,9 +520,9 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>20</y>
+         <y>30</y>
          <width>491</width>
-         <height>331</height>
+         <height>301</height>
         </rect>
        </property>
       </widget>
@@ -493,12 +530,18 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>360</y>
+         <y>340</y>
          <width>491</width>
-         <height>68</height>
+         <height>83</height>
         </rect>
        </property>
        <layout class="QFormLayout" name="formLayout">
+        <property name="horizontalSpacing">
+         <number>0</number>
+        </property>
+        <property name="verticalSpacing">
+         <number>0</number>
+        </property>
         <item row="0" column="0">
          <widget class="QCheckBox" name="CheckBox_reference">
           <property name="font">
@@ -550,13 +593,14 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>150</y>
+        <y>130</y>
         <width>521</width>
         <height>291</height>
        </rect>
       </property>
       <property name="font">
        <font>
+        <family>Times New Roman</family>
         <pointsize>15</pointsize>
         <stylestrategy>PreferDefault</stylestrategy>
        </font>
@@ -571,9 +615,9 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>20</y>
+         <y>30</y>
          <width>511</width>
-         <height>261</height>
+         <height>251</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="Layout_step1">
@@ -618,6 +662,11 @@
         </item>
         <item>
          <widget class="QLabel" name="Label_step1_1">
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
           <property name="text">
            <string>*This should be the raw file from LCR meter.</string>
           </property>
@@ -625,6 +674,11 @@
         </item>
         <item>
          <widget class="QLabel" name="Label_step1_2">
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
           <property name="text">
            <string>**Filename: [serial](-DCB-[DCB]), eg. 88-8-DCB8.8</string>
           </property>
@@ -639,7 +693,7 @@
         <x>10</x>
         <y>0</y>
         <width>1041</width>
-        <height>141</height>
+        <height>121</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -651,11 +705,14 @@
       <property name="font">
        <font>
         <pointsize>18</pointsize>
-        <weight>50</weight>
         <italic>true</italic>
-        <bold>false</bold>
-        <stylestrategy>PreferDefault</stylestrategy>
        </font>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::LeftToRight</enum>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
       </property>
       <property name="styleSheet">
        <string notr="true"/>
@@ -664,39 +721,75 @@
        <string>Havriliak–Negami Relaxation</string>
       </property>
       <property name="alignment">
-       <set>Qt::AlignCenter</set>
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+      </property>
+      <property name="flat">
+       <bool>false</bool>
+      </property>
+      <property name="checkable">
+       <bool>false</bool>
       </property>
       <widget class="QWidget" name="horizontalLayoutWidget">
        <property name="geometry">
         <rect>
          <x>9</x>
-         <y>19</y>
+         <y>30</y>
          <width>1021</width>
-         <height>111</height>
+         <height>85</height>
         </rect>
        </property>
        <layout class="QHBoxLayout" name="Layout_title">
         <item>
-         <widget class="QLabel" name="Label_fomula">
-          <property name="styleSheet">
-           <string notr="true">image: url(:/Formula/source/formula.png);</string>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item>
          <layout class="QGridLayout" name="Layout_title_right">
+          <property name="spacing">
+           <number>0</number>
+          </property>
           <item row="1" column="0">
            <widget class="QRadioButton" name="RadioButton_ccmodel">
+            <property name="font">
+             <font>
+              <italic>true</italic>
+             </font>
+            </property>
             <property name="text">
              <string>Cole–Cole</string>
             </property>
            </widget>
           </item>
+          <item row="0" column="1">
+           <widget class="QRadioButton" name="RadioButton_cdmodel">
+            <property name="font">
+             <font>
+              <family>Times New Roman</family>
+              <italic>true</italic>
+             </font>
+            </property>
+            <property name="text">
+             <string>Cole–Davidson</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QRadioButton" name="RadioButton_dmodel">
+            <property name="font">
+             <font>
+              <family>Times New Roman</family>
+              <italic>true</italic>
+             </font>
+            </property>
+            <property name="text">
+             <string>Debye</string>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="0">
            <widget class="QRadioButton" name="RadioButton_hnmodel">
+            <property name="font">
+             <font>
+              <family>Times New Roman</family>
+              <italic>true</italic>
+             </font>
+            </property>
             <property name="text">
              <string>Havriliak–Negami</string>
             </property>
@@ -705,21 +798,47 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QRadioButton" name="RadioButton_cdmodel">
-            <property name="text">
-             <string>Cole–Davidson</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QRadioButton" name="RadioButton_dmodel">
-            <property name="text">
-             <string>Debye</string>
-            </property>
-           </widget>
-          </item>
          </layout>
+        </item>
+        <item>
+         <widget class="QLabel" name="Label_fomula">
+          <property name="sizeIncrement">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="autoFillBackground">
+           <bool>false</bool>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">image: url(:/Formula/source/formula.png);</string>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="midLineWidth">
+           <number>0</number>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="wordWrap">
+           <bool>false</bool>
+          </property>
+          <property name="margin">
+           <number>0</number>
+          </property>
+          <property name="indent">
+           <number>-1</number>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -728,9 +847,9 @@
       <property name="geometry">
        <rect>
         <x>539</x>
-        <y>160</y>
+        <y>130</y>
         <width>511</width>
-        <height>45</height>
+        <height>51</height>
        </rect>
       </property>
       <layout class="QFormLayout" name="formLayout_2">
@@ -744,7 +863,8 @@
         <widget class="QPushButton" name="PushButton_clearAll">
          <property name="font">
           <font>
-           <pointsize>24</pointsize>
+           <family>Times New Roman</family>
+           <pointsize>21</pointsize>
            <weight>75</weight>
            <italic>false</italic>
            <bold>true</bold>
@@ -772,7 +892,8 @@
         <widget class="QPushButton" name="PushButton_simulate">
          <property name="font">
           <font>
-           <pointsize>24</pointsize>
+           <family>Times New Roman</family>
+           <pointsize>21</pointsize>
            <weight>75</weight>
            <italic>false</italic>
            <bold>true</bold>
@@ -809,7 +930,7 @@
         <x>10</x>
         <y>0</y>
         <width>1041</width>
-        <height>101</height>
+        <height>121</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -821,10 +942,7 @@
       <property name="font">
        <font>
         <pointsize>18</pointsize>
-        <weight>50</weight>
         <italic>true</italic>
-        <bold>false</bold>
-        <stylestrategy>PreferDefault</stylestrategy>
        </font>
       </property>
       <property name="styleSheet">
@@ -834,7 +952,7 @@
        <string>Jiles-Atherton Magnetization</string>
       </property>
       <property name="alignment">
-       <set>Qt::AlignCenter</set>
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
       </property>
       <widget class="QWidget" name="horizontalLayoutWidget_2">
        <property name="geometry">
@@ -842,22 +960,15 @@
          <x>9</x>
          <y>30</y>
          <width>1021</width>
-         <height>66</height>
+         <height>88</height>
         </rect>
        </property>
        <layout class="QHBoxLayout" name="Layout_title_M">
         <item>
-         <widget class="QLabel" name="Label_fomula_M">
-          <property name="styleSheet">
-           <string notr="true">image: url(:/Formula/source/formula_m.png)</string>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item>
          <layout class="QGridLayout" name="Layout_title_right_M">
+          <property name="spacing">
+           <number>0</number>
+          </property>
           <item row="1" column="1">
            <widget class="QRadioButton" name="RadioButton_tamodel">
             <property name="text">
@@ -891,6 +1002,16 @@
           </item>
          </layout>
         </item>
+        <item>
+         <widget class="QLabel" name="Label_fomula_M">
+          <property name="styleSheet">
+           <string notr="true">image: url(:/Formula/source/formula_m.png)</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
      </widget>
@@ -898,9 +1019,9 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>110</y>
+        <y>130</y>
         <width>521</width>
-        <height>271</height>
+        <height>241</height>
        </rect>
       </property>
       <property name="font">
@@ -915,16 +1036,22 @@
       <property name="title">
        <string>STEP.1 Raw Data</string>
       </property>
+      <property name="flat">
+       <bool>false</bool>
+      </property>
       <widget class="QWidget" name="verticalLayoutWidget_2">
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>20</y>
-         <width>511</width>
-         <height>241</height>
+         <y>30</y>
+         <width>521</width>
+         <height>209</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="Layout_step1_M">
+        <property name="spacing">
+         <number>4</number>
+        </property>
         <item>
          <layout class="QHBoxLayout" name="Layout_step1_file_M">
           <item>
@@ -966,13 +1093,22 @@
         </item>
         <item>
          <layout class="QHBoxLayout" name="Layout_unit_M">
+          <property name="spacing">
+           <number>7</number>
+          </property>
           <item>
            <layout class="QFormLayout" name="Layout_unit_M_unit_M">
+            <property name="horizontalSpacing">
+             <number>7</number>
+            </property>
+            <property name="verticalSpacing">
+             <number>7</number>
+            </property>
             <item row="0" column="0">
              <widget class="QLabel" name="Label_unit_M">
               <property name="font">
                <font>
-                <pointsize>18</pointsize>
+                <pointsize>16</pointsize>
                 <weight>50</weight>
                 <italic>false</italic>
                 <bold>false</bold>
@@ -998,7 +1134,7 @@
              <widget class="QLabel" name="Label_unit_H">
               <property name="font">
                <font>
-                <pointsize>18</pointsize>
+                <pointsize>16</pointsize>
                 <weight>50</weight>
                 <italic>false</italic>
                 <bold>false</bold>
@@ -1022,6 +1158,11 @@
         </item>
         <item>
          <widget class="QLabel" name="Label_step1_3">
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
           <property name="text">
            <string>*This should be the raw file from VSM device.</string>
           </property>
@@ -1034,9 +1175,9 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>390</y>
+        <y>380</y>
         <width>521</width>
-        <height>251</height>
+        <height>241</height>
        </rect>
       </property>
       <property name="font">
@@ -1055,9 +1196,9 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>20</y>
+         <y>30</y>
          <width>511</width>
-         <height>231</height>
+         <height>211</height>
         </rect>
        </property>
        <layout class="QFormLayout" name="Layout_step2_M">
@@ -1088,8 +1229,23 @@
            <bool>false</bool>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_3">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
            <item>
             <layout class="QVBoxLayout" name="Layout_step2_M_left">
+             <property name="spacing">
+              <number>0</number>
+             </property>
              <property name="sizeConstraint">
               <enum>QLayout::SetDefaultConstraint</enum>
              </property>
@@ -1097,7 +1253,7 @@
               <widget class="QLabel" name="Label_ms">
                <property name="font">
                 <font>
-                 <pointsize>18</pointsize>
+                 <pointsize>16</pointsize>
                  <weight>50</weight>
                  <italic>false</italic>
                  <bold>false</bold>
@@ -1116,7 +1272,7 @@
               <widget class="QLabel" name="Label_a">
                <property name="font">
                 <font>
-                 <pointsize>18</pointsize>
+                 <pointsize>16</pointsize>
                  <weight>50</weight>
                  <italic>false</italic>
                  <bold>false</bold>
@@ -1135,7 +1291,7 @@
               <widget class="QLabel" name="Label_k">
                <property name="font">
                 <font>
-                 <pointsize>18</pointsize>
+                 <pointsize>16</pointsize>
                  <weight>50</weight>
                  <italic>false</italic>
                  <bold>false</bold>
@@ -1154,7 +1310,7 @@
               <widget class="QLabel" name="Label_alpha_2">
                <property name="font">
                 <font>
-                 <pointsize>18</pointsize>
+                 <pointsize>16</pointsize>
                  <weight>50</weight>
                  <italic>false</italic>
                  <bold>false</bold>
@@ -1173,7 +1329,7 @@
               <widget class="QLabel" name="Label_c">
                <property name="font">
                 <font>
-                 <pointsize>18</pointsize>
+                 <pointsize>16</pointsize>
                  <weight>50</weight>
                  <italic>false</italic>
                  <bold>false</bold>
@@ -1192,7 +1348,7 @@
               <widget class="QLabel" name="Label_J">
                <property name="font">
                 <font>
-                 <pointsize>18</pointsize>
+                 <pointsize>16</pointsize>
                  <weight>50</weight>
                  <italic>false</italic>
                  <bold>false</bold>
@@ -1211,7 +1367,7 @@
               <widget class="QLabel" name="Label_g_J">
                <property name="font">
                 <font>
-                 <pointsize>18</pointsize>
+                 <pointsize>16</pointsize>
                  <weight>50</weight>
                  <italic>false</italic>
                  <bold>false</bold>
@@ -1238,6 +1394,9 @@
           </property>
           <property name="rowWrapPolicy">
            <enum>QFormLayout::DontWrapRows</enum>
+          </property>
+          <property name="verticalSpacing">
+           <number>3</number>
           </property>
           <item row="0" column="0">
            <widget class="QLCDNumber" name="lcdNumber_ms">
@@ -1570,9 +1729,9 @@
       <property name="geometry">
        <rect>
         <x>540</x>
-        <y>170</y>
+        <y>190</y>
         <width>511</width>
-        <height>471</height>
+        <height>431</height>
        </rect>
       </property>
       <property name="font">
@@ -1591,9 +1750,9 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>20</y>
+         <y>30</y>
          <width>491</width>
-         <height>361</height>
+         <height>301</height>
         </rect>
        </property>
       </widget>
@@ -1601,12 +1760,18 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>390</y>
+         <y>340</y>
          <width>491</width>
-         <height>68</height>
+         <height>84</height>
         </rect>
        </property>
        <layout class="QFormLayout" name="formLayout_M">
+        <property name="horizontalSpacing">
+         <number>0</number>
+        </property>
+        <property name="verticalSpacing">
+         <number>0</number>
+        </property>
         <item row="0" column="0">
          <widget class="QCheckBox" name="CheckBox_bg">
           <property name="font">
@@ -1615,7 +1780,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Ref.</string>
+           <string>B.G.</string>
           </property>
          </widget>
         </item>
@@ -1640,6 +1805,8 @@
           <property name="font">
            <font>
             <pointsize>18</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
             <stylestrategy>PreferDefault</stylestrategy>
            </font>
           </property>
@@ -1658,7 +1825,7 @@
       <property name="geometry">
        <rect>
         <x>540</x>
-        <y>120</y>
+        <y>130</y>
         <width>511</width>
         <height>51</height>
        </rect>
@@ -1705,7 +1872,7 @@
         <x>10</x>
         <y>0</y>
         <width>1041</width>
-        <height>101</height>
+        <height>121</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -1716,6 +1883,7 @@
       </property>
       <property name="font">
        <font>
+        <family>Times New Roman</family>
         <pointsize>18</pointsize>
         <weight>50</weight>
         <italic>true</italic>
@@ -1730,7 +1898,7 @@
        <string>Faraday Rotation Angle</string>
       </property>
       <property name="alignment">
-       <set>Qt::AlignCenter</set>
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
       </property>
       <widget class="QWidget" name="horizontalLayoutWidget_6">
        <property name="geometry">
@@ -1738,22 +1906,15 @@
          <x>9</x>
          <y>30</y>
          <width>1021</width>
-         <height>66</height>
+         <height>82</height>
         </rect>
        </property>
        <layout class="QHBoxLayout" name="Layout_title_F">
         <item>
-         <widget class="QLabel" name="Label_fomula_F">
-          <property name="styleSheet">
-           <string notr="true">image: url(:/Formula/source/formula_faraday.png)</string>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item>
          <layout class="QGridLayout" name="Layout_title_right_F">
+          <property name="spacing">
+           <number>0</number>
+          </property>
           <item row="1" column="1">
            <widget class="QRadioButton" name="RadioButton_camodel_2nd">
             <property name="text">
@@ -1790,6 +1951,16 @@
           </item>
          </layout>
         </item>
+        <item>
+         <widget class="QLabel" name="Label_fomula_F">
+          <property name="styleSheet">
+           <string notr="true">image: url(:/Formula/source/formula_faraday.png)</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
      </widget>
@@ -1797,13 +1968,14 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>110</y>
+        <y>130</y>
         <width>521</width>
-        <height>291</height>
+        <height>251</height>
        </rect>
       </property>
       <property name="font">
        <font>
+        <family>Times New Roman</family>
         <pointsize>15</pointsize>
         <stylestrategy>PreferDefault</stylestrategy>
        </font>
@@ -1818,9 +1990,9 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>20</y>
+         <y>30</y>
          <width>511</width>
-         <height>261</height>
+         <height>211</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="Layout_step1_F">
@@ -1896,13 +2068,14 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>410</y>
+        <y>390</y>
         <width>521</width>
         <height>231</height>
        </rect>
       </property>
       <property name="font">
        <font>
+        <family>Times New Roman</family>
         <pointsize>15</pointsize>
         <stylestrategy>PreferDefault</stylestrategy>
        </font>
@@ -1917,7 +2090,7 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>20</y>
+         <y>30</y>
          <width>511</width>
          <height>201</height>
         </rect>
@@ -1950,8 +2123,26 @@
            <bool>false</bool>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_5">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
            <item>
             <layout class="QVBoxLayout" name="Layout_step2_M_left_3">
+             <property name="spacing">
+              <number>0</number>
+             </property>
              <property name="sizeConstraint">
               <enum>QLayout::SetDefaultConstraint</enum>
              </property>
@@ -1959,7 +2150,7 @@
               <widget class="QLabel" name="Label_alpha_3">
                <property name="font">
                 <font>
-                 <pointsize>18</pointsize>
+                 <pointsize>16</pointsize>
                  <weight>50</weight>
                  <italic>false</italic>
                  <bold>false</bold>
@@ -1978,7 +2169,7 @@
               <widget class="QLabel" name="Label_A">
                <property name="font">
                 <font>
-                 <pointsize>18</pointsize>
+                 <pointsize>16</pointsize>
                  <weight>50</weight>
                  <italic>false</italic>
                  <bold>false</bold>
@@ -1997,7 +2188,7 @@
               <widget class="QLabel" name="Label_B1">
                <property name="font">
                 <font>
-                 <pointsize>18</pointsize>
+                 <pointsize>16</pointsize>
                  <weight>50</weight>
                  <italic>false</italic>
                  <bold>false</bold>
@@ -2016,7 +2207,7 @@
               <widget class="QLabel" name="Label_B2">
                <property name="font">
                 <font>
-                 <pointsize>18</pointsize>
+                 <pointsize>16</pointsize>
                  <weight>50</weight>
                  <italic>false</italic>
                  <bold>false</bold>
@@ -2035,7 +2226,7 @@
               <widget class="QLabel" name="Label_C1">
                <property name="font">
                 <font>
-                 <pointsize>18</pointsize>
+                 <pointsize>16</pointsize>
                  <weight>50</weight>
                  <italic>false</italic>
                  <bold>false</bold>
@@ -2054,7 +2245,7 @@
               <widget class="QLabel" name="Label_C2">
                <property name="font">
                 <font>
-                 <pointsize>18</pointsize>
+                 <pointsize>16</pointsize>
                  <weight>50</weight>
                  <italic>false</italic>
                  <bold>false</bold>
@@ -2357,13 +2548,14 @@
       <property name="geometry">
        <rect>
         <x>540</x>
-        <y>120</y>
+        <y>130</y>
         <width>511</width>
         <height>51</height>
        </rect>
       </property>
       <property name="font">
        <font>
+        <family>Times New Roman</family>
         <pointsize>24</pointsize>
         <weight>75</weight>
         <italic>false</italic>
@@ -2391,13 +2583,14 @@
       <property name="geometry">
        <rect>
         <x>540</x>
-        <y>170</y>
+        <y>190</y>
         <width>511</width>
-        <height>471</height>
+        <height>431</height>
        </rect>
       </property>
       <property name="font">
        <font>
+        <family>Times New Roman</family>
         <pointsize>15</pointsize>
         <stylestrategy>PreferDefault</stylestrategy>
        </font>
@@ -2412,9 +2605,9 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>20</y>
+         <y>30</y>
          <width>491</width>
-         <height>401</height>
+         <height>341</height>
         </rect>
        </property>
       </widget>
@@ -2422,12 +2615,18 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>427</y>
+         <y>380</y>
          <width>491</width>
-         <height>34</height>
+         <height>46</height>
         </rect>
        </property>
        <layout class="QFormLayout" name="formLayout_F">
+        <property name="horizontalSpacing">
+         <number>0</number>
+        </property>
+        <property name="verticalSpacing">
+         <number>0</number>
+        </property>
         <item row="0" column="0">
          <widget class="QCheckBox" name="CheckBox_All_F">
           <property name="font">
@@ -2446,6 +2645,8 @@
           <property name="font">
            <font>
             <pointsize>18</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
             <stylestrategy>PreferDefault</stylestrategy>
            </font>
           </property>
@@ -2468,8 +2669,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1080</width>
-     <height>23</height>
+     <width>1079</width>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -2486,8 +2687,15 @@
     </property>
     <addaction name="actionParameters_Range"/>
    </widget>
+   <widget class="QMenu" name="menuToolBox">
+    <property name="title">
+     <string>ToolBox</string>
+    </property>
+    <addaction name="actionUTF_8_Conversion"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuSetting"/>
+   <addaction name="menuToolBox"/>
   </widget>
   <widget class="QStatusBar" name="statusbar">
    <property name="toolTip">
@@ -2506,10 +2714,27 @@
    <property name="text">
     <string>Save Results As...</string>
    </property>
+   <property name="font">
+    <font>
+     <family>Times New Roman</family>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
   </action>
   <action name="actionParameters_Range">
    <property name="text">
     <string>Parameters Range</string>
+   </property>
+   <property name="font">
+    <font>
+     <family>Times New Roman</family>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
+  </action>
+  <action name="actionUTF_8_Conversion">
+   <property name="text">
+    <string>Character Encoding Conversion</string>
    </property>
   </action>
  </widget>

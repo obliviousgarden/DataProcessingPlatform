@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QMessageBox
 
 from simulator_ui import Ui_MainWindow
 from params_range_setting_ui import Ui_ParametersRangeSettingDialog
+from character_encoding_conversion_ui import Ui_CharacterEncodingConversionDialog
 import numpy as np
 import os, sys
 
@@ -50,7 +51,7 @@ class Simulator(Ui_MainWindow):
 
 
 class ParametersRangeSettingDialog(Ui_ParametersRangeSettingDialog):
-    def __init__(self, parent=None, simulator = None):
+    def __init__(self, parent=None, simulator=None):
         super(ParametersRangeSettingDialog, self).__init__()
         self.simulator = simulator
         self.tau_double_validator = QDoubleValidator()
@@ -70,48 +71,60 @@ class ParametersRangeSettingDialog(Ui_ParametersRangeSettingDialog):
 
         self.warning_box = QMessageBox(QMessageBox.Warning, 'WARNING', 'Check your inputs!!!')
 
-    def setupUi(self, ParametersRangeSettingDialog):
-        Ui_ParametersRangeSettingDialog.setupUi(self, ParametersRangeSettingDialog)
-        self.pushButton_d_apply.clicked.connect(self.on_pushButton_d_apply)
-        self.lineEdit_tau_from.setValidator(self.tau_double_validator)
-        self.lineEdit_tau_to.setValidator(self.tau_double_validator)
-        self.lineEdit_epsilon_inf_from.setValidator(self.epsiloninf_double_validator)
-        self.lineEdit_epsilon_inf_to.setValidator(self.epsiloninf_double_validator)
-        self.lineEdit_delta_epsilon_from.setValidator(self.deltaepsilon_double_validator)
-        self.lineEdit_delta_epsilon_to.setValidator(self.deltaepsilon_double_validator)
 
-    def on_pushButton_d_apply(self):
-        error_flag = False
-        if self.lineEdit_tau_from.text() is "" and self.lineEdit_tau_to.text() is "":
-            pass
-        elif 0.0 < float(self.lineEdit_tau_from.text()) < 1.0 and \
-                0.0 < float(self.lineEdit_tau_to.text()) <= 1.0 and \
-                float(self.lineEdit_tau_from.text()) < float(self.lineEdit_tau_to.text()):
-            print("更新Tau范围,开始")
-            self.simulator.get_modal_dielectric().update_tau_range(float(self.lineEdit_tau_from.text()),float(self.lineEdit_tau_to.text()))
-        else:
-            error_flag = True
+class CharacterEncodingConversionDialog(Ui_CharacterEncodingConversionDialog):
+    def __init__(self, parent=None, simulator=None):
+        # TODO:
+        super(CharacterEncodingConversionDialog, self).__init__()
+        self.simulator = simulator
 
-        if self.lineEdit_epsilon_inf_from.text() is "" and self.lineEdit_epsilon_inf_to.text() is "":
-            pass
-        elif float(self.lineEdit_epsilon_inf_from.text()) < float(self.lineEdit_epsilon_inf_to.text()):
-            print("更新epsilon_inf范围,开始")
-            self.simulator.get_modal_dielectric().update_epsilon_inf_range(float(self.lineEdit_epsilon_inf_from.text()), float(self.lineEdit_tau_to.text()))
 
-        else:
-            error_flag = True
+def setupUi(self, ParametersRangeSettingDialog, CharacterEncodingConversionDialog):
+    Ui_ParametersRangeSettingDialog.setupUi(self, ParametersRangeSettingDialog)
+    Ui_CharacterEncodingConversionDialog.setupUi(self, CharacterEncodingConversionDialog)
+    self.pushButton_d_apply.clicked.connect(self.on_pushButton_d_apply)
+    self.lineEdit_tau_from.setValidator(self.tau_double_validator)
+    self.lineEdit_tau_to.setValidator(self.tau_double_validator)
+    self.lineEdit_epsilon_inf_from.setValidator(self.epsiloninf_double_validator)
+    self.lineEdit_epsilon_inf_to.setValidator(self.epsiloninf_double_validator)
+    self.lineEdit_delta_epsilon_from.setValidator(self.deltaepsilon_double_validator)
+    self.lineEdit_delta_epsilon_to.setValidator(self.deltaepsilon_double_validator)
 
-        if self.lineEdit_delta_epsilon_from.text() is "" and self.lineEdit_delta_epsilon_to.text() is "":
-            pass
-        elif float(self.lineEdit_delta_epsilon_from.text()) < float(self.lineEdit_delta_epsilon_to.text()):
-            print("更新delta_epsilon范围,开始")
-            self.simulator.get_modal_dielectric().update_delta_epsilon_range(float(self.lineEdit_delta_epsilon_from.text()), float(self.lineEdit_delta_epsilon_to.text()))
+def on_pushButton_d_apply(self):
+    error_flag = False
+    if self.lineEdit_tau_from.text() == "" and self.lineEdit_tau_to.text() == "":
+        pass
+    elif 0.0 < float(self.lineEdit_tau_from.text()) < 1.0 and \
+            0.0 < float(self.lineEdit_tau_to.text()) <= 1.0 and \
+            float(self.lineEdit_tau_from.text()) < float(self.lineEdit_tau_to.text()):
+        print("更新Tau范围,开始")
+        self.simulator.get_modal_dielectric().update_tau_range(float(self.lineEdit_tau_from.text()),
+                                                                float(self.lineEdit_tau_to.text()))
+    else:
+        error_flag = True
 
-        else:
-            error_flag = True
+    if self.lineEdit_epsilon_inf_from.text() == "" and self.lineEdit_epsilon_inf_to.text() == "":
+        pass
+    elif float(self.lineEdit_epsilon_inf_from.text()) < float(self.lineEdit_epsilon_inf_to.text()):
+        print("更新epsilon_inf范围,开始")
+        self.simulator.get_modal_dielectric().update_epsilon_inf_range(float(self.lineEdit_epsilon_inf_from.text()),
+                                                                        float(self.lineEdit_tau_to.text()))
 
-        if error_flag:
-            self.warning_box.show()
+    else:
+        error_flag = True
+
+    if self.lineEdit_delta_epsilon_from.text() == "" and self.lineEdit_delta_epsilon_to.text() == "":
+        pass
+    elif float(self.lineEdit_delta_epsilon_from.text()) < float(self.lineEdit_delta_epsilon_to.text()):
+        print("更新delta_epsilon范围,开始")
+        self.simulator.get_modal_dielectric().update_delta_epsilon_range(
+            float(self.lineEdit_delta_epsilon_from.text()), float(self.lineEdit_delta_epsilon_to.text()))
+
+    else:
+        error_flag = True
+
+    if error_flag:
+        self.warning_box.show()
 
 
 if __name__ == "__main__":
@@ -120,17 +133,21 @@ if __name__ == "__main__":
     # 分别对窗体进行实例化
     mainWindow = QtWidgets.QMainWindow()
     parametersRangeSettingDialog = QtWidgets.QDialog()
+    characterEncodingConversionDialog = QtWidgets.QDialog()
     # 固定主窗口尺寸
     # mainWindow.setFixedSize(mainWindow.width(), mainWindow.height())
     mainWindow.setFixedSize(1080, 720)
     # 包装
     simulator = Simulator()
     parametersRangeSettingDialogWindow = ParametersRangeSettingDialog(simulator=simulator)
+    characterEncodingConversionWindow = CharacterEncodingConversionDialog(simulator=simulator)
     # 分别初始化UI
     simulator.setupUi(mainWindow)
     parametersRangeSettingDialogWindow.setupUi(parametersRangeSettingDialog)
+    characterEncodingConversionWindow.setupUi(characterEncodingConversionDialog)
     # 连接窗体
     simulator.actionParameters_Range.triggered.connect(parametersRangeSettingDialog.show)
+    simulator.actionUTF_8_Conversion.triggered.connect(characterEncodingConversionDialog.show)
 
     mainWindow.show()  # show（）显示主窗口
 

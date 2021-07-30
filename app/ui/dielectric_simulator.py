@@ -71,6 +71,7 @@ def func_Havriliak_Negami(freq, alpha, beta, tau, epsilon_inf, delta_epsilon):
     # print('A', A)
     # epsilon = epsilon_inf + delta_epsilon*A*B
     epsilon = epsilon_inf + np.multiply(np.multiply(A, B), delta_epsilon)
+    print(epsilon.shape)
     return epsilon
 
 
