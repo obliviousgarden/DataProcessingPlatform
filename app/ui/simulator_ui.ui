@@ -7,7 +7,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1079</width>
+    <width>1080</width>
     <height>720</height>
    </rect>
   </property>
@@ -56,7 +56,7 @@
      <bool>false</bool>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="tabDielectric">
      <attribute name="title">
@@ -971,6 +971,9 @@
           </property>
           <item row="1" column="1">
            <widget class="QRadioButton" name="RadioButton_tamodel">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Takacs</string>
             </property>
@@ -1005,7 +1008,7 @@
         <item>
          <widget class="QLabel" name="Label_fomula_M">
           <property name="styleSheet">
-           <string notr="true">image: url(:/Formula/source/formula_m.png)</string>
+           <string notr="true">image: url(:/Formula/source/formula_m_ja.png)</string>
           </property>
           <property name="text">
            <string/>
@@ -1019,9 +1022,9 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>130</y>
+        <y>120</y>
         <width>521</width>
-        <height>241</height>
+        <height>311</height>
        </rect>
       </property>
       <property name="font">
@@ -1039,26 +1042,216 @@
       <property name="flat">
        <bool>false</bool>
       </property>
-      <widget class="QWidget" name="verticalLayoutWidget_2">
+      <widget class="QWidget" name="layoutWidget">
        <property name="geometry">
         <rect>
-         <x>0</x>
+         <x>20</x>
          <y>30</y>
-         <width>521</width>
-         <height>209</height>
+         <width>501</width>
+         <height>261</height>
         </rect>
        </property>
-       <layout class="QVBoxLayout" name="Layout_step1_M">
-        <property name="spacing">
-         <number>4</number>
-        </property>
-        <item>
-         <layout class="QHBoxLayout" name="Layout_step1_file_M">
+       <layout class="QGridLayout" name="GridLayout_step1_M" rowstretch="0,1,0,0,0" rowminimumheight="0,0,0,0,0">
+        <item row="1" column="0">
+         <layout class="QHBoxLayout" name="Layout_step1_M_datapos">
           <item>
-           <widget class="QPushButton" name="PushButton_file_M">
+           <widget class="QGroupBox" name="GroupBox_step1_M_H">
             <property name="font">
              <font>
-              <pointsize>18</pointsize>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="title">
+             <string>Magnetic Field (H)</string>
+            </property>
+            <widget class="QWidget" name="verticalLayoutWidget_2">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>20</y>
+               <width>241</width>
+               <height>131</height>
+              </rect>
+             </property>
+             <layout class="QVBoxLayout" name="VerticalLayout_step1_M_H" stretch="0,1">
+              <item>
+               <widget class="QLabel" name="Label_step1_M_H_info">
+                <property name="font">
+                 <font>
+                  <pointsize>12</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>*Input info. of 1st H.</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <layout class="QFormLayout" name="FormLayout_step1_M_H">
+                <item row="2" column="0">
+                 <widget class="QLabel" name="Label_step1_M_H_unit">
+                  <property name="font">
+                   <font>
+                    <pointsize>12</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Unit : </string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QComboBox" name="ComboBoxFormLayout_step1_M_H_unit"/>
+                </item>
+                <item row="0" column="0">
+                 <widget class="QLabel" name="Label_step1_M_H_row">
+                  <property name="font">
+                   <font>
+                    <pointsize>12</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Row :</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QLineEdit" name="LineEdit_step1_M_H_row">
+                  <property name="text">
+                   <string>0</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QLabel" name="Label_step1_M_H_col">
+                  <property name="font">
+                   <font>
+                    <pointsize>12</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Col :</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QLineEdit" name="LineEdit_step1_M_H_col">
+                  <property name="text">
+                   <string>0</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="GroupBox_step1_M_M">
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="title">
+             <string>Magnetization (M)</string>
+            </property>
+            <widget class="QWidget" name="verticalLayoutWidget_3">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>20</y>
+               <width>241</width>
+               <height>131</height>
+              </rect>
+             </property>
+             <layout class="QVBoxLayout" name="VerticalLayout_step1_M_M" stretch="0,1">
+              <item>
+               <widget class="QLabel" name="Label_step1_M_M_info">
+                <property name="font">
+                 <font>
+                  <pointsize>12</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>*Input info. of 1st M.</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <layout class="QFormLayout" name="FormLayout_step1_M_M">
+                <item row="2" column="0">
+                 <widget class="QLabel" name="Label_step1_M_M_unit">
+                  <property name="font">
+                   <font>
+                    <pointsize>12</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Unit : </string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QComboBox" name="ComboBoxFormLayout_step1_M_M_unit"/>
+                </item>
+                <item row="0" column="0">
+                 <widget class="QLabel" name="Label_step1_M_M_row">
+                  <property name="font">
+                   <font>
+                    <pointsize>12</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Row :</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QLineEdit" name="LineEdit_step1_M_M_row">
+                  <property name="text">
+                   <string>0</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QLabel" name="Label_step1_M_M_col">
+                  <property name="font">
+                   <font>
+                    <pointsize>12</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Col :</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QLineEdit" name="LineEdit_step1_M_M_col">
+                  <property name="text">
+                   <string>0</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="0" column="0">
+         <layout class="QHBoxLayout" name="Layout_step1_M_file">
+          <property name="sizeConstraint">
+           <enum>QLayout::SetDefaultConstraint</enum>
+          </property>
+          <item>
+           <widget class="QPushButton" name="PushButton_step1_M_file">
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
               <stylestrategy>PreferDefault</stylestrategy>
              </font>
             </property>
@@ -1071,10 +1264,10 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="PushButton_dir_M">
+           <widget class="QPushButton" name="PushButton_step1_M_dir">
             <property name="font">
              <font>
-              <pointsize>18</pointsize>
+              <pointsize>12</pointsize>
               <stylestrategy>PreferDefault</stylestrategy>
              </font>
             </property>
@@ -1088,85 +1281,105 @@
           </item>
          </layout>
         </item>
-        <item>
-         <widget class="QListView" name="ListView_file_M"/>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="Layout_unit_M">
-          <property name="spacing">
-           <number>7</number>
-          </property>
+        <item row="3" column="0">
+         <layout class="QHBoxLayout" name="HorizontalLayout_step1_M_size">
           <item>
-           <layout class="QFormLayout" name="Layout_unit_M_unit_M">
-            <property name="horizontalSpacing">
-             <number>7</number>
-            </property>
-            <property name="verticalSpacing">
-             <number>7</number>
+           <layout class="QFormLayout" name="FormLayout_step1_M_width">
+            <property name="rowWrapPolicy">
+             <enum>QFormLayout::DontWrapRows</enum>
             </property>
             <item row="0" column="0">
-             <widget class="QLabel" name="Label_unit_M">
+             <widget class="QLabel" name="Label_step1_M_width">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="font">
                <font>
-                <pointsize>16</pointsize>
-                <weight>50</weight>
-                <italic>false</italic>
-                <bold>false</bold>
-                <stylestrategy>PreferDefault</stylestrategy>
+                <pointsize>12</pointsize>
                </font>
               </property>
               <property name="text">
-               <string>M unit: </string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               <string>Width (mm)</string>
               </property>
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QComboBox" name="ComboBox_unit_M"/>
+             <widget class="QLineEdit" name="LineEdit_step1_M_width">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Ignored">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>5</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
           <item>
-           <layout class="QFormLayout" name="Layout_unit_M_unit_H">
+           <layout class="QFormLayout" name="FormLayout_step1_M_length">
             <item row="0" column="0">
-             <widget class="QLabel" name="Label_unit_H">
+             <widget class="QLabel" name="Label_step1_M_length">
               <property name="font">
                <font>
-                <pointsize>16</pointsize>
-                <weight>50</weight>
-                <italic>false</italic>
-                <bold>false</bold>
-                <stylestrategy>PreferDefault</stylestrategy>
+                <pointsize>12</pointsize>
                </font>
               </property>
               <property name="text">
-               <string>H unit: </string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               <string>Length(mm)</string>
               </property>
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QComboBox" name="ComboBox_unit_H"/>
+             <widget class="QLineEdit" name="LineEdit_step1_M_length">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Ignored">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>5</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
          </layout>
         </item>
-        <item>
-         <widget class="QLabel" name="Label_step1_3">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>*This should be the raw file from VSM device.</string>
-          </property>
-         </widget>
+        <item row="4" column="0">
+         <layout class="QFormLayout" name="FormLayout_step1_M_thickness">
+          <item row="0" column="0">
+           <widget class="QLabel" name="Label_step1_M_thickness">
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Thickness(nm)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="LineEdit_step1_M_thickness">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Ignored">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>1000</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>
@@ -1175,9 +1388,9 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>380</y>
+        <y>420</y>
         <width>521</width>
-        <height>241</height>
+        <height>201</height>
        </rect>
       </property>
       <property name="font">
@@ -1198,14 +1411,20 @@
          <x>10</x>
          <y>30</y>
          <width>511</width>
-         <height>211</height>
+         <height>165</height>
         </rect>
        </property>
        <layout class="QFormLayout" name="Layout_step2_M">
+        <property name="sizeConstraint">
+         <enum>QLayout::SetMaximumSize</enum>
+        </property>
+        <property name="verticalSpacing">
+         <number>0</number>
+        </property>
         <item row="0" column="0">
-         <widget class="QGroupBox" name="groupBox_5">
+         <widget class="QGroupBox" name="GroupBox_step2_M_left">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -1247,13 +1466,13 @@
               <number>0</number>
              </property>
              <property name="sizeConstraint">
-              <enum>QLayout::SetDefaultConstraint</enum>
+              <enum>QLayout::SetFixedSize</enum>
              </property>
              <item>
               <widget class="QLabel" name="Label_ms">
                <property name="font">
                 <font>
-                 <pointsize>16</pointsize>
+                 <pointsize>12</pointsize>
                  <weight>50</weight>
                  <italic>false</italic>
                  <bold>false</bold>
@@ -1261,7 +1480,7 @@
                 </font>
                </property>
                <property name="text">
-                <string>sat. mz.: </string>
+                <string>M_S: </string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1272,7 +1491,7 @@
               <widget class="QLabel" name="Label_a">
                <property name="font">
                 <font>
-                 <pointsize>16</pointsize>
+                 <pointsize>12</pointsize>
                  <weight>50</weight>
                  <italic>false</italic>
                  <bold>false</bold>
@@ -1291,7 +1510,7 @@
               <widget class="QLabel" name="Label_k">
                <property name="font">
                 <font>
-                 <pointsize>16</pointsize>
+                 <pointsize>12</pointsize>
                  <weight>50</weight>
                  <italic>false</italic>
                  <bold>false</bold>
@@ -1307,10 +1526,10 @@
               </widget>
              </item>
              <item>
-              <widget class="QLabel" name="Label_alpha_2">
+              <widget class="QLabel" name="Label_alfa">
                <property name="font">
                 <font>
-                 <pointsize>16</pointsize>
+                 <pointsize>12</pointsize>
                  <weight>50</weight>
                  <italic>false</italic>
                  <bold>false</bold>
@@ -1329,7 +1548,7 @@
               <widget class="QLabel" name="Label_c">
                <property name="font">
                 <font>
-                 <pointsize>16</pointsize>
+                 <pointsize>12</pointsize>
                  <weight>50</weight>
                  <italic>false</italic>
                  <bold>false</bold>
@@ -1348,7 +1567,7 @@
               <widget class="QLabel" name="Label_J">
                <property name="font">
                 <font>
-                 <pointsize>16</pointsize>
+                 <pointsize>12</pointsize>
                  <weight>50</weight>
                  <italic>false</italic>
                  <bold>false</bold>
@@ -1364,21 +1583,36 @@
               </widget>
              </item>
              <item>
-              <widget class="QLabel" name="Label_g_J">
+              <widget class="QCheckBox" name="ComboBox_sigma">
                <property name="font">
                 <font>
-                 <pointsize>16</pointsize>
-                 <weight>50</weight>
-                 <italic>false</italic>
-                 <bold>false</bold>
+                 <pointsize>12</pointsize>
                  <stylestrategy>PreferDefault</stylestrategy>
                 </font>
                </property>
-               <property name="text">
-                <string>g_J: </string>
+               <property name="mouseTracking">
+                <bool>true</bool>
                </property>
-               <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               <property name="focusPolicy">
+                <enum>Qt::StrongFocus</enum>
+               </property>
+               <property name="acceptDrops">
+                <bool>false</bool>
+               </property>
+               <property name="layoutDirection">
+                <enum>Qt::LeftToRight</enum>
+               </property>
+               <property name="autoFillBackground">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>       σ:</string>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>19</width>
+                 <height>19</height>
+                </size>
                </property>
               </widget>
              </item>
@@ -1389,6 +1623,9 @@
         </item>
         <item row="0" column="1">
          <layout class="QFormLayout" name="Layout_step2_M_right">
+          <property name="sizeConstraint">
+           <enum>QLayout::SetMaximumSize</enum>
+          </property>
           <property name="fieldGrowthPolicy">
            <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
           </property>
@@ -1396,7 +1633,7 @@
            <enum>QFormLayout::DontWrapRows</enum>
           </property>
           <property name="verticalSpacing">
-           <number>3</number>
+           <number>0</number>
           </property>
           <item row="0" column="0">
            <widget class="QLCDNumber" name="lcdNumber_ms">
@@ -1425,8 +1662,33 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QSlider" name="Slider_ms">
+          <item row="1" column="0">
+           <widget class="QLCDNumber" name="lcdNumber_a">
+            <property name="font">
+             <font>
+              <pointsize>9</pointsize>
+              <stylestrategy>PreferDefault</stylestrategy>
+             </font>
+            </property>
+            <property name="digitCount">
+             <number>7</number>
+            </property>
+            <property name="segmentStyle">
+             <enum>QLCDNumber::Flat</enum>
+            </property>
+            <property name="value" stdset="0">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QSlider" name="Slider_a">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Ignored">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="cursor">
              <cursorShape>ArrowCursor</cursorShape>
             </property>
@@ -1453,8 +1715,8 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QLCDNumber" name="lcdNumber_a">
+          <item row="2" column="0">
+           <widget class="QLCDNumber" name="lcdNumber_k">
             <property name="font">
              <font>
               <pointsize>9</pointsize>
@@ -1472,8 +1734,14 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QSlider" name="Slider_a">
+          <item row="2" column="1">
+           <widget class="QSlider" name="Slider_k">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Ignored">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="cursor">
              <cursorShape>ArrowCursor</cursorShape>
             </property>
@@ -1481,13 +1749,13 @@
              <number>100</number>
             </property>
             <property name="singleStep">
-             <number>10</number>
+             <number>1</number>
             </property>
             <property name="pageStep">
-             <number>10</number>
+             <number>5</number>
             </property>
             <property name="value">
-             <number>100</number>
+             <number>0</number>
             </property>
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -1501,7 +1769,7 @@
            </widget>
           </item>
           <item row="3" column="0">
-           <widget class="QLCDNumber" name="lcdNumber_alpha_2">
+           <widget class="QLCDNumber" name="lcdNumber_alfa">
             <property name="font">
              <font>
               <pointsize>9</pointsize>
@@ -1523,7 +1791,13 @@
            </widget>
           </item>
           <item row="3" column="1">
-           <widget class="QSlider" name="Slider_alpha_2">
+           <widget class="QSlider" name="Slider_alfa">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Ignored">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="cursor">
              <cursorShape>ArrowCursor</cursorShape>
             </property>
@@ -1568,6 +1842,12 @@
           </item>
           <item row="4" column="1">
            <widget class="QSlider" name="Slider_c">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Ignored">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="cursor">
              <cursorShape>ArrowCursor</cursorShape>
             </property>
@@ -1592,7 +1872,7 @@
            </widget>
           </item>
           <item row="5" column="0">
-           <widget class="QLCDNumber" name="lcdNumber_J">
+           <widget class="QLCDNumber" name="lcdNumber_j">
             <property name="font">
              <font>
               <pointsize>9</pointsize>
@@ -1608,48 +1888,13 @@
            </widget>
           </item>
           <item row="5" column="1">
-           <widget class="QSlider" name="Slider_J">
-            <property name="cursor">
-             <cursorShape>ArrowCursor</cursorShape>
+           <widget class="QSlider" name="Slider_j">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Ignored">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
-            <property name="maximum">
-             <number>100</number>
-            </property>
-            <property name="singleStep">
-             <number>1</number>
-            </property>
-            <property name="pageStep">
-             <number>2</number>
-            </property>
-            <property name="value">
-             <number>100</number>
-            </property>
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="tickPosition">
-             <enum>QSlider::TicksAbove</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="0">
-           <widget class="QLCDNumber" name="lcdNumber_g_J">
-            <property name="font">
-             <font>
-              <pointsize>9</pointsize>
-              <stylestrategy>PreferDefault</stylestrategy>
-             </font>
-            </property>
-            <property name="digitCount">
-             <number>7</number>
-            </property>
-            <property name="segmentStyle">
-             <enum>QLCDNumber::Flat</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="1">
-           <widget class="QSlider" name="Slider_g_J">
             <property name="cursor">
              <cursorShape>ArrowCursor</cursorShape>
             </property>
@@ -1673,8 +1918,8 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLCDNumber" name="lcdNumber_k">
+          <item row="6" column="0">
+           <widget class="QLCDNumber" name="lcdNumber_sigma">
             <property name="font">
              <font>
               <pointsize>9</pointsize>
@@ -1687,13 +1932,21 @@
             <property name="segmentStyle">
              <enum>QLCDNumber::Flat</enum>
             </property>
-            <property name="value" stdset="0">
-             <double>1.000000000000000</double>
-            </property>
            </widget>
           </item>
-          <item row="2" column="1">
-           <widget class="QSlider" name="Slider_k">
+          <item row="6" column="1">
+           <widget class="QSlider" name="Slider_sigma">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Ignored">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>15</pointsize>
+             </font>
+            </property>
             <property name="cursor">
              <cursorShape>ArrowCursor</cursorShape>
             </property>
@@ -1707,7 +1960,38 @@
              <number>10</number>
             </property>
             <property name="value">
-             <number>0</number>
+             <number>100</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="tickPosition">
+             <enum>QSlider::TicksAbove</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QSlider" name="Slider_ms">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Ignored">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="cursor">
+             <cursorShape>ArrowCursor</cursorShape>
+            </property>
+            <property name="maximum">
+             <number>100</number>
+            </property>
+            <property name="singleStep">
+             <number>1</number>
+            </property>
+            <property name="pageStep">
+             <number>5</number>
+            </property>
+            <property name="value">
+             <number>100</number>
             </property>
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -1765,7 +2049,7 @@
          <height>84</height>
         </rect>
        </property>
-       <layout class="QFormLayout" name="formLayout_M">
+       <layout class="QFormLayout" name="FormLayout_results_M">
         <property name="horizontalSpacing">
          <number>0</number>
         </property>
@@ -1773,7 +2057,7 @@
          <number>0</number>
         </property>
         <item row="0" column="0">
-         <widget class="QCheckBox" name="CheckBox_bg">
+         <widget class="QCheckBox" name="CheckBox_bg_results_M">
           <property name="font">
            <font>
             <pointsize>18</pointsize>
@@ -1785,10 +2069,10 @@
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QComboBox" name="ComboBox_bg"/>
+         <widget class="QComboBox" name="ComboBox_bg_results_M"/>
         </item>
         <item row="1" column="0">
-         <widget class="QCheckBox" name="CheckBox_All_M">
+         <widget class="QCheckBox" name="CheckBox_All_results_M">
           <property name="font">
            <font>
             <pointsize>18</pointsize>
@@ -1821,39 +2105,73 @@
        </layout>
       </widget>
      </widget>
-     <widget class="QPushButton" name="PushButton_simulate_M">
+     <widget class="QWidget" name="formLayoutWidget_4">
       <property name="geometry">
        <rect>
-        <x>540</x>
-        <y>130</y>
-        <width>511</width>
+        <x>543</x>
+        <y>129</y>
+        <width>501</width>
         <height>51</height>
        </rect>
       </property>
-      <property name="font">
-       <font>
-        <pointsize>24</pointsize>
-        <weight>75</weight>
-        <italic>false</italic>
-        <bold>true</bold>
-        <stylestrategy>PreferDefault</stylestrategy>
-       </font>
-      </property>
-      <property name="cursor">
-       <cursorShape>PointingHandCursor</cursorShape>
-      </property>
-      <property name="text">
-       <string>STEP.3 Simulate!!!</string>
-      </property>
-      <property name="autoDefault">
-       <bool>false</bool>
-      </property>
-      <property name="default">
-       <bool>false</bool>
-      </property>
-      <property name="flat">
-       <bool>false</bool>
-      </property>
+      <layout class="QFormLayout" name="FormLayout_step3_M">
+       <item row="0" column="1">
+        <widget class="QPushButton" name="PushButton_simulate_M">
+         <property name="font">
+          <font>
+           <pointsize>21</pointsize>
+           <weight>75</weight>
+           <italic>false</italic>
+           <bold>true</bold>
+           <stylestrategy>PreferDefault</stylestrategy>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
+         <property name="text">
+          <string>STEP.3 Simulate!!!</string>
+         </property>
+         <property name="autoDefault">
+          <bool>false</bool>
+         </property>
+         <property name="default">
+          <bool>false</bool>
+         </property>
+         <property name="flat">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QPushButton" name="PushButton_clearall_M">
+         <property name="font">
+          <font>
+           <pointsize>21</pointsize>
+           <weight>75</weight>
+           <italic>false</italic>
+           <bold>true</bold>
+           <stylestrategy>PreferDefault</stylestrategy>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
+         <property name="text">
+          <string>Clear All</string>
+         </property>
+         <property name="autoDefault">
+          <bool>false</bool>
+         </property>
+         <property name="default">
+          <bool>false</bool>
+         </property>
+         <property name="flat">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </widget>
     <widget class="QWidget" name="tabFaraday">
@@ -2669,7 +2987,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1079</width>
+     <width>1080</width>
      <height>26</height>
     </rect>
    </property>

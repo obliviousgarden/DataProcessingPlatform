@@ -38,6 +38,9 @@ class Simulator(Ui_MainWindow):
     def get_modal_dielectric(self):
         return self.modal_dielectric
 
+    def get_modal_magnetization(self):
+        return self.modal_magnetization
+
     def setupUi(self, MainWindow):
         # 继承调用父类的
         Ui_MainWindow.setupUi(self, MainWindow)
@@ -45,6 +48,7 @@ class Simulator(Ui_MainWindow):
         self.actionQuit.triggered.connect(on_Action_quit)
         self.actionSaveResultsAs.triggered.connect(self.on_Action_save_results_as)
         self.modal_dielectric.setupUi()
+        self.modal_magnetization.setupUi()
 
     def on_Action_save_results_as(self):
         self.modal_dielectric.on_Action_save_results_as()

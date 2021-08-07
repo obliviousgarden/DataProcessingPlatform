@@ -104,7 +104,7 @@ class ModalDielectric(object):
         self.parent.Slider_epsiloninf.valueChanged.connect(self.on_Slider_epsiloninf_valueChanged)
         self.parent.Slider_deltaepsilon.valueChanged.connect(self.on_Slider_deltaepsilon_valueChanged)
         # 初始化figure和cavas
-        self.dialog_plot.setWindowTitle('Plot results')
+        self.dialog_plot.setWindowTitle('Plot results - Dielectric Simulation')
         self.layout_plot_epsilon.addWidget(self.canvas_epsilon)
         self.tab_plot_epsilon.setLayout(self.layout_plot_epsilon)
         self.layout_plot_delta_epsilon.addWidget(self.canvas_delta_epsilon)
@@ -185,13 +185,13 @@ class ModalDielectric(object):
         self.file_path = []
         dir_ = QtWidgets.QFileDialog.getExistingDirectory()
         print('dir:', dir_)
-        if dir_ is not '':
+        if dir_ != '':
             self.file_name = os.listdir(dir_)
             for i in range(self.file_name.__len__()):
                 self.file_path.append(dir_ + '/' + self.file_name[i])
             self.list_view_file_model.setStringList(self.file_name)
-            print(self.file_path)
-            print(self.file_name)
+        print(self.file_path)
+        print(self.file_name)
 
     def on_Slider_alpha_valueChanged(self):
         self.alpha = self.alpha_min + (self.alpha_max - self.alpha_min) * self.parent.Slider_alpha.value() / 100.0

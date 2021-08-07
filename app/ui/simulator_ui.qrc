@@ -2,7 +2,10 @@
   <qresource prefix="Formula">
     <file>source/formula.png</file>
     <file>source/formula_faraday.png</file>
-    <file>source/formula_m.png</file>
+    <file>source/formula_m_ja.png</file>
+    <file>source/formula_m_b.png</file>
+    <file>source/formula_m_l.png</file>
+    <file>source/formula_m_t.png</file>
   </qresource>
   <qresource prefix="Icon">
     <file>simulator.ico</file>

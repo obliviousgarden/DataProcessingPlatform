@@ -19,6 +19,8 @@ constant.g_S = 2.0023193043768
 g_S = constant.g_S
 constant.miu_B = e*h_bar/(2*m_e)
 miu_B = constant.miu_B
+constant.magnetization_unit_list = ["Tesla(T)","Gauss(G)","kiloGauss(kG)","kiloOersted(kOe)","A/m","emu/cm^3"]
+magnetization_unit_list = constant.magnetization_unit_list
 
 
 def Lande_g_Factor(s, l, j):

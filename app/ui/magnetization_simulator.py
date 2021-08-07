@@ -1,12 +1,19 @@
+import time
+
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit, least_squares
-from scipy.integrate import odeint
+from scipy.integrate import odeint, quad
+from scipy.stats import lognorm
 from app.utils import sci_const
+
+from joblib import Parallel, delayed
+from numba import cfunc
+
 
 
 class MagnetizationSimulator:
-    def __init__(self, model, file_path, p0=None, bounds=()):
+    def __init__(self, model, file_path, p0=None, bounds=(), info_tuple = ()):
         self.model = model
         self.file_path = file_path
         # 一个初始尝试值的数组
@@ -119,7 +126,7 @@ class MagnetizationSimulator:
 
         return h_list, m_list, m_0_list, break_index_list
 
-    def simulate(self, g_j=1.33, temp=300.):
+    def simulate(self, g_j=1.33, temp=300., distribution=False):
         print('开始模拟')
         h_raw, m_raw, m_0_list, break_index_list = self.get_data()
         print('获取数据完毕', h_raw, m_raw)
@@ -129,8 +136,8 @@ class MagnetizationSimulator:
             return {'popt': [], 'pcov': [], 'perr': []}
         popt, pcov = curve_fit(
             {1: Jiles_Atherton_Model(m_0_list=m_0_list, break_index_list=break_index_list).func_Jiles_Atherton,
-             2: Brillouin_Model(g_j=g_j, temp=temp).func_Brillouin,
-             3: Langevin_Model(g_j=g_j, temp=temp).func_Langevin,
+             2: Brillouin_Model(g_j=g_j, temp=temp, distribution=distribution).func_Brillouin,
+             3: Langevin_Model(g_j=g_j, temp=temp, distribution=distribution).func_Langevin,
              4: Takacs_Model(g_j=g_j, temp=temp, break_index_list=break_index_list).func_Takacs}.get(self.model)
             , h_raw
             , m_raw
@@ -148,10 +155,10 @@ class MagnetizationSimulator:
                 h_raw, popt[0], popt[1], popt[2], popt[3], popt[4])
 
         elif self.model == 2:
-            m_cal = Brillouin_Model(g_j=g_j, temp=temp).func_Brillouin(h_raw, popt[0], popt[1])
+            m_cal = Brillouin_Model(g_j=g_j, temp=temp, distribution=distribution).func_Brillouin(h_raw, popt[0], popt[1], popt[2])
 
         elif self.model == 3:
-            m_cal = Langevin_Model(g_j=g_j, temp=temp).func_Langevin(h_raw, popt[0], popt[1])
+            m_cal = Langevin_Model(g_j=g_j, temp=temp, distribution=distribution).func_Langevin(h_raw, popt[0], popt[1], popt[2])
 
         elif self.model == 4:
             # m_cal = Takacs_Model(g_j=g_j,temp=temp).func_Takacs(h_raw, popt[0], popt[1])
@@ -199,7 +206,7 @@ class Jiles_Atherton_Model:
         self.m_0_list = m_0_list
         self.break_index_list = break_index_list
 
-    def func_Jiles_Atherton(self, h, a, alpha, c, m_s, k):
+    def func_Jiles_Atherton(self, h, m_s, alpha, c, a, k):
         # 参数含义:
         # h External Magnetic Field
         # a Magnetic Coupling Coefficient
@@ -207,35 +214,35 @@ class Jiles_Atherton_Model:
         # c Reversible Magnetization Coefficient, c=1 means Paramagnetism
         # m_s Saturation Magnetization
         # k Irreversible Loss Coefficient
-        print("a={0},alpha={1}.c={2},m_s={3},k={4},m_0_list={5}".format(a, alpha, c, m_s, k, self.m_0_list))
+        print("ms={0},alpha={1}.c={2},a={3},k={4},m_0_list={5}".format(m_s, alpha, c, a, k, self.m_0_list))
 
         # 分别对4支函数进行计算
         # 第1支 下降支
         (m1_result, m1_info_dict) = odeint(self.func_dm_dh,
                                            self.m_0_list[0],
                                            h[0:self.break_index_list[0]],
-                                           args=(a, alpha, c, m_s, k, -1),
+                                           args=(m_s, alpha, c, a, k, -1),
                                            printmessg=True,
                                            full_output=True)
         # 第2支 上升支
         (m2_result, m2_info_dict) = odeint(self.func_dm_dh,
                                            self.m_0_list[1],
                                            h[self.break_index_list[0]:self.break_index_list[1]],
-                                           args=(a, alpha, c, m_s, k, 1),
+                                           args=(m_s, alpha, c, a, k, 1),
                                            printmessg=True,
                                            full_output=True)
         # 第3支 下降支
         (m3_result, m3_info_dict) = odeint(self.func_dm_dh,
                                            self.m_0_list[2],
                                            h[self.break_index_list[1]:self.break_index_list[2]],
-                                           args=(a, alpha, c, m_s, k, -1),
+                                           args=(m_s, alpha, c, a, k, -1),
                                            printmessg=True,
                                            full_output=True)
         # 第4支 上升支
         (m4_result, m4_info_dict) = odeint(self.func_dm_dh,
                                            self.m_0_list[3],
                                            h[self.break_index_list[2]:],
-                                           args=(a, alpha, c, m_s, k, 1),
+                                           args=(m_s, alpha, c, a, k, 1),
                                            printmessg=True,
                                            full_output=True)
         # 注意这里的m是一个数组的数组是一个二维数组必须进行降维
@@ -252,7 +259,7 @@ class Jiles_Atherton_Model:
         m_result = np.concatenate([m1_list, m2_list, m3_list, m4_list])
         return m_result
 
-    def func_dm_dh(m, h, a, alpha, c, m_s, k, delta):
+    def func_dm_dh(self, m, h, m_s, alpha, c, a, k, delta):
         # dm/dh= (分子1+分子2)/分母
         # 这个方程的详细说明：这是一个用来描述磁场H和磁化强度M的关系公式
         # 磁化强度分为两部分可逆M_rev和不可逆M_irr
@@ -293,11 +300,12 @@ class Jiles_Atherton_Model:
 
 
 class Brillouin_Model:
-    def __init__(self, g_j, temp):
+    def __init__(self, g_j, temp, distribution=False):
         self.g_j = g_j
         self.temp = temp
+        self.distribution = distribution
 
-    def func_Brillouin(self, h, m_s, j):
+    def func_Brillouin(self, h, m_s, j, sigma = 0.0):
         # 参数含义:
         # h External Magnetic Field
         # m_s Saturation Magnetization
@@ -315,23 +323,65 @@ class Brillouin_Model:
 
 
 class Langevin_Model:
-    def __init__(self, g_j, temp):
+    def __init__(self, g_j, temp, distribution=False):
         self.g_j = g_j
         self.temp = temp
+        self.distribution = distribution
 
-    def func_Langevin(self, h, m_s, j):
+    def func_Langevin(self, h, m_s, j, sigma = 0.0):
         # 参数含义:
         # h External Magnetic Field
         # m_s Saturation Magnetization
         # j Total Angular Momentum
         # temp Temperature
-        print("g_j={0},temp={1},m_s={2},j={3}".format(self.g_j, self.temp, m_s, j))
+        # sigma Standard Deviation of the Reduced Diameter Distribution (OPTIONAL)
+        print(time.asctime(time.localtime(time.time())))
+        D_m = np.power(self.g_j*sci_const.miu_B*j*6./(np.pi*m_s),1/3)
+        print("g_j={0},temp={1},m_s={2},j={3},distribution={4},D_m={5} nm,sigma={6}".format(self.g_j, self.temp, m_s, j,
+                                                                                 self.distribution,D_m*1.e9, sigma))
+        if self.distribution:
+            # 这里比较特殊，所以h被遍历
+            start = time.time()
+            m = []
+
+            # for var_h in h:
+            #     (var_m,abserr) = quad(self.func_Langevin_y,0,np.inf,args=(var_h,m_s,j,sigma),limlst=3)
+            #     m.append(var_m)
+
+            m = Parallel(n_jobs=4)(
+                delayed(self.func_integral)(var_h, m_s, j, sigma)
+                for var_h in h)
+
+            # for var_h in h:
+            #     var_m = cfunc("float64(float64)")(self.func_Langevin_y)(var_h, m_s, j, sigma)
+            #     m.append(var_m)
+
+            end = time.time()
+            print(str(end - start) + 's')
+            return m
+        else:
+            b = np.multiply(sci_const.miu_0, h)
+            x = np.divide(np.multiply(self.g_j * sci_const.miu_B, b), sci_const.k_B * self.temp)
+            l_x = np.subtract(np.reciprocal(np.tanh(np.multiply(j, x))),
+                              np.reciprocal(np.multiply(j, x)))
+            m = np.multiply(m_s, l_x)
+            return m
+
+    def func_integral(self, var_h, m_s, j, sigma):
+        # (var_m, abserr) = quad(self.func_Langevin_y, 0, np.inf, args=(var_h, m_s, j, sigma), limlst=3)
+        (var_m, abserr) = quad(self.func_Langevin_y, 0, 2, args=(var_h, m_s, j, sigma), limlst=3)
+        return var_m
+
+    def func_Langevin_y(self, y, h, m_s, j, sigma):
+        # j -> j*y^3
+        j_y = np.multiply(j, np.power(y, 3))
         b = np.multiply(sci_const.miu_0, h)
         x = np.divide(np.multiply(self.g_j * sci_const.miu_B, b), sci_const.k_B * self.temp)
-        l_x = np.subtract(np.reciprocal(np.tanh(np.multiply(j, x))),
-                          np.reciprocal(np.multiply(j, x)))
-        m = np.multiply(m_s, l_x)
-        return m
+        l_x = np.subtract(np.reciprocal(np.tanh(np.multiply(j_y, x))),
+                          np.reciprocal(np.multiply(j_y, x)))
+        f_y = lognorm.pdf(y, sigma)
+        dm = np.multiply(np.multiply(m_s, l_x), f_y)
+        return dm
 
 
 class Takacs_Model:
@@ -361,36 +411,37 @@ class Takacs_Model:
 
 if __name__ == '__main__':
     #  J-A Model
-    # a, alpha, c, m_s, k, delta
+    # ms, alpha, c, a, k, delta
     # a=76434.33625750794,alpha=0.17716254982042273.c=0.0002219543796726332,m_s=647678.7831977553,k=2319.3791455301916
-    # magnetization_simulator = MagnetizationSimulator(
-    #     model=1,
-    #     file_path="D:\\PycharmProjects\\AIProcessingPlatform\\app\\ui\\V210705112208.Csv",
-    #     p0=[76434, 0.17716254982042273, 0.0002219543796726332, 647678, 2319],
-    #     bounds=([1e3, 0, 0.00000001, 1e4, 1e3], [1e5, 0.3, 0.01, 1e7, 1e5])
-    # )
+    magnetization_simulator = MagnetizationSimulator(
+        model=1,
+        file_path="D:\\PycharmProjects\\AIProcessingPlatform\\app\\ui\\V210705112208.Csv",
+        p0=[647678, 0.17716254982042273, 0.0002219543796726332, 76434, 2319],
+        bounds=([1e4, 0, 0.00000001, 1e3, 1e3], [1e7, 0.3, 0.01, 1e5, 1e5])
+    )
+    magnetization_simulator.simulate()
 
     # B Model
-    # m_s, j
-    g_j = sci_const.Lande_g_Factor(3 / 2, 3, 9 / 2)  # Co2+ ion
-    magnetization_simulator = MagnetizationSimulator(
-        model=2,
-        file_path="D:\\PycharmProjects\\AIProcessingPlatform\\app\\ui\\V210705112208.Csv",
-        p0=[6e6, 4500],
-        bounds=([1e4, 1], [1e8, 1e10])
-    )
-    magnetization_simulator.simulate(g_j=g_j, temp=300)
+    # m_s, j, sigma(OPTIONAL)
+    # g_j = sci_const.Lande_g_Factor(3 / 2, 3, 9 / 2)  # Co2+ ion
+    # magnetization_simulator = MagnetizationSimulator(
+    #     model=2,
+    #     file_path="D:\\PycharmProjects\\AIProcessingPlatform\\app\\ui\\V210705112208.Csv",
+    #     p0=[6e6, 4500],
+    #     bounds=([1e4, 1], [1e8, 1e10])
+    # )
+    # magnetization_simulator.simulate(g_j=g_j, temp=300)
 
     # L Model
-    # m_s
-    # g_j = sci_const.Lande_g_Factor(3/2,3,9/2) # Co2+ ion
+    # m_s, j, sigma(OPTIONAL)
+    # g_j = sci_const.Lande_g_Factor(3 / 2, 3, 9 / 2)  # Co2+ ion
     # magnetization_simulator = MagnetizationSimulator(
     #     model=3,
     #     file_path="D:\\PycharmProjects\\AIProcessingPlatform\\app\\ui\\V210705112208.Csv",
-    #     p0=[6e6,4500],
-    #     bounds=([1e4,1], [1e8, 1e10])
+    #     p0=[646085, 5913.0, 0.27535552365222604],
+    #     bounds=([1e4, 1, 0.0], [1e8, 1e10, 1.0])
     # )
-    # magnetization_simulator.simulate(g_j=g_j,temp=300)
+    # magnetization_simulator.simulate(g_j=g_j, temp=300, distribution=True)
 
     # T Model (主要适用于x不为零且有一定大小的情况下，暂时从前端封住self.model不准为4)
     # m_s, j
