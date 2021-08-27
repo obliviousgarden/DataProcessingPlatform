@@ -38,7 +38,15 @@ class FaradaySimulator:
         pass
 
     def simulate(self, file_path:str):
-        # 1
+        # ROUTE A:
+        # 1 实验复折射率M,D-->计算复折射率M,D
+        # 2 计算复折射率M,D-->计算复介电常数M,D
+        # 3 计算复介电常数M,D-->有效介质近似-->计算复介电常数EFF
+        # 4 计算复介电常数EFF-->计算FARADAY
+        # ROUTE B:
+        # 1 实验复折射率M,D-->计算复折射率M,D
+        # 2,3 计算复折射率M,D-->有效介质近似(需要自己设计)-->计算复折射率EFF
+        # 4 计算复折射率EFF-->计算FARADAY
         print('模拟折射率色散方程')
         print('计算方程')
         print('开始模拟')

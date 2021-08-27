@@ -57,9 +57,9 @@ class NKSimulator:
                                                     to_unit=to_unit.value, value=data)
 
         # 3 wl_bound单位变换,截取需要数据
-        wl_unit_name = str(self.wl_bound[0])
-        # TODO: 通过名称获取枚举的函数
-        wl_unit = ScienceUnit.Wavelength.nm
+        wl_unit_symbol = str(self.wl_bound[0])
+        # 通过名称获取枚举的函数
+        wl_unit = ScienceUnit.get_from_symbol(ScienceUnit.Wavelength,wl_unit_symbol)
 
         self.wl_lower_bound = ScienceUnitConverter.convert(from_unit_class=wl_unit.__class__,
                                                            to_unit_class=to_unit.__class__, from_unit=wl_unit.value,
