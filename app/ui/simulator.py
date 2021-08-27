@@ -78,7 +78,7 @@ class ParametersRangeSettingDialog(Ui_ParametersRangeSettingDialog):
 
 class CharacterEncodingConversionDialog(Ui_CharacterEncodingConversionDialog):
     def __init__(self, parent=None, simulator=None):
-        # TODO:
+        # FIXME:编码转换，暂时没用
         super(CharacterEncodingConversionDialog, self).__init__()
         self.simulator = simulator
 

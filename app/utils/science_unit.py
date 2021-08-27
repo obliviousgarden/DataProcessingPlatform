@@ -45,9 +45,6 @@ class ScienceUnit(Enum):
                 if key == obj.__name__:
                     # 匹配到obj的目标类
                     unit_enum = value.__dict__['_member_map_'][symbol]
-                    print(type(unit_enum).__name__)
-                    print(obj.__name__)
-                print('AAA')
         return unit_enum
 
 
