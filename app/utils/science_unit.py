@@ -1,60 +1,167 @@
-from aenum import Enum, unique, skip
+from aenum import Enum, unique, skip,EnumType
+import numpy as np
+from app.utils import sci_const
+from app.utils.science_base import Unit
 
-
-class Unit:
-    def __init__(self, index: int, symbol: str, description: str):
-        self.index = index
-        self.symbol = symbol
-        self.description = description
 
 
 @unique
 class ScienceUnit(Enum):
     @unique
-    class Magnetization(Enum):
-        A_m_1 = Unit(index=0, symbol="A/m", description="Ampere per Meter")
-        T = Unit(index=1, symbol="T", description="Tesla")
-        G = Unit(index=2, symbol="G", description="Gauss")
-        kG = Unit(index=3, symbol="kG", description="kiloGauss")
-        Oe = Unit(index=4, symbol="Oe", description="Oersted")
-        kOe = Unit(index=5, symbol="kOe", description="kiloOersted")
-        emu_cm_3 = Unit(index=6, symbol="emu/cm^3", description="emu per Cubic Centimeter")
+    class Length(Enum):
+        m = Unit(index=0, symbol="m", ratio=1., description="Meter")
+        cm = Unit(index=1, symbol="cm", ratio=1./1.e2,description="Centimeter")
+        mm = Unit(index=2, symbol="mm", ratio=1./1.e3, description="Millimeter")
+        um = Unit(index=3, symbol="um", ratio=1./1.e6, description="Micrometer")
+        nm = Unit(index=4, symbol="nm", ratio=1./1.e9, description="Nanometer")
+        A = Unit(index=5, symbol="A", ratio=1./1.e10, description="Angstrom")
 
     @unique
-    class Wavelength(Enum):
-        um = Unit(index=0, symbol="um", description="Wavelength, micrometer")
-        nm = Unit(index=1, symbol="nm", description="Wavelength, nanometer")
-        A = Unit(index=2, symbol="A", description="Wavelength, Angstrom")
-        cm = Unit(index=3, symbol="cm", description="Wavelength, centimeter")
+    class Area(Enum):
+        m2 = Unit(index=0, symbol="m^2", ratio=1., description="Square Meter")
+        cm2 = Unit(index=1, symbol="cm^2", ratio=1./1.e4, description="Square Centimeter")
+        mm2 = Unit(index=2, symbol="mm^2", ratio=1./1.e6, description="Square Millimeter")
+        um2 = Unit(index=3, symbol="um^2", ratio=1./1.e12, description="Square Micrometer")
+        nm2 = Unit(index=4, symbol="nm^2", ratio=1./1.e18, description="Square Nanometer")
+
+    @unique
+    class Volume(Enum):
+        m3 = Unit(index=0, symbol="m^3", ratio=1., description="Cubic Meter")
+        cm3 = Unit(index=1, symbol="cm^3", ratio=1./1.e6, description="Cubic Centimeter")
+        mm3 = Unit(index=2, symbol="mm^3", ratio=1./1.e9, description="Cubic Millimeter")
+        um3 = Unit(index=3, symbol="um^3", ratio=1./1.e18, description="Cubic Micrometer")
+        nm3 = Unit(index=4, symbol="nm^3", ratio=1./1.e27, description="Cubic Nanometer")
+
+    @unique
+    class Mass(Enum):
+        kg = Unit(index=0, symbol="kg", ratio=1., description="Kilogram")
+        g = Unit(index=1, symbol="g", ratio=1./1.e3, description="Gram")
+        mg = Unit(index=2, symbol="mg", ratio=1./1.e6, description="Milligram")
+        ug = Unit(index=3, symbol="ug", ratio=1./1.e9, description="Microgram")
+
+    @unique
+    class Magnetization(Enum):
+        A_m_1 = Unit(index=0, symbol="A/m", ratio=1., description="Ampere per Meter")
+        T = Unit(index=1, symbol="T", ratio=1.e7/(4.*np.pi), description="Tesla")
+        G = Unit(index=2, symbol="G", ratio=1.e3/(4.*np.pi), description="Gauss")
+        kG = Unit(index=3, symbol="kG", ratio=1.e6/(4.*np.pi), description="kiloGauss")
+        Oe = Unit(index=4, symbol="Oe", ratio=1.e3/(4.*np.pi), description="Oersted")
+        kOe = Unit(index=5, symbol="kOe", ratio=1.e6/(4.*np.pi), description="kiloOersted")
+        emu_cm_3 = Unit(index=6, symbol="emu/cm^3", ratio=1.e3, description="emu per Cubic Centimeter")
+
+    @unique
+    class Permeability(Enum):
+        H_m_1 = Unit(index=0, symbol="H/m", ratio=1., description="Henry per Meter")
 
     @unique
     class Wavenumber(Enum):
-        um_1 = Unit(index=0, symbol="um-1", description="Wavenumber, micrometer-1")
-        nm_1 = Unit(index=1, symbol="nm-1", description="Wavenumber, nanometer-1")
-        A_1 = Unit(index=2, symbol="A-1", description="Wavenumber, Angstrom-1")
-        cm_1 = Unit(index=3, symbol="cm-1", description="Wavenumber, centimeter-1")
-        eV = Unit(index=4, symbol="eV", description="Wavenumber, Energy, electronVolt")
+        m_1 = Unit(index=0, symbol="m-1", ratio=1., description="Wavenumber, micrometer-1")
+        cm_1 = Unit(index=1, symbol="cm-1", ratio=1.e2, description="Wavenumber, centimeter-1")
+        mm_1 = Unit(index=2, symbol="mm-1", ratio=1.e3, description="Wavenumber, centimeter-1")
+        um_1 = Unit(index=3, symbol="um-1", ratio=1.e6, description="Wavenumber, micrometer-1")
+        nm_1 = Unit(index=4, symbol="nm-1", ratio=1.e9, description="Wavenumber, nanometer-1")
+        A_1 = Unit(index=5, symbol="A-1", ratio=1.e10, description="Wavenumber, Angstrom-1")
+        eV = Unit(index=6, symbol="eV", ratio=sci_const.h*sci_const.c/sci_const.e, description="Wavenumber, Energy, electronVolt")
+
+    @unique
+    class Dimensionless(Enum):
+        DN = Unit(index=0, symbol="1", ratio=1., description="Dimensionless Number, no unit")
+
+    @unique
+    class Unknown(Enum):
+        unkn = Unit(index=0, symbol="unknown", ratio=1., description="Unknown unit")
 
     @staticmethod
-    def get_from_symbol(obj: object, symbol: str)->Unit:
-        unit_enum = None
+    def get_from_symbol(symbol: str)->Unit:
+        for key,value in ScienceUnit.__dict__.items():
+            # print(key,value,type(value).__name__)
+            if type(value).__name__ == 'EnumType':
+                for name,unit in value.__dict__['_member_map_'].items():
+                    if unit.value.get_symbol() == symbol:
+                        return unit.value
+        return ScienceUnit.Unknown.unkn.value
+
+    @staticmethod
+    def get_from_description_with_symbol_bracket(description_with_symbol_bracket: str)->Unit:
+        for key,value in ScienceUnit.__dict__.items():
+            # print(key,value,type(value).__name__)
+            if type(value).__name__ == 'EnumType':
+                for name,unit in value.__dict__['_member_map_'].items():
+                    if unit.value.get_description_with_symbol_bracket() == description_with_symbol_bracket:
+                        return unit.value
+        return ScienceUnit.Unknown.unkn
+
+    @staticmethod
+    def is_symbol_repeat():
+        symbol_list = []
         for key,value in ScienceUnit.__dict__.items():
             print(key,value,type(value).__name__)
             if type(value).__name__ == 'EnumType':
-                # 类型是EnumType的那些内部的class
-                if key == obj.__name__:
-                    # 匹配到obj的目标类
-                    unit_enum = value.__dict__['_member_map_'][symbol]
-        return unit_enum
+                # print(value.__dict__['_member_map_'])
+                for name,unit in value.__dict__['_member_map_'].items():
+                    symbol_list.append(unit.value.get_symbol())
+                    print(value)
+        print("symbol_list:",symbol_list)
+        return len(symbol_list) == len(set(symbol_list))
+
+    @staticmethod
+    def classify_unit(classified_unit:Unit)->str:
+        classification_str = 'Unknown'
+        for key,value in ScienceUnit.__dict__.items():
+            if type(value).__name__ == 'EnumType':
+                # print(key,value.__dict__['_member_map_'])
+                for name,unit in value.__dict__['_member_map_'].items():
+                    if classified_unit == unit.value:
+                        classification_str = key
+        return classification_str
+
+    @staticmethod
+    def get_unit_list_by_classification(classification):
+        unit_list = []
+        if type(classification) is str:
+            # print("get_unit_list_by_classification FROM str")
+            classification_name = classification
+        elif type(classification) is EnumType:
+            # print("get_unit_list_by_classification FROM EnumType")
+            classification_name = classification.__name__
+        else:
+            print("WRONG INPUT PARAMETER")
+            return []
+
+        for key,value in ScienceUnit.__dict__.items():
+            if type(value).__name__ == 'EnumType' and key == classification_name:
+                for name,unit in value.__dict__['_member_map_'].items():
+                    unit_list.append(unit.value)
+        return unit_list
+
+def science_unit_convert(from_list:list,from_unit:Unit,to_unit:Unit)->list:
+    # FIXME:ScienceUnit 转为 Unit
+    # print(from_list,from_unit,to_unit)
+    # print(ScienceUnit.classify_unit(from_unit),ScienceUnit.classify_unit(to_unit),ScienceUnit.classify_unit(from_unit)==ScienceUnit.classify_unit(to_unit))
+    if ScienceUnit.classify_unit(from_unit) == ScienceUnit.classify_unit(to_unit):
+        return np.multiply(from_list,from_unit.get_ratio()/to_unit.get_ratio())
+    elif from_unit == ScienceUnit.Permeability.H_m_1.value and to_unit == ScienceUnit.Dimensionless.DN.value:
+        return np.multiply(from_list,1.e7/(4.*np.pi))
+    elif from_unit == ScienceUnit.Dimensionless.DN.value and to_unit == ScienceUnit.Permeability.H_m_1.value:
+        return np.multiply(from_list,4.*np.pi/1.e7)
+    else:
+        print('ERROR,No conversion between different types of units.')
+        return np.nan
+
+SI_UNIT_LIST = [ScienceUnit.Magnetization.A_m_1.value,ScienceUnit.Magnetization.T.value,ScienceUnit.Length.m.value,ScienceUnit.Length.mm.value,ScienceUnit.Length.um.value,ScienceUnit.Length.nm.value,ScienceUnit.Length.A.value]
+CGS_UNIT_LIST = [ScienceUnit.Magnetization.G.value,ScienceUnit.Magnetization.kG.value,ScienceUnit.Magnetization.Oe.value,ScienceUnit.Magnetization.kOe.value,ScienceUnit.Magnetization.emu_cm_3,ScienceUnit.Length.cm.value]
 
 
 
 
 if __name__ == '__main__':
-    unit_get_by_name = ScienceUnit.get_from_symbol(ScienceUnit.Wavelength, 'nm')
-    # print(unit_get_by_name.value.index)
-    # print(unit_get_by_name.value.symbol)
-    # print(unit_get_by_name.value.description)
-    # print(ScienceUnit.Magnetic.IS.value.index)
-    # print(ScienceUnit.Magnetic.IS.value.symbol)
-    # print(ScienceUnit.Magnetic.IS.value.description)
+    # print(ScienceUnit.is_symbol_repeat())
+    # print(ScienceUnit.get_from_symbol('kOe').get_description())
+    # a_unit = ScienceUnit.Length.m.value
+    # print(ScienceUnit.classify_unit(ScienceUnit.Length.m.value))
+    # print(ScienceUnit.classify_unit(ScienceUnit.Length.cm.value))
+    print(science_unit_convert([0.394770493],ScienceUnit.Magnetization.kG.value,ScienceUnit.Magnetization.A_m_1.value))
+    # print(ScienceUnit.get_from_symbol('1'))
+    # print(ScienceUnit.get_unit_list_by_classification("Magnetization"))
+    # print(ScienceUnit.get_unit_list_by_classification(ScienceUnit.Magnetization))
+    # print(ScienceUnit.Magnetization.__name__)

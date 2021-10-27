@@ -377,7 +377,8 @@ class ModalDielectric(object):
             self.canvas_delta_epsilon.draw()
         self.dialog_plot.open()
 
-    def on_Action_save_results_as(self):
+    def save_results_as(self):
+        # TODO:仿照M进行改写
         file_path, file_type = QtWidgets.QFileDialog.getSaveFileName(filter="Text Files (*.txt);;CSV (*.csv)")
         print(file_path)
         if file_type == 'Text Files (*.txt)':
@@ -405,7 +406,7 @@ class ModalDielectric(object):
         elif file_type == 'CSV (*.csv)':
             print(file_path, file_type)
         else:
-            pass
+            print("save_results_as,unknown file_type.")
 
     def on_PushButton_clearAll_clicked(self):
         self.list_view_results_model.clear()

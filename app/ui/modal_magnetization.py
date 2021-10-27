@@ -6,11 +6,17 @@ import numpy as np
 import os, sys
 import matplotlib.pyplot as plt
 import random
+import xlwt, xlrd
 from app.utils import sci_const
+from app.utils.science_data import ScienceData,ScienceFileType,ScienceWriter
+from app.utils.science_base import PhysicalQuantity
+from app.utils.science_unit import ScienceUnit
+from scipy import interpolate
 
 matplotlib.use("Qt5Agg")  # 声明使用QT5
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from magnetization_simulator import MagnetizationSimulator
+
 
 
 class ModalMagnetization(object):
@@ -18,11 +24,11 @@ class ModalMagnetization(object):
     def __init__(self, parent):
         self.parent = parent
         # 模型 1:Jiles-Atherton,模型 2:Brillouin,模型 3:Langevin,模型 4:Takacs
-        # 默认模型为1:Jiles-Atherton
-        self.model = 1
+        # 默认模型为3:Langevin
+        self.model = 3
         # 饱和磁化强度(A/m)-LOG 10 kOe~795775A/m
-        self.ms_min = 10000.
-        self.ms_max = 100000000.
+        self.ms_min = 100. # 0.00125664 kG
+        self.ms_max = 100000000. #
         # 磁耦合系数(J/(Tm^3))
         self.a_min = 1e3
         self.a_max = 1e5
@@ -36,11 +42,11 @@ class ModalMagnetization(object):
         self.c_min = 0.0
         self.c_max = 1.0
         # 轨道量子数，是自然数(1)
-        self.j_min = 1e3
-        self.j_max = 1e5
+        self.j_min = 1.
+        self.j_max = 1.e5
         # 颗粒尺寸分布的标准差(1)
-        self.sigma_min = 0.0
-        self.sigma_max = 1.0
+        self.sigma_min = 0.00001
+        self.sigma_max = 1.00000
         # 轨道量子数的朗德因子(1)
         self.g_j = sci_const.Lande_g_Factor(3 / 2, 3, 9 / 2)  # Co2+ ion
         # 温度(K)
@@ -78,6 +84,8 @@ class ModalMagnetization(object):
         self.fig_M_magnetization = plt.Figure()
         self.canvas_M_magnetization = FigureCanvas(self.fig_M_magnetization)
 
+        self.magnetization_unit_list = ScienceUnit.get_unit_list_by_classification(ScienceUnit.Magnetization)
+
     def setupUi(self):
         # 初始化参数UI
         self.parent.Slider_ms.setValue(
@@ -101,11 +109,17 @@ class ModalMagnetization(object):
         self.parent.lcdNumber_sigma.display(str(self.sigma))
 
         # 设定RadioButton,选择模型
-        self.parent.RadioButton_jamodel.clicked.connect(self.on_RadioButton_clicked)
-        self.parent.RadioButton_brmodel.clicked.connect(self.on_RadioButton_clicked)
-        self.parent.RadioButton_lamodel.clicked.connect(self.on_RadioButton_clicked)
-        self.parent.RadioButton_tamodel.clicked.connect(self.on_RadioButton_clicked)
-        self.parent.RadioButton_jamodel.click()
+        self.parent.RadioButton_jamodel.clicked.connect(self.on_RadioButton_model_clicked)
+        self.parent.RadioButton_brmodel.clicked.connect(self.on_RadioButton_model_clicked)
+        self.parent.RadioButton_lamodel.clicked.connect(self.on_RadioButton_model_clicked)
+        self.parent.RadioButton_tamodel.clicked.connect(self.on_RadioButton_model_clicked)
+        self.parent.RadioButton_lamodel.click()
+        # 设定RadioButton,选择设备类型
+        self.parent.radioButton_M_device_fris.clicked.connect(self.on_RadioButton_device_clicked)
+        self.parent.radioButton_M_device_denjiken.clicked.connect(self.on_RadioButton_device_clicked)
+        self.parent.radioButton_M_device_other.clicked.connect(self.on_RadioButton_device_clicked)
+        self.parent.radioButton_M_device_fris.click()
+
         # 设定sigma的ComboBox,判定是否考虑尺寸分布
         self.parent.ComboBox_sigma.clicked.connect(self.on_ComboBox_sigma_clicked)
         # 设定PushButton
@@ -146,13 +160,13 @@ class ModalMagnetization(object):
         self.parent.LineEdit_step1_M_M_row.textChanged.connect(self.on_LineEdit_step1_M_M_row_textChanged)
         self.parent.LineEdit_step1_M_M_col.textChanged.connect(self.on_LineEdit_step1_M_M_col_textChanged)
         # 为单位的ComboBox添加选项
-        for magnetization_unit in sci_const.magnetization_unit_list:
-            self.parent.ComboBoxFormLayout_step1_M_H_unit.addItem(magnetization_unit)
-            self.parent.ComboBoxFormLayout_step1_M_M_unit.addItem(magnetization_unit)
+        for magnetization_unit in self.magnetization_unit_list:
+            self.parent.ComboBoxFormLayout_step1_M_H_unit.addItem(magnetization_unit.get_description_with_symbol_bracket())
+            self.parent.ComboBoxFormLayout_step1_M_M_unit.addItem(magnetization_unit.get_description_with_symbol_bracket())
         # 磁化这里会有这样的一个东西，选择emu的情况下 尺寸的相关数据是必填的
         self.parent.ComboBoxFormLayout_step1_M_M_unit.addItem("*Magn.Moment(emu)")
-        self.parent.ComboBoxFormLayout_step1_M_H_unit.setCurrentIndex(3)
-        self.parent.ComboBoxFormLayout_step1_M_M_unit.setCurrentIndex(sci_const.magnetization_unit_list.__len__())
+        self.parent.ComboBoxFormLayout_step1_M_H_unit.setCurrentIndex(4)
+        self.parent.ComboBoxFormLayout_step1_M_M_unit.setCurrentIndex(self.magnetization_unit_list.__len__())
 
     def resetTableViewHeaderItems(self, tableviewmodel: QtGui.QStandardItemModel):
         table_header_item_0 = QtGui.QStandardItem('file_name')
@@ -200,7 +214,7 @@ class ModalMagnetization(object):
             line_input = ''.join(filter(lambda x: x in '.0123456789', line_input))
         object_LineEdit_number.setText(line_input)
 
-    def on_RadioButton_clicked(self):
+    def on_RadioButton_model_clicked(self):
         if self.parent.RadioButton_jamodel.isChecked():
             self.model = 1
             # 更新公式的图片资源
@@ -227,7 +241,7 @@ class ModalMagnetization(object):
             self.parent.Slider_j.setEnabled(True)
             self.parent.Slider_j.setValue(100)
             self.parent.ComboBox_sigma.setEnabled(True)
-            self.parent.ComboBox_sigma.setChecked(True)
+            self.parent.ComboBox_sigma.setChecked(False)
             self.parent.Slider_sigma.setEnabled(True)
             self.parent.Slider_sigma.setValue(100)
 
@@ -259,6 +273,41 @@ class ModalMagnetization(object):
             self.parent.ComboBox_sigma.setChecked(True)
             self.parent.Slider_sigma.setEnabled(True)
             self.parent.Slider_sigma.setValue(100)
+
+    def on_RadioButton_device_clicked(self):
+
+        if self.parent.radioButton_M_device_other.isChecked():
+            # Device: Other
+            self.parent.LineEdit_step1_M_H_row.setEnabled(True)
+            self.parent.LineEdit_step1_M_H_col.setEnabled(True)
+            self.parent.ComboBoxFormLayout_step1_M_H_unit.setEnabled(True)
+            self.parent.LineEdit_step1_M_M_row.setEnabled(True)
+            self.parent.LineEdit_step1_M_M_col.setEnabled(True)
+            self.parent.ComboBoxFormLayout_step1_M_M_unit.setEnabled(True)
+        else:
+            self.parent.LineEdit_step1_M_H_row.setEnabled(False)
+            self.parent.LineEdit_step1_M_H_col.setEnabled(False)
+            self.parent.ComboBoxFormLayout_step1_M_H_unit.setEnabled(False)
+            self.parent.LineEdit_step1_M_M_row.setEnabled(False)
+            self.parent.LineEdit_step1_M_M_col.setEnabled(False)
+            self.parent.ComboBoxFormLayout_step1_M_M_unit.setEnabled(False)
+            if self.parent.radioButton_M_device_fris.isChecked():
+                # Device: FRIS VSM
+                self.parent.LineEdit_step1_M_H_row.setText("88")
+                self.parent.LineEdit_step1_M_H_col.setText("10")
+                self.parent.ComboBoxFormLayout_step1_M_H_unit.setCurrentIndex(4)
+                self.parent.LineEdit_step1_M_M_row.setText("88")
+                self.parent.LineEdit_step1_M_M_col.setText("11")
+                self.parent.ComboBoxFormLayout_step1_M_M_unit.setCurrentIndex(self.magnetization_unit_list.__len__())
+            else:
+                # Device: DENJIKEN VSM
+                self.parent.LineEdit_step1_M_H_row.setText("29")
+                self.parent.LineEdit_step1_M_H_col.setText("1")
+                self.parent.ComboBoxFormLayout_step1_M_H_unit.setCurrentIndex(4)
+                self.parent.LineEdit_step1_M_M_row.setText("29")
+                self.parent.LineEdit_step1_M_M_col.setText("2")
+                self.parent.ComboBoxFormLayout_step1_M_M_unit.setCurrentIndex(self.magnetization_unit_list.__len__())
+
 
     def on_ComboBox_sigma_clicked(self):
         if self.parent.ComboBox_sigma.isChecked():
@@ -424,18 +473,19 @@ class ModalMagnetization(object):
         print('初始值', p0)
         print('边界', bounds)
 
-        my_simulator = MagnetizationSimulator(model=self.model,
-                                              first_pos_info_tuple=first_pos_info_tuple,
-                                              bg_file_path=self.file_path[bg_index],
-                                              size_dict=size_dict,
-                                              p0=p0, bounds=bounds,
-                                              g_j=self.g_j, temp=self.temp,
-                                              distribution_flag=distribution_flag)
         for i in range(self.file_path.__len__()):
             print(i, self.file_name[i])
             if i == bg_index:
                 print('BG index:{}, it will not simulated.'.format(i))
             else:
+                my_simulator = MagnetizationSimulator(model=self.model,
+                                                      first_pos_info_tuple=first_pos_info_tuple,
+                                                      bg_file_path=self.file_path[bg_index],
+                                                      size_dict=size_dict,
+                                                      p0=p0, bounds=bounds,
+                                                      g_j=self.g_j, temp=self.temp,
+                                                      distribution_flag=distribution_flag)
+                # 这里绝对不要共用一个simulator
                 self.result_dict[self.file_name[i]] = my_simulator.simulate(self.file_name[i],self.file_path[i])
                 result = self.result_dict[self.file_name[i]]['popt']
                 # 组装结果的ListView内的Item
@@ -445,20 +495,20 @@ class ModalMagnetization(object):
                                                        , "Jiles_Atherton_Model"
                                                        , result[0], result[1], result[2], result[3], result[4]))
                 else:
+                    # print(result[0],result[1])
                     D_m = np.power(self.g_j*sci_const.miu_B*result[0]*6./(np.pi*result[1]),1/3)
                     if distribution_flag:
-                        item = QtGui.QStandardItem("{}, Model={},\nM_S={} A/m,\nJ={},D_m={} nm, sigma={}."
-                                                   .format(self.file_name[i]
-                                                           , {1: "Jiles_Atherton_Model", 2: "Brillouin_Model",
-                                                              3: "Langevin_Model", 4: "Takacs_Model"}[self.model]
-                                                           , result[0], result[1],D_m
-                                                           , result[2]))
+                        sigma = result[2]
                     else:
-                        item = QtGui.QStandardItem("{}, Model={},\nM_S={} A/m,\nJ={},D_m={} nm, sigma= 0.0."
-                                                   .format(self.file_name[i]
-                                                           , {1: "Jiles_Atherton_Model", 2: "Brillouin_Model",
-                                                              3: "Langevin_Model", 4: "Takacs_Model"}[self.model]
-                                                           , result[0], result[1],D_m))
+                        sigma = 0.
+
+                    item = QtGui.QStandardItem("{}, Model={},\nM_S={} A/m,\nJ={},D_m={} nm, sigma={}."
+                                               .format(self.file_name[i]
+                                                       , {1: "Jiles_Atherton_Model", 2: "Brillouin_Model",
+                                                          3: "Langevin_Model", 4: "Takacs_Model"}[self.model]
+                                                       , result[0], result[1],D_m
+                                                       , sigma))
+
                 item.setCheckable(True)
                 self.list_view_results_model.appendRow(item)
         print('结果', self.result_dict)
@@ -480,3 +530,140 @@ class ModalMagnetization(object):
         check_state = QtCore.Qt.Checked if self.parent.CheckBox_All_results_M.isChecked() else QtCore.Qt.Unchecked
         for i in range(self.list_view_results_model.rowCount()):
             self.list_view_results_model.item(i).setCheckState(check_state)
+
+    def save_results_as(self):
+        filter_str = ScienceFileType.get_filter_str(ScienceFileType.XLSX, ScienceFileType.CSV, ScienceFileType.TXT, ScienceFileType.ALL)
+        file_path, file_type = QtWidgets.QFileDialog.getSaveFileName(filter=filter_str)
+        print("save_results_as:file_path:{},file_type:{}".format(file_path,file_type))
+        file_dic = file_path.rsplit('/',1)[0]
+        file_name = file_path.rsplit('/',1)[1].split('.')[0]
+        # 需要保存的文件有2个：1 曲线数据表 2 曲线的特征参数表
+        write_file_type = ScienceFileType.get_by_description(file_type)
+        # 组装ScienceWriteData需要的数据
+        # data_dict是一个2层字典，例：#S999_data-Magnetization(kG)-[1,2,3],#S999_para-Coercivity(Oe)-[10000]
+        # 每一个样品的磁化的数据被分为两类：1. 用来画图的点坐标数据, 2. 由1的数据总结得到了磁性特征参数数据
+        # 表1的表头包括:
+        # 实验值： H_raw 磁场强度, M_raw 磁化强度(这里的M_raw是已经去掉BG的)
+        # 计算值： M 磁化强度, B磁感应强度, J磁极化强度/内禀磁感应强度, χ磁化率, μ磁导率
+        # 表2的表头包括：
+        # Hm 磁场强度最大值, Hcb 磁感矫顽力, Hcj 内禀矫顽力, Hk 膝点, Q 方形度,
+        # Ms 饱和磁化强度, Mm 磁化强度最大值, Mr 剩余磁化强度,
+        # Bs 饱和磁感应强度, Bm 磁感应强度最大值, Br 剩余磁感应强度
+
+        data_dict = self.data_process()
+
+        write_data = ScienceData(file_dic=file_dic, file_name=file_name, file_type=write_file_type.value, data_dict=data_dict)
+        ScienceWriter.write_file(write_data)
+
+    def data_process(self):
+        # 这里对para没有进行总结合并
+        # result_dict转write_data
+        # FIXME: 注意现在只是langevin专用，之后要改成通用的
+        data_dict = {}
+        print(self.result_dict)
+        for sample_name, sample_content in self.result_dict.items():
+            print(sample_name)
+            name_para = sample_name+'-para'
+            name_data = sample_name+'-data'
+            # 表1的表头包括:
+            # 实验值： H_raw 磁场强度, M_raw 磁化强度(这里的M_raw是已经去掉BG的)
+            # 计算值： M 磁化强度, B磁感应强度, J磁极化强度/内禀磁感应强度, χ磁化率, μ绝对磁导率, μr相对磁导率
+            H_raw = sample_content['h_raw'].get_data() #A/m
+            M_raw = sample_content['m_raw'].get_data() #A/m
+            H = copy.deepcopy(H_raw) #A/m
+            M = sample_content['m_cal'].get_data() #A/m
+            B = np.multiply(sci_const.miu_0,np.add(H,M)) #T
+            J = np.multiply(sci_const.miu_0,M) #T
+            chi = np.divide(M,H) #[1]
+            miu = np.divide(B,H) #H/m
+            miu_r = np.divide(miu,sci_const.miu_0) #[1]
+            # 表2的表头包括：
+            # l 长 w 宽 t 厚度 V 体积 m 质量
+            # J 总角动量量子数, Dm 粒子直径
+            # Hm 磁场强度最大值, Hcb 磁感矫顽力, Hcj 内禀矫顽力, Hk 膝点, Q 方形度,
+            # Ms 饱和磁化强度, Mm 磁化强度最大值, Mr 剩余磁化强度,
+            # Bs 饱和磁感应强度, Bm 磁感应强度最大值, Br 剩余磁感应强度
+            # 需要的插值方法
+            interpolate_func_H_M = interpolate.interp1d(H,M,kind="slinear")
+            interpolate_func_M_H = interpolate.interp1d(M,H,kind="slinear")
+            interpolate_func_H_B = interpolate.interp1d(H,B,kind="slinear")
+            # 未使用 interpolate_func_B_H = interpolate.interp1d(B,H,kind="slinear")
+            interpolate_func_H_J = interpolate.interp1d(H,J,kind="slinear")
+            interpolate_func_J_H = interpolate.interp1d(J,H,kind="slinear")
+
+            l = sample_content['l'].get_data()[0]
+            w = sample_content['w'].get_data()[0]
+            t = sample_content['t'].get_data()[0]
+            V = l * w * t
+
+            quantum_number_J = sample_content['popt'][1] #[1]
+
+            Hm = (np.absolute(np.max(H))+np.absolute(np.min(H)))/2 #A/m
+            Hcb = interpolate_func_M_H([0.])[0] #A/m FIXME:H的插值可能还要再商讨
+            Hcj = interpolate_func_J_H([0.])[0] #A/m
+
+            Ms = sample_content['popt'][0] #A/m
+            Mm = (np.absolute(np.max(M))+np.absolute(np.min(M)))/2 #A/m
+            Mr = interpolate_func_H_M([0.])[0] #A/m
+
+            Bs = sci_const.miu_0*(Hm+Ms) #T
+            Bm = (np.absolute(np.max(B))+np.absolute(np.min(B)))/2 #T
+            Br = interpolate_func_H_B([0.])[0] #T
+
+            Js = sci_const.miu_0*(Ms) #T
+            Jm = (np.absolute(np.max(J))+np.absolute(np.min(J)))/2 #T
+            Jr = interpolate_func_H_J([0.])[0] #T
+
+            Hk = interpolate_func_J_H([Jr*0.9])[0] #A/m
+            Q = Hk/Hcj #[1]
+            # Dm = np.power(self.g_j*sci_const.miu_B*Ms*6./(np.pi*quantum_number_J), 1/3) #m
+            Dm = np.power(self.g_j*sci_const.miu_B*quantum_number_J*6./(np.pi*Ms), 1/3) #m
+            sigma = sample_content['sigma'].get_data()[0]
+
+            data_dict.update({
+                name_para: [
+                    PhysicalQuantity('l',ScienceUnit.Length.m.value,[l]),
+                    PhysicalQuantity('w',ScienceUnit.Length.m.value,[w]),
+                    PhysicalQuantity('t',ScienceUnit.Length.m.value,[t]),
+                    PhysicalQuantity('V',ScienceUnit.Volume.m3.value,[V]),
+                    PhysicalQuantity('m',ScienceUnit.Mass.kg.value,[0.]), # FIXME:这里暂时不提供仅仅放一个0.填充
+                    PhysicalQuantity('Ms_cal',ScienceUnit.Magnetization.A_m_1.value,[Ms]),
+                    PhysicalQuantity('J_cal',ScienceUnit.Dimensionless.DN.value,[quantum_number_J]),
+                    PhysicalQuantity('Hm',ScienceUnit.Magnetization.A_m_1.value,[Hm]),
+                    PhysicalQuantity('Hcb',ScienceUnit.Magnetization.A_m_1.value,[Hcb]),
+                    PhysicalQuantity('Hcj',ScienceUnit.Magnetization.A_m_1.value,[Hcj]),
+                    PhysicalQuantity('Ms',ScienceUnit.Magnetization.A_m_1.value,[Ms]),
+                    PhysicalQuantity('Mm',ScienceUnit.Magnetization.A_m_1.value,[Mm]),
+                    PhysicalQuantity('Mr',ScienceUnit.Magnetization.A_m_1.value,[Mr]),
+                    PhysicalQuantity('Bs',ScienceUnit.Magnetization.T.value,[Bs]),
+                    PhysicalQuantity('Bm',ScienceUnit.Magnetization.T.value,[Bm]),
+                    PhysicalQuantity('Br',ScienceUnit.Magnetization.T.value,[Br]),
+                    PhysicalQuantity('Js',ScienceUnit.Magnetization.T.value,[Js]),
+                    PhysicalQuantity('Jm',ScienceUnit.Magnetization.T.value,[Jm]),
+                    PhysicalQuantity('Jr',ScienceUnit.Magnetization.T.value,[Jr]),
+                    PhysicalQuantity('Hk',ScienceUnit.Magnetization.A_m_1.value,[Hk]),
+                    PhysicalQuantity('Q',ScienceUnit.Dimensionless.DN.value,[Q]),
+                    PhysicalQuantity('Dm',ScienceUnit.Length.m.value,[Dm]),
+                    PhysicalQuantity('sigma',ScienceUnit.Dimensionless.DN.value,[sigma]),
+                ],
+                name_data: [
+                    PhysicalQuantity('H_raw',ScienceUnit.Magnetization.A_m_1.value,H_raw),
+                    PhysicalQuantity('M_raw',ScienceUnit.Magnetization.A_m_1.value,M_raw),
+                    PhysicalQuantity('H',ScienceUnit.Magnetization.A_m_1.value,H),
+                    PhysicalQuantity('M',ScienceUnit.Magnetization.A_m_1.value,M),
+                    PhysicalQuantity('B',ScienceUnit.Magnetization.T.value,B),
+                    PhysicalQuantity('J',ScienceUnit.Magnetization.T.value,J),
+                    PhysicalQuantity('χ',ScienceUnit.Dimensionless.DN.value,chi),
+                    PhysicalQuantity('μ',ScienceUnit.Permeability.H_m_1.value,miu),
+                    PhysicalQuantity('μr',ScienceUnit.Dimensionless.DN.value,miu_r),
+                ]
+            })
+        print(data_dict)
+        return data_dict
+
+
+if __name__ == "__main__":
+    a = 'a.v'
+    b,c = a.split('.')
+    print(b,c)
+    print('AAA')

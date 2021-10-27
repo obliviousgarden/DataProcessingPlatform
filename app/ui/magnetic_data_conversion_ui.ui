@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MagneticDataConversionDialog</class>
+ <widget class="QDialog" name="MagneticDataConversionDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1450</width>
+    <height>750</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1450</width>
+    <height>750</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>1920</width>
+    <height>1080</height>
+   </size>
+  </property>
+  <property name="font">
+   <font>
+    <family>Times New Roman</family>
+    <pointsize>16</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>Magnetic Data Conversion</string>
+  </property>
+  <property name="modal">
+   <bool>false</bool>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_3">
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout_mdc" stretch="0,0,0,1,0">
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_mdc_1">
+       <item>
+        <widget class="QPushButton" name="pushButton_mdc_file">
+         <property name="text">
+          <string>Select File...</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_mdc_dir">
+         <property name="text">
+          <string>Select Dir...</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_mdc_info">
+       <property name="maximumSize">
+        <size>
+         <width>1920</width>
+         <height>1080</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>40</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>SI &lt;=?=&gt; CGS</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_mdc_3" stretch="2,1,1">
+       <item>
+        <widget class="QLabel" name="label_mdc_PQ">
+         <property name="text">
+          <string>┏Physical Quantity┓</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_mdc_SI">
+         <property name="text">
+          <string>┏SI Unit┓</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_mdc_CGS">
+         <property name="text">
+          <string>┏CGS Unit┓</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_mdc_4" stretch="3,2,2,2,3,2">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_mdc_length" stretch="2,1,1">
+         <item>
+          <widget class="QPlainTextEdit" name="plainTextEdit_mdc_length">
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="verticalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+           <property name="plainText">
+            <string>Length: 
+length(l), width(w), thickness(t)
+diameter(Dm)</string>
+           </property>
+           <property name="backgroundVisible">
+            <bool>false</bool>
+           </property>
+           <property name="centerOnScroll">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="comboBox_mdc_length_SI"/>
+         </item>
+         <item>
+          <widget class="QComboBox" name="comboBox_mdc_length_CGS"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_mdc_volume" stretch="2,1,1">
+         <item>
+          <widget class="QPlainTextEdit" name="plainTextEdit_mdc_volume">
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="verticalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+           <property name="plainText">
+            <string>Volume: 
+volume(V)</string>
+           </property>
+           <property name="tabStopWidth">
+            <number>80</number>
+           </property>
+           <property name="centerOnScroll">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="comboBox_mdc_volume_SI"/>
+         </item>
+         <item>
+          <widget class="QComboBox" name="comboBox_mdc_volume_CGS"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_mdc_H" stretch="2,1,1">
+         <item>
+          <widget class="QPlainTextEdit" name="plainTextEdit_mdc_HM">
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="verticalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+           <property name="plainText">
+            <string>Magnetic Field(H):
+Maximum/Coercive/Intrinsic Coercive/Knee-point Magnetic Field(Hm,Hcb,Hcj,Hk)</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="comboBox_mdc_H_SI"/>
+         </item>
+         <item>
+          <widget class="QComboBox" name="comboBox_mdc_H_CGS"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_mdc_M" stretch="2,1,1">
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QPlainTextEdit" name="plainTextEdit">
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="verticalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="plainText">
+            <string>Magnetization(M):
+Saturation/Maximum/Residual Magnetization(Ms,Mm,Mr)</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="comboBox_mdc_M_SI"/>
+         </item>
+         <item>
+          <widget class="QComboBox" name="comboBox_mdc_M_CGS"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_mdc_BJ" stretch="2,1,1">
+         <item>
+          <widget class="QPlainTextEdit" name="plainTextEdit_mdc_BJ">
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="verticalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+           <property name="plainText">
+            <string>Magnetic Flux Density(B) &amp; Magnetic Polarization(J):
+Saturation/Maximum/Residual Magnetic Flux Density(Bs,Bm,Br)
+Saturation/Maximum/Residual Magnetic Polarization(Js,Jm,Jr)</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="comboBox_mdc_BJ_SI"/>
+         </item>
+         <item>
+          <widget class="QComboBox" name="comboBox_mdc_BJ_CGS"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_mdc_miu" stretch="2,1,1">
+         <item>
+          <widget class="QPlainTextEdit" name="plainTextEdit_mdc_miu">
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="verticalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+           <property name="plainText">
+            <string>Magnetic Permeability:
+Magnetic Permeability(μ)</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="comboBox_mdc_miu_SI"/>
+         </item>
+         <item>
+          <widget class="QComboBox" name="comboBox_mdc_miu_CGS"/>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButton_mdc_conversion">
+       <property name="font">
+        <font>
+         <pointsize>24</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Conversion!!!</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

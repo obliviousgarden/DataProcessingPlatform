@@ -47,8 +47,8 @@ class NKSimulator:
             n_list.append(float(data[int(self.n_start_rol) - 1]))
             k_list.append(float(data[int(self.k_start_rol) - 1]))
         # 2 波长单位变换到um
-        from_unit = ScienceUnit.Wavelength.um
-        to_unit = ScienceUnit.Wavelength.um
+        from_unit = ScienceUnit.Length.um
+        to_unit = ScienceUnit.Length.um
         if from_unit != to_unit:
             # X轴的单位变换
             for data in wl_list:
@@ -59,7 +59,7 @@ class NKSimulator:
         # 3 wl_bound单位变换,截取需要数据
         wl_unit_symbol = str(self.wl_bound[0])
         # 通过名称获取枚举的函数
-        wl_unit = ScienceUnit.get_from_symbol(ScienceUnit.Wavelength,wl_unit_symbol)
+        wl_unit = ScienceUnit.get_from_symbol(ScienceUnit.Length, wl_unit_symbol)
 
         self.wl_lower_bound = ScienceUnitConverter.convert(from_unit_class=wl_unit.__class__,
                                                            to_unit_class=to_unit.__class__, from_unit=wl_unit.value,

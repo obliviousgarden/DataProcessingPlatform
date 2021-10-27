@@ -67,7 +67,6 @@ class SciencePlot:
                          data.y_data(figure_title=figure_title, y_legend=y_label))
             plt.legend(data.y_legends(figure_title=figure_title))
         plt.show()
-        print('SciencePlot.sci_plot FINISHED!!!')
 
 
 if __name__ == "__main__":

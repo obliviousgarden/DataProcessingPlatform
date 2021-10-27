@@ -1,7 +1,7 @@
 from app.utils.science_unit import Unit, ScienceUnit
 import numpy as np
 from app.utils import sci_const
-
+# TODO: 重写方法 Wavelength变为了Length
 
 class ScienceUnitConverter:
     def __init__(self):
@@ -31,20 +31,20 @@ class ScienceUnitConverter:
         result = np.nan
         if from_unit_class == ScienceUnit.Magnetization and from_unit_class == to_unit_class:
             result = instance.__magnetization_unit_converter(from_unit=from_unit, to_unit=to_unit, value=value)
-        elif from_unit_class == ScienceUnit.Wavelength:
-            if to_unit_class == ScienceUnit.Wavelength:
+        elif from_unit_class == ScienceUnit.Length:
+            if to_unit_class == ScienceUnit.Length:
                 result = instance.__wavelength_unit_converter(from_unit=from_unit, to_unit=to_unit, value=value)
             elif to_unit_class == ScienceUnit.Wavenumber:
-                result_0 = instance.__wavelength_unit_converter(from_unit=from_unit, to_unit=ScienceUnit.Wavelength.um.value, value=value)
+                result_0 = instance.__wavelength_unit_converter(from_unit=from_unit, to_unit=ScienceUnit.Length.um.value, value=value)
                 result = instance.__wavenumber_unit_converter(from_unit=ScienceUnit.Wavenumber.um_1.value, to_unit=to_unit, value=np.reciprocal(result_0))
             else:
                 print("WRONG. ScienceUnitConverter to_unit_type.")
         elif from_unit_class == ScienceUnit.Wavenumber:
             if to_unit_class == ScienceUnit.Wavenumber:
                 result = instance.__wavenumber_unit_converter(from_unit=from_unit, to_unit=to_unit, value=value)
-            elif to_unit_class == ScienceUnit.Wavelength:
+            elif to_unit_class == ScienceUnit.Length:
                 result_0 = instance.__wavenumber_unit_converter(from_unit=from_unit, to_unit=ScienceUnit.Wavenumber.um_1.value, value=value)
-                result = instance.__wavenumber_unit_converter( from_unit=ScienceUnit.Wavelength.um.value, to_unit=to_unit, value=np.reciprocal(result_0))
+                result = instance.__wavenumber_unit_converter(from_unit=ScienceUnit.Length.um.value, to_unit=to_unit, value=np.reciprocal(result_0))
             else:
                 print("WRONG. ScienceUnitConverter to_unit_type.")
         else:
@@ -52,17 +52,14 @@ class ScienceUnitConverter:
         return result
 
     def __magnetization_unit_converter(self, from_unit: Unit, to_unit: Unit, value):
-        print("__magnetization_unit_converter")
         result = value * self.magnetic_convert_factor_matrix[from_unit.index][to_unit.index]
         return result
 
     def __wavelength_unit_converter(self, from_unit: Unit, to_unit: Unit, value):
-        print("__wavelength_unit_converter")
         result = value * self.wavelength_convert_factor_matrix[from_unit.index][to_unit.index]
         return result
 
     def __wavenumber_unit_converter(self, from_unit: Unit, to_unit: Unit, value):
-        print("__wavenumber_unit_converter")
         result = value * self.wavenumber_convert_factor_matrix[from_unit.index][to_unit.index]
         return result
 
