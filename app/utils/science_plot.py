@@ -32,6 +32,12 @@ class SciencePlotData:
     def y_data(self, figure_title, y_legend):
         return list(self.plot_data[figure_title]['y_data_dict'][y_legend][1])
 
+    def x_label(self,figure_title) -> str:
+        return str(self.plot_data[figure_title]['x_label'])
+
+    def y_label(self,figure_title) -> str:
+        return str(self.plot_data[figure_title]['y_label'])
+
 
 class SciencePlot:
     @staticmethod
@@ -62,6 +68,8 @@ class SciencePlot:
             ax = plt.subplot(row_count, col_count, i)
             plt.sca(ax)
             plt.title(figure_title)
+            plt.xlabel(data.x_label(figure_title))
+            plt.ylabel(data.y_label(figure_title))
             for y_label in data.y_legends(figure_title=figure_title):
                 plt.plot(data.x_data(figure_title=figure_title, y_legend=y_label),
                          data.y_data(figure_title=figure_title, y_legend=y_label))

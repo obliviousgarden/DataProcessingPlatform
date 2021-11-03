@@ -99,7 +99,7 @@
            <string notr="true"/>
           </property>
           <property name="title">
-           <string>Havriliak–Negami Relaxation</string>
+           <string>Dielectric Relaxation Models</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -912,7 +912,7 @@
            <string notr="true"/>
           </property>
           <property name="title">
-           <string>Jiles-Atherton Magnetization</string>
+           <string>Magnetization Models</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -2064,7 +2064,7 @@
            <string notr="true"/>
           </property>
           <property name="title">
-           <string>Faraday Rotation Angle</string>
+           <string>Dispersion Models</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>

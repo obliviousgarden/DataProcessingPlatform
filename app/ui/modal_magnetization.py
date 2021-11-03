@@ -11,6 +11,7 @@ from app.utils import sci_const
 from app.utils.science_data import ScienceData,ScienceFileType,ScienceWriter
 from app.utils.science_base import PhysicalQuantity
 from app.utils.science_unit import ScienceUnit
+from app.utils.science_plot import SciencePlot,SciencePlotData
 from scipy import interpolate
 
 matplotlib.use("Qt5Agg")  # 声明使用QT5
@@ -517,10 +518,19 @@ class ModalMagnetization(object):
         self.parent.PushButton_plot_M.setEnabled(True)
 
     def on_PushButton_plot_M_clicked(self):
-        # TODO:画图
-        plot_data_dict = {}
-        
-        pass
+        data_dict = self.data_process()
+        science_plot_data = SciencePlotData()
+        for row_index in range(self.list_view_results_model.rowCount()):
+            item = self.list_view_results_model.item(row_index)
+            if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
+                print(item.text().split('\n')[0].split(',')[0])
+                data_name = item.text().split('\n')[0].split(',')[0]
+                data_key = data_name + '-data'
+                data_list = data_dict[data_key] # data_list = [H_raw,M_raw,H,M,......]
+                science_plot_data.add_figure_info(figure_title=data_name,x_label='External Magnetic Field,H (A/m)',y_label='Magnetization,M (A/m)')
+                science_plot_data.add_plot_data(figure_title=data_name,x_data=data_list[0].get_data(),y_data=data_list[1].get_data(),y_legend='raw')
+                science_plot_data.add_plot_data(figure_title=data_name,x_data=data_list[2].get_data(),y_data=data_list[3].get_data(),y_legend='cal')
+        SciencePlot.sci_plot(science_plot_data)
 
     def on_PushButton_clearall_M_clicked(self):
         self.list_view_results_model.clear()
