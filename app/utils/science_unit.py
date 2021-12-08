@@ -8,6 +8,10 @@ from app.utils.science_base import Unit
 @unique
 class ScienceUnit(Enum):
     @unique
+    class Time(Enum):
+        s = Unit(index=0, symbol="s", ratio=1., description="Second")
+
+    @unique
     class Length(Enum):
         m = Unit(index=0, symbol="m", ratio=1., description="Meter")
         cm = Unit(index=1, symbol="cm", ratio=1./1.e2,description="Centimeter")
@@ -40,6 +44,28 @@ class ScienceUnit(Enum):
         ug = Unit(index=3, symbol="ug", ratio=1./1.e9, description="Microgram")
 
     @unique
+    class Voltage(Enum):
+        V = Unit(index=0, symbol="V", ratio=1., description="Volt")
+        mV = Unit(index=1, symbol="mV", ratio=1./1.e3, description="Millivolt")
+
+    @unique
+    class Frequency(Enum):
+        Hz = Unit(index=0, symbol="Hz", ratio=1., description="Hertz")
+        kHz = Unit(index=1, symbol="kHz", ratio=1.e3, description="Kilohertz")
+        MHz = Unit(index=2, symbol="MHz", ratio=1.e6, description="Megahertz")
+        GHz = Unit(index=3, symbol="GHz", ratio=1.e9, description="Gigahertz")
+        THz = Unit(index=4, symbol="THz", ratio=1.e12, description="Terahertz")
+
+    @unique
+    class Capacitance(Enum):
+        F = Unit(index=0, symbol="F", ratio=1., description="Farad")
+        mF = Unit(index=1, symbol="mF", ratio=1./1.e3, description="Millifarad")
+        uF = Unit(index=2, symbol="uF", ratio=1./1.e6, description="Microfarad")
+        nF = Unit(index=3, symbol="nF", ratio=1./1.e9, description="Nanofarad")
+        pF = Unit(index=4, symbol="pF", ratio=1./1.e12, description="Picofarad")
+        fF = Unit(index=5, symbol="fF", ratio=1./1.e15, description="Femtofarad")
+
+    @unique
     class Magnetization(Enum):
         A_m_1 = Unit(index=0, symbol="A/m", ratio=1., description="Ampere per Meter")
         T = Unit(index=1, symbol="T", ratio=1.e7/(4.*np.pi), description="Tesla")
@@ -66,6 +92,10 @@ class ScienceUnit(Enum):
     @unique
     class Dimensionless(Enum):
         DN = Unit(index=0, symbol="1", ratio=1., description="Dimensionless Number, no unit")
+
+    @unique
+    class AtomicContent(Enum):
+        at = Unit(index=0, symbol="at.%", ratio=1., description="Atomic Percent, at.%")
 
     @unique
     class Unknown(Enum):
@@ -138,6 +168,9 @@ def science_unit_convert(from_list:list,from_unit:Unit,to_unit:Unit)->list:
     # FIXME:ScienceUnit 转为 Unit
     # print(from_list,from_unit,to_unit)
     # print(ScienceUnit.classify_unit(from_unit),ScienceUnit.classify_unit(to_unit),ScienceUnit.classify_unit(from_unit)==ScienceUnit.classify_unit(to_unit))
+    for index in range(from_list.__len__()):
+        if from_list[index] is None:
+            from_list[index] = 0.
     if ScienceUnit.classify_unit(from_unit) == ScienceUnit.classify_unit(to_unit):
         return np.multiply(from_list,from_unit.get_ratio()/to_unit.get_ratio())
     elif from_unit == ScienceUnit.Permeability.H_m_1.value and to_unit == ScienceUnit.Dimensionless.DN.value:
@@ -160,7 +193,7 @@ if __name__ == '__main__':
     # a_unit = ScienceUnit.Length.m.value
     # print(ScienceUnit.classify_unit(ScienceUnit.Length.m.value))
     # print(ScienceUnit.classify_unit(ScienceUnit.Length.cm.value))
-    print(science_unit_convert([0.394770493],ScienceUnit.Magnetization.kG.value,ScienceUnit.Magnetization.A_m_1.value))
+    print(science_unit_convert([1],ScienceUnit.Capacitance.F.value,ScienceUnit.Capacitance.fF.value))
     # print(ScienceUnit.get_from_symbol('1'))
     # print(ScienceUnit.get_unit_list_by_classification("Magnetization"))
     # print(ScienceUnit.get_unit_list_by_classification(ScienceUnit.Magnetization))

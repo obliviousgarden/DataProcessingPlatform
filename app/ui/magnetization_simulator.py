@@ -12,6 +12,7 @@ from scipy import interpolate
 from joblib import Parallel, delayed
 from numba import cfunc
 
+
 class MagnetizationSimulator:
     def __init__(self,model:int,bg_file_path:str,g_j:float,temp:float,distribution_flag:bool,first_pos_info_tuple=(),p0=[],bounds=(),size_dict={}):
         self.model = model
@@ -40,19 +41,18 @@ class MagnetizationSimulator:
                 lines = file.readlines()
         return lines
 
-    def get_data(self,file_name:str, file_path:str):
+    def get_data(self, file_name:str, file_path:str):
         h_list = []
         bg_m_list = []
         m_list = []
         bg_lines = self.open_file(path = self.bg_file_path)
         lines = self.open_file(path = file_path)
-        print(self.size_dict.keys())
         length = self.size_dict[file_name][0]  # 单位 mm
         width = self.size_dict[file_name][1]  # 单位 mm
         thickness = self.size_dict[file_name][2]  # 单位 nm #S070
 
         volume = length * width * thickness * 1e-9  # 单位 cm^3
-
+        # 有的文件会出现有H没有对应M的情况
         if self.H_start_row != self.M_start_row:
             print("WARNING: self.H_start_row != self.M_start_row.")
 
@@ -186,7 +186,6 @@ class MagnetizationSimulator:
         if self.model == 1:
             m_cal = Jiles_Atherton_Model(m_0_list=m_0_list, break_index_list=break_index_list).func_Jiles_Atherton(
                 h_raw, popt[0], popt[1], popt[2], popt[3], popt[4])
-
         elif self.model == 2:
             if self.distribution_flag:
                 m_cal = Brillouin_Model(g_j=self.g_j, temp=self.temp, distribution=self.distribution_flag).func_Brillouin(h_raw, popt[0], popt[1], popt[2])
@@ -245,14 +244,13 @@ class MagnetizationSimulator:
             'pcov': pcov,
             'perr': perr,
             'l': PhysicalQuantity('l',ScienceUnit.Length.m.value, [length/1.e3]),
-            'w': PhysicalQuantity('l',ScienceUnit.Length.m.value, [width/1.e3]),
-            't': PhysicalQuantity('l',ScienceUnit.Length.m.value, [thickness/1.e9]),
+            'w': PhysicalQuantity('w',ScienceUnit.Length.m.value, [width/1.e3]),
+            't': PhysicalQuantity('t',ScienceUnit.Length.m.value, [thickness/1.e9]),
             'h_raw': PhysicalQuantity('h_raw', ScienceUnit.Magnetization.A_m_1.value, h_raw),
             'm_raw': PhysicalQuantity('m_raw', ScienceUnit.Magnetization.A_m_1.value, m_raw),
             'm_cal': PhysicalQuantity('m_cal', ScienceUnit.Magnetization.A_m_1.value, m_cal),
-            'sigma': PhysicalQuantity('l',ScienceUnit.Dimensionless.DN.value, [sigma])
+            'sigma': PhysicalQuantity('sigma',ScienceUnit.Dimensionless.DN.value, [sigma])
         }
-            # 'popt': popt, 'pcov': pcov, 'perr': perr, 'h_raw':h_raw, 'm_raw':m_raw, 'm_cal':m_cal}
 
 
 class Jiles_Atherton_Model:
@@ -422,8 +420,8 @@ class Langevin_Model:
         # sigma Standard Deviation of the Reduced Diameter Distribution (OPTIONAL)
         print(time.asctime(time.localtime(time.time())))
         D_m = np.power(self.g_j*sci_const.miu_B*j*6./(np.pi*m_s),1/3)
-        print("g_j={0},temp={1},m_s={2},j={3},distribution={4},D_m={5} nm,sigma={6}".format(self.g_j, self.temp, m_s, j,
-                                                                                 self.distribution,D_m*1.e9, sigma))
+        print("g_j={0},temp={1},m_s={2},j={3},distribution={4},D_m={5} m,sigma={6}".format(self.g_j, self.temp, m_s, j,
+                                                                                 self.distribution,D_m, sigma))
         if self.distribution:
             # 这里比较特殊，所有h被遍历
             start = time.time()
@@ -465,10 +463,10 @@ class Langevin_Model:
             m = np.multiply(m_s, l_x)
             return m
 
-    def func_integral(self, var_h, m_s, j, sigma):
-        # (var_m, abserr) = quad(self.func_Langevin_y, 0, np.inf, args=(var_h, m_s, j, sigma), limlst=3)
-        (var_m, abserr) = quad(self.func_Langevin_y, 0, 2, args=(var_h, m_s, j, sigma), limlst=3)
-        return var_m
+    # def func_integral(self, var_h, m_s, j, sigma):
+    #     # (var_m, abserr) = quad(self.func_Langevin_y, 0, np.inf, args=(var_h, m_s, j, sigma), limlst=3)
+    #     (var_m, abserr) = quad(self.func_Langevin_y, 0, 2, args=(var_h, m_s, j, sigma), limlst=3)
+    #     return var_m
 
     def func_Langevin_y(self, y, h, m_s, j, sigma):
         # j -> j*y^3
@@ -477,7 +475,7 @@ class Langevin_Model:
         x = np.divide(np.multiply(self.g_j * sci_const.miu_B, b), sci_const.k_B * self.temp)
         l_x = np.subtract(np.reciprocal(np.tanh(np.multiply(j_y, x))),
                           np.reciprocal(np.multiply(j_y, x)))
-        d_m = np.power(self.g_j*sci_const.miu_B*j*6./(np.pi*m_s), 1/3)
+        # d_m = np.power(self.g_j*sci_const.miu_B*j*6./(np.pi*m_s), 1/3)
         # f_y = lognorm.pdf(y, sigma, loc=0, scale=d_m)
         f_y = lognorm.pdf(y, sigma)  # 这里已经进行了归一化，loc和scale使用默认的参数即可
         dm = np.multiply(np.multiply(m_s, l_x), f_y)

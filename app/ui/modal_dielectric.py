@@ -4,14 +4,20 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 import random
+import re
+from app.utils.science_data import ScienceData,ScienceFileType,ScienceWriter
+from app.utils.science_base import PhysicalQuantity
+from app.utils.science_unit import ScienceUnit
+from app.utils.science_plot import SciencePlot,SciencePlotData
+
 
 from PyQt5.QtWidgets import QApplication
 
 matplotlib.use("Qt5Agg")  # 声明使用QT5
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from dielectric_simulator import DielectricSimulator, func_Havriliak_Negami, \
-    func_Cole_Cole, func_Cole_Davidson, func_Debye
+from dielectric_simulator import DielectricSimulator
 
+# TODO: denpendent on 功能
 
 class ModalDielectric(object):
 
@@ -20,28 +26,37 @@ class ModalDielectric(object):
         # 模型 1:Havriliak–Negami,模型 2:Cole-Cole,模型 3:Cole–Davidson,模型 4:Debye
         # 默认模型为1:Havriliak–Negami
         self.model = 1
+        self.device = None
+        self.dependent = None
 
         self.alpha_min = 0.0
         self.alpha_max = 1.0
+        self.alpha_fix = False
         self.beta_min = 0.0
         self.beta_max = 1.0
+        self.beta_fix = False
         self.tau_min = 1e-9
         self.tau_max = 1e-3
-        self.epsiloninf_min = 0.0
-        self.epsiloninf_max = 50.0
-        self.deltaepsilon_min = 100.0
-        self.deltaepsilon_max = 1000.0
+        self.tau_fix = False
+        self.epsilon_inf_min = 0.0
+        self.epsilon_inf_max = 50.0
+        self.epsilon_inf_fix = False
+        self.delta_epsilon_min = 100.0
+        self.delta_epsilon_max = 1000.0
+        self.delta_epsilon_fix = False
 
         self.alpha = self.alpha_max
         self.beta = self.beta_max
         self.tau = self.tau_min
-        self.epsiloninf = self.epsiloninf_min
-        self.deltaepsilon = self.deltaepsilon_min
+        self.epsilon_inf = self.epsilon_inf_min
+        self.delta_epsilon = self.delta_epsilon_min
+
+        self.fixed_param_dict = {}
 
         self.file_path = []
         self.file_name = []
-        self.list_view_file_model = QtCore.QStringListModel()
-        self.list_view_file_model.setStringList(self.file_name)
+        self.table_view_file_model = QtGui.QStandardItemModel()
+        self.resetTableViewHeaderItems(tableviewmodel=self.table_view_file_model)
         self.list_view_results_model = QtGui.QStandardItemModel()
         # file_name为键
         self.result_dict = {}
@@ -64,46 +79,66 @@ class ModalDielectric(object):
         self.fig_delta_epsilon = plt.Figure()
         self.canvas_delta_epsilon = FigureCanvas(self.fig_delta_epsilon)
 
+        self.frequency_unit_list = ScienceUnit.get_unit_list_by_classification(ScienceUnit.Frequency)
+        self.capacitance_unit_list = ScienceUnit.get_unit_list_by_classification(ScienceUnit.Capacitance)
+
     def setupUi(self):
+        pass
         # 初始化参数UI
         self.parent.Slider_alpha.setValue((self.alpha - self.alpha_min) / (self.alpha_max - self.alpha_min) * 100.0)
         self.parent.Slider_beta.setValue((self.beta - self.beta_min) / (self.beta_max - self.beta_min) * 100.0)
         self.parent.Slider_tau.setValue(
             (np.log10(self.tau) - np.log10(self.tau_min)) / (np.log10(self.tau_max / self.tau_min)) * 100.0)
         self.parent.Slider_epsiloninf.setValue(
-            (self.epsiloninf - self.epsiloninf_min) / (self.epsiloninf_max - self.epsiloninf_min) * 100.0)
+            (self.epsilon_inf - self.epsilon_inf_min) / (self.epsilon_inf_max - self.epsilon_inf_min) * 100.0)
         self.parent.Slider_deltaepsilon.setValue(
-            (self.deltaepsilon - self.deltaepsilon_min) / (self.deltaepsilon_max - self.deltaepsilon_min) * 100.0)
+            (self.delta_epsilon - self.delta_epsilon_min) / (self.delta_epsilon_max - self.delta_epsilon_min) * 100.0)
+
         self.parent.lcdNumber_alpha.display(str(self.alpha))
         self.parent.lcdNumber_beta.display(str(self.beta))
         self.parent.lcdNumber_tau.display('%.1e' % self.tau)
-        self.parent.lcdNumber_epsiloninf.display(str(self.epsiloninf))
-        self.parent.lcdNumber_deltaepsilon.display(str(self.deltaepsilon))
+        self.parent.lcdNumber_epsiloninf.display(str(self.epsilon_inf))
+        self.parent.lcdNumber_deltaepsilon.display(str(self.delta_epsilon))
 
-        # 设定RadioButton
-        self.parent.RadioButton_hnmodel.clicked.connect(self.on_RadioButton_clicked)
-        self.parent.RadioButton_ccmodel.clicked.connect(self.on_RadioButton_clicked)
-        self.parent.RadioButton_cdmodel.clicked.connect(self.on_RadioButton_clicked)
-        self.parent.RadioButton_dmodel.clicked.connect(self.on_RadioButton_clicked)
-        # 设定PushButton
+        # 设定RadioButton,选择模型
+        self.parent.RadioButton_hnmodel.clicked.connect(self.on_RadioButton_model_clicked)
+        self.parent.RadioButton_ccmodel.clicked.connect(self.on_RadioButton_model_clicked)
+        self.parent.RadioButton_cdmodel.clicked.connect(self.on_RadioButton_model_clicked)
+        self.parent.RadioButton_dmodel.clicked.connect(self.on_RadioButton_model_clicked)
+        # 设定RadioButton,选择设备
+        self.parent.RadioButton_device_impedance.clicked.connect(self.on_RadioButton_device_clicked)
+        self.parent.RadioButton_device_lcr.clicked.connect(self.on_RadioButton_device_clicked)
+        self.parent.RadioButton_other.clicked.connect(self.on_RadioButton_device_clicked)
+        self.parent.RadioButton_device_impedance.click()
+        # 设定RadioButton,选择依赖性
+        self.parent.RadioButton_dependent_H.clicked.connect(self.on_RadioButton_dependent_clicked)
+        self.parent.RadioButton_dependent_Co.clicked.connect(self.on_RadioButton_dependent_clicked)
+        self.parent.RadioButton_dependent_DCB.clicked.connect(self.on_RadioButton_dependent_clicked)
+
+
+        # # 设定PushButton
         self.parent.PushButton_file.clicked.connect(self.on_PushButton_file_clicked)
         self.parent.PushButton_dir.clicked.connect(self.on_PushButton_dir_clicked)
         self.parent.PushButton_simulate.clicked.connect(self.on_PushButton_simulate_clicked)
         self.parent.PushButton_plot.clicked.connect(self.on_PushButton_plot_clicked)
         self.parent.PushButton_clearAll.clicked.connect(self.on_PushButton_clearAll_clicked)
-        # 设定ListView内的Model
-        self.parent.ListView_file.setModel(self.list_view_file_model)
+        # 设定TableView内的Model，并禁止编辑
+        self.parent.TableView_file.setModel(self.table_view_file_model)
+        self.parent.TableView_file_M.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Black))
+        self.parent.TableView_file_M.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        # self.parent.TableView_file_M.doubleClicked.connect(self.on_TableView_file_doubleClicked)
+
         self.parent.ListView_results.setModel(self.list_view_results_model)
-        # 禁止编辑
-        self.parent.ListView_file.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.parent.ListView_results.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+
         # 设定Slider
         self.parent.Slider_alpha.valueChanged.connect(self.on_Slider_alpha_valueChanged)
         self.parent.Slider_beta.valueChanged.connect(self.on_Slider_beta_valueChanged)
         self.parent.Slider_tau.valueChanged.connect(self.on_Slider_tau_valueChanged)
-        self.parent.Slider_epsiloninf.valueChanged.connect(self.on_Slider_epsiloninf_valueChanged)
-        self.parent.Slider_deltaepsilon.valueChanged.connect(self.on_Slider_deltaepsilon_valueChanged)
-        # 初始化figure和cavas
+        self.parent.Slider_epsiloninf.valueChanged.connect(self.on_Slider_epsilon_inf_valueChanged)
+        self.parent.Slider_deltaepsilon.valueChanged.connect(self.on_Slider_delta_epsilon_valueChanged)
+
+        # # 初始化figure和cavas
         self.dialog_plot.setWindowTitle('Plot results - Dielectric Simulation')
         self.layout_plot_epsilon.addWidget(self.canvas_epsilon)
         self.tab_plot_epsilon.setLayout(self.layout_plot_epsilon)
@@ -111,13 +146,67 @@ class ModalDielectric(object):
         self.tab_plot_delta_epsilon.setLayout(self.layout_plot_delta_epsilon)
         # Checkbox
         self.parent.CheckBox_All.clicked.connect(self.on_CheckBox_All_clicked)
-        self.parent.CheckBox_reference.clicked.connect(self.on_CheckBox_reference_clicked)
 
         # 初始化没有数据所以直接禁用
         self.parent.CheckBox_All.setEnabled(False)
         self.parent.PushButton_plot.setEnabled(False)
-        self.parent.CheckBox_reference.setEnabled(False)
-        self.parent.ComboBox_reference.setEnabled(False)
+
+        # 设定LineEdit，并且禁止数字外的输入
+        self.parent.LineEdit_step1_f_row.textChanged.connect(self.on_LineEdit_step1_f_row_textChanged)
+        self.parent.LineEdit_step1_f_col.textChanged.connect(self.on_LineEdit_step1_f_col_textChanged)
+        self.parent.LineEdit_step1_Cp_row.textChanged.connect(self.on_LineEdit_step1_Cp_row_textChanged)
+        self.parent.LineEdit_step1_Cp_col.textChanged.connect(self.on_LineEdit_step1_Cp_col_textChanged)
+
+        # 为单位的ComboBox添加选项
+        for frequency_unit in self.frequency_unit_list:
+            self.parent.ComboBox_step1_f_unit.addItem(frequency_unit.get_description_with_symbol_bracket())
+        for capacitance_unit in self.capacitance_unit_list:
+            self.parent.ComboBox_step1_Cp_unit.addItem(capacitance_unit.get_description_with_symbol_bracket())
+
+    def resetTableViewHeaderItems(self, tableviewmodel: QtGui.QStandardItemModel):
+        table_header_item_0 = QtGui.QStandardItem('file_name')
+        table_header_item_0.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Black))
+        table_header_item_1 = QtGui.QStandardItem('thickness(nm)')
+        table_header_item_1.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Black))
+        table_header_item_2 = QtGui.QStandardItem('area(m^2)')
+        table_header_item_2.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Black))
+        table_header_item_3 = QtGui.QStandardItem('H(Oe)')
+        table_header_item_3.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Black))
+        table_header_item_4 = QtGui.QStandardItem('x_Co(at.%)')
+        table_header_item_4.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Black))
+        table_header_item_5 = QtGui.QStandardItem('DCB(V)')
+        table_header_item_5.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Black))
+        table_header_item_6 = QtGui.QStandardItem('OSC(V)')
+        table_header_item_6.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Black))
+        table_header_item_7 = QtGui.QStandardItem('C.C.(1)')
+        table_header_item_7.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Black))
+        tableviewmodel.setHorizontalHeaderItem(0, table_header_item_0)
+        tableviewmodel.setHorizontalHeaderItem(1, table_header_item_1)
+        tableviewmodel.setHorizontalHeaderItem(2, table_header_item_2)
+        tableviewmodel.setHorizontalHeaderItem(3, table_header_item_3)
+        tableviewmodel.setHorizontalHeaderItem(4, table_header_item_4)
+        tableviewmodel.setHorizontalHeaderItem(5, table_header_item_5)
+        tableviewmodel.setHorizontalHeaderItem(6, table_header_item_6)
+        tableviewmodel.setHorizontalHeaderItem(7, table_header_item_7)
+
+    def on_LineEdit_step1_f_row_textChanged(self,line_input):
+        self.on_LineEdit_textChanged_number(self.parent.LineEdit_step1_f_row, line_input)
+
+    def on_LineEdit_step1_f_col_textChanged(self,line_input):
+        self.on_LineEdit_textChanged_number(self.parent.LineEdit_step1_f_col, line_input)
+
+    def on_LineEdit_step1_Cp_row_textChanged(self,line_input):
+        self.on_LineEdit_textChanged_number(self.parent.LineEdit_step1_Cp_row, line_input)
+
+    def on_LineEdit_step1_Cp_col_textChanged(self,line_input):
+        self.on_LineEdit_textChanged_number(self.parent.LineEdit_step1_Cp_col, line_input)
+
+    def on_LineEdit_textChanged_number(self, object_LineEdit_number: QtWidgets.QLineEdit, line_input):
+        try:
+            float(line_input)
+        except ValueError:
+            line_input = ''.join(filter(lambda x: x in '.0123456789', line_input))
+        object_LineEdit_number.setText(line_input)
 
     def update_tau_range(self, tau_min, tau_max):
         print("更新Tau范围,结束")
@@ -130,43 +219,97 @@ class ModalDielectric(object):
 
     def update_epsilon_inf_range(self, epsilon_inf_min, epsilon_inf_max):
         print("更新epsilon_inf范围,结束")
-        self.epsiloninf_min = epsilon_inf_min
-        self.epsiloninf_max = epsilon_inf_max
-        self.epsiloninf = self.epsiloninf_min
+        self.epsilon_inf_min = epsilon_inf_min
+        self.epsilon_inf_max = epsilon_inf_max
+        self.epsilon_inf = self.epsilon_inf_min
         self.parent.Slider_epsiloninf.setValue(
-            (self.epsiloninf - self.epsiloninf_min) / (self.epsiloninf_max - self.epsiloninf_min) * 100.0)
-        self.parent.lcdNumber_epsiloninf.display(str(self.epsiloninf))
+            (self.epsilon_inf - self.epsilon_inf_min) / (self.epsilon_inf_max - self.epsilon_inf_min) * 100.0)
+        self.parent.lcdNumber_epsiloninf.display(str(self.epsilon_inf))
 
     def update_delta_epsilon_range(self, delta_epsilon_min, delta_epsilon_max):
         print("更新delta_epsilon范围,结束")
-        self.deltaepsilon_min = delta_epsilon_min
-        self.deltaepsilon_max = delta_epsilon_max
-        self.deltaepsilon = self.deltaepsilon_min
+        self.delta_epsilon_min = delta_epsilon_min
+        self.delta_epsilon_max = delta_epsilon_max
+        self.delta_epsilon = self.delta_epsilon_min
         self.parent.Slider_deltaepsilon.setValue(
-            (self.deltaepsilon - self.deltaepsilon_min) / (self.deltaepsilon_max - self.deltaepsilon_min) * 100.0)
-        self.parent.lcdNumber_deltaepsilon.display(str(self.deltaepsilon))
+            (self.delta_epsilon - self.delta_epsilon_min) / (self.delta_epsilon_max - self.delta_epsilon_min) * 100.0)
+        self.parent.lcdNumber_deltaepsilon.display(str(self.delta_epsilon))
 
-    def on_RadioButton_clicked(self):
+    def on_RadioButton_model_clicked(self):
         if self.parent.RadioButton_hnmodel.isChecked():
             self.model = 1
             self.parent.Slider_alpha.setEnabled(True)
             self.parent.Slider_beta.setEnabled(True)
+            self.parent.CheckBox_alpha_fix.setEnabled(True)
+            self.parent.CheckBox_beta_fix.setEnabled(True)
         elif self.parent.RadioButton_ccmodel.isChecked():
             self.model = 2
             self.parent.Slider_alpha.setEnabled(True)
             self.parent.Slider_beta.setEnabled(False)
             self.parent.Slider_beta.setValue(100)
+            self.parent.CheckBox_alpha_fix.setEnabled(True)
+            self.parent.CheckBox_beta_fix.setEnabled(False)
         elif self.parent.RadioButton_cdmodel.isChecked():
             self.model = 3
             self.parent.Slider_alpha.setEnabled(False)
             self.parent.Slider_beta.setEnabled(True)
             self.parent.Slider_alpha.setValue(100)
+            self.parent.CheckBox_alpha_fix.setEnabled(False)
+            self.parent.CheckBox_beta_fix.setEnabled(True)
         else:
             self.model = 4
             self.parent.Slider_alpha.setEnabled(False)
             self.parent.Slider_beta.setEnabled(False)
             self.parent.Slider_alpha.setValue(100)
             self.parent.Slider_beta.setValue(100)
+            self.parent.CheckBox_alpha_fix.setEnabled(False)
+            self.parent.CheckBox_beta_fix.setEnabled(False)
+
+    def on_RadioButton_device_clicked(self):
+        if self.parent.RadioButton_other.isChecked():
+            # Device: Other
+            self.parent.LineEdit_step1_f_row.setEnabled(True)
+            self.parent.LineEdit_step1_f_col.setEnabled(True)
+            self.parent.ComboBox_step1_f_unit.setEnabled(True)
+            self.parent.LineEdit_step1_Cp_row.setEnabled(True)
+            self.parent.LineEdit_step1_Cp_col.setEnabled(True)
+            self.parent.ComboBox_step1_Cp_unit.setEnabled(True)
+        else:
+            self.parent.LineEdit_step1_f_row.setEnabled(False)
+            self.parent.LineEdit_step1_f_col.setEnabled(False)
+            self.parent.ComboBox_step1_f_unit.setEnabled(False)
+            self.parent.LineEdit_step1_Cp_row.setEnabled(False)
+            self.parent.LineEdit_step1_Cp_col.setEnabled(False)
+            self.parent.ComboBox_step1_Cp_unit.setEnabled(False)
+            if self.parent.RadioButton_device_impedance.isChecked():
+                # Device: Impedance Analyzer (~120MHz)
+                self.parent.LineEdit_step1_f_row.setText("20")
+                self.parent.LineEdit_step1_f_col.setText("1")
+                self.parent.ComboBox_step1_f_unit.setCurrentIndex(0)
+                self.parent.LineEdit_step1_Cp_row.setText("20")
+                self.parent.LineEdit_step1_Cp_col.setText("3")
+                self.parent.ComboBox_step1_Cp_unit.setCurrentIndex(0)
+            elif self.parent.RadioButton_device_lcr.isChecked():
+                # Device: LCR Meter (~1MHz)
+                self.parent.LineEdit_step1_f_row.setText("16")
+                self.parent.LineEdit_step1_f_col.setText("1")
+                self.parent.ComboBox_step1_f_unit.setCurrentIndex(0)
+                self.parent.LineEdit_step1_Cp_row.setText("16")
+                self.parent.LineEdit_step1_Cp_col.setText("2")
+                self.parent.ComboBox_step1_Cp_unit.setCurrentIndex(0)
+            else:
+                print('ERROR. Unknown Device.')
+
+    def on_RadioButton_dependent_clicked(self):
+        if self.parent.RadioButton_dependent_H.isChecked():
+            self.dependent = "H"
+        elif self.parent.RadioButton_dependent_Co.isChecked():
+            self.dependent = "Co"
+        elif self.parent.RadioButton_dependent_DCB.isChecked():
+            self.dependent = "DCB"
+        else:
+            print("Unknown Dependent.")
+            self.dependent = None
 
     def on_PushButton_file_clicked(self):
         self.file_name = []
@@ -174,11 +317,72 @@ class ModalDielectric(object):
         file_name, file_type = QtWidgets.QFileDialog.getOpenFileNames()
         print('file:', file_name)
         self.file_path = file_name
+        self.table_view_file_model.clear()
+        self.resetTableViewHeaderItems(self.table_view_file_model)
         for i in range(file_name.__len__()):
             self.file_name.append(file_name[i].split('/')[-1])
-        self.list_view_file_model.setStringList(self.file_name)
+            file_name_item = QtGui.QStandardItem(self.file_name[i])
+            file_name_item.setEditable(False)
+            thickness_value = 1./1.e6 # 1000 nm
+            area_value = 1./1.e6 # 1 mm^2
+            with open(self.file_path[i], 'r') as file:
+                lines = file.readlines()
+                if self.parent.RadioButton_device_impedance.isChecked():
+                    thickness_value = float(lines[4])/1e6  # um -> m
+                    area_value = float(lines[5])/1e4  # cm^2 -> m^2
+                elif self.parent.RadioButton_device_lcr.isChecked():
+                    thickness_value = float(lines[4])  # m -> m
+                    area_value = float(lines[5])  # m^2 -> m^2
+                else:
+                    # 未知设备的膜厚和电极面积的数值未知
+                    pass
+            thickness_item = QtGui.QStandardItem('%.5g' % thickness_value)
+            thickness_item.setEditable(True)
+            thickness_item.setSelectable(False)
+            area_item = QtGui.QStandardItem('%.5g' % area_value)
+            area_item.setEditable(True)
+            area_item.setSelectable(False)
+            if 'Oe' in self.file_name[i]:
+                h_value = re.findall(".*-(.*)Oe.*",self.file_name[i])[0]
+                if 'k' in h_value:
+                    h_value = float(h_value.replace('k',''))*1000
+                h_value = float(h_value)
+            else:
+                h_value = 0.
+            h_item = QtGui.QStandardItem('%.5g' % h_value)
+            h_item.setEditable(True)
+            h_item.setSelectable(False)
+            if 'Co' in self.file_name[i]:
+                co_value = float(re.findall(".*-Co(.*).*",self.file_name[i])[0].split('-')[0])
+            else:
+                co_value = 0.
+            co_item = QtGui.QStandardItem('%.5g' % co_value)
+            co_item.setEditable(True)
+            co_item.setSelectable(False)
+            if 'DCB' in self.file_name[i]:
+                dcb_value = float(re.findall(".*-DCB(.*).*",self.file_name[i])[0].split('-')[0])
+            else:
+                dcb_value = 0.
+            dcb_item = QtGui.QStandardItem('%.5g' % dcb_value)
+            dcb_item.setEditable(True)
+            dcb_item.setSelectable(False)
+            if 'V' in self.file_name[i]:
+                ocs_value = float(re.findall(".*-(.*)V.*",self.file_name[i])[0])
+            else:
+                ocs_value = 0.
+            ocs_item = QtGui.QStandardItem('%.5g' % ocs_value)
+            ocs_item.setEditable(True)
+            ocs_item.setSelectable(False)
+            cc_item = QtGui.QStandardItem('1')
+            cc_item.setEditable(True)
+            cc_item.setSelectable(False)
+            self.table_view_file_model.appendRow([file_name_item, thickness_item, area_item, h_item, co_item, dcb_item, ocs_item, cc_item])
         print(self.file_path)
         print(self.file_name)
+        # 因为刚导入数据，结果解析相关部分全部封住
+        self.list_view_results_model.clear()
+        self.parent.CheckBox_All.setEnabled(False)
+        self.parent.PushButton_plot.setEnabled(False)
 
     def on_PushButton_dir_clicked(self):
         self.file_name = []
@@ -186,12 +390,73 @@ class ModalDielectric(object):
         dir_ = QtWidgets.QFileDialog.getExistingDirectory()
         print('dir:', dir_)
         if dir_ != '':
+            self.table_view_file_model.clear()
+            self.resetTableViewHeaderItems(self.table_view_file_model)
             self.file_name = os.listdir(dir_)
             for i in range(self.file_name.__len__()):
                 self.file_path.append(dir_ + '/' + self.file_name[i])
-            self.list_view_file_model.setStringList(self.file_name)
+                file_name_item = QtGui.QStandardItem(self.file_name[i])
+                file_name_item.setEditable(False)
+                thickness_value = 1./1.e6 # 1000 nm
+                area_value = 1./1.e6 # 1 mm^2
+                with open(self.file_path[i], 'r') as file:
+                    lines = file.readlines()
+                    if self.parent.RadioButton_device_impedance.isChecked():
+                        thickness_value = float(lines[4])/1e6  # um -> m
+                        area_value = float(lines[5])/1e4  # cm^2 -> m^2
+                    elif self.parent.RadioButton_device_lcr.isChecked():
+                        thickness_value = float(lines[4])  # m -> m
+                        area_value = float(lines[5])  # m^2 -> m^2
+                    else:
+                        # 未知设备的膜厚和电极面积的数值未知
+                        pass
+                thickness_item = QtGui.QStandardItem('%.5g' % thickness_value)
+                thickness_item.setEditable(True)
+                thickness_item.setSelectable(False)
+                area_item = QtGui.QStandardItem('%.5g' % area_value)
+                area_item.setEditable(True)
+                area_item.setSelectable(False)
+                if 'Oe' in self.file_name[i]:
+                    h_value = re.findall(".*-(.*)Oe.*",self.file_name[i])[0]
+                    if 'k' in h_value:
+                        h_value = float(h_value.replace('k',''))*1000
+                    h_value = float(h_value)
+                else:
+                    h_value = 0.
+                h_item = QtGui.QStandardItem('%.5g' % h_value)
+                h_item.setEditable(True)
+                h_item.setSelectable(False)
+                if 'Co' in self.file_name[i]:
+                    co_value = float(re.findall(".*-Co(.*).*",self.file_name[i])[0].split('-')[0])
+                else:
+                    co_value = 0.
+                co_item = QtGui.QStandardItem('%.5g' % co_value)
+                co_item.setEditable(True)
+                co_item.setSelectable(False)
+                if 'DCB' in self.file_name[i]:
+                    dcb_value = float(re.findall(".*-DCB(.*).*",self.file_name[i])[0].split('-')[0])
+                else:
+                    dcb_value = 0.
+                dcb_item = QtGui.QStandardItem('%.5g' % dcb_value)
+                dcb_item.setEditable(True)
+                dcb_item.setSelectable(False)
+                if 'V' in self.file_name[i]:
+                    ocs_value = float(re.findall(".*-(.*)V.*",self.file_name[i])[0])
+                else:
+                    ocs_value = 0.
+                ocs_item = QtGui.QStandardItem('%.5g' % ocs_value)
+                ocs_item.setEditable(True)
+                ocs_item.setSelectable(False)
+                cc_item = QtGui.QStandardItem('1')
+                cc_item.setEditable(True)
+                cc_item.setSelectable(False)
+                self.table_view_file_model.appendRow([file_name_item, thickness_item, area_item, h_item, co_item, dcb_item, ocs_item, cc_item])
         print(self.file_path)
         print(self.file_name)
+        # 因为刚导入数据，结果解析相关部分全部封住
+        self.list_view_results_model.clear()
+        self.parent.CheckBox_All.setEnabled(False)
+        self.parent.PushButton_plot.setEnabled(False)
 
     def on_Slider_alpha_valueChanged(self):
         self.alpha = self.alpha_min + (self.alpha_max - self.alpha_min) * self.parent.Slider_alpha.value() / 100.0
@@ -206,15 +471,15 @@ class ModalDielectric(object):
                 np.log10(self.tau_max) - np.log10(self.tau_min)) * self.parent.Slider_tau.value() / 100.0)
         self.parent.lcdNumber_tau.display('%.1e' % self.tau)
 
-    def on_Slider_epsiloninf_valueChanged(self):
-        self.epsiloninf = self.epsiloninf_min + (
-                self.epsiloninf_max - self.epsiloninf_min) * self.parent.Slider_epsiloninf.value() / 100.0
-        self.parent.lcdNumber_epsiloninf.display(str(self.epsiloninf))
+    def on_Slider_epsilon_inf_valueChanged(self):
+        self.epsilon_inf = self.epsilon_inf_min + (
+                self.epsilon_inf_max - self.epsilon_inf_min) * self.parent.Slider_epsiloninf.value() / 100.0
+        self.parent.lcdNumber_epsiloninf.display(str(self.epsilon_inf))
 
-    def on_Slider_deltaepsilon_valueChanged(self):
-        self.deltaepsilon = self.deltaepsilon_min + (
-                self.deltaepsilon_max - self.deltaepsilon_min) * self.parent.Slider_deltaepsilon.value() / 100.0
-        self.parent.lcdNumber_deltaepsilon.display(str(self.deltaepsilon))
+    def on_Slider_delta_epsilon_valueChanged(self):
+        self.delta_epsilon = self.delta_epsilon_min + (
+                self.delta_epsilon_max - self.delta_epsilon_min) * self.parent.Slider_deltaepsilon.value() / 100.0
+        self.parent.lcdNumber_deltaepsilon.display(str(self.delta_epsilon))
 
     def on_PushButton_simulate_clicked(self):
         # 清空列表
@@ -224,54 +489,110 @@ class ModalDielectric(object):
         # 全选取消
         self.parent.CheckBox_All.setCheckState(QtCore.Qt.Unchecked)
         # 这里需要根据model构造p0和bounds参数
+        # 清空结果的listview
+        self.list_view_results_model.clear()
+        # 需要的额外参数：f以及Cp 的 第一个数据位置 和 单位，试料的膜厚和电极的面积
+        first_pos_info_tuple = (
+            (int(self.parent.LineEdit_step1_f_row.text()),
+             int(self.parent.LineEdit_step1_f_col.text()),
+             str(self.parent.ComboBox_step1_f_unit.currentText())),
+            (int(self.parent.LineEdit_step1_Cp_row.text()),
+             int(self.parent.LineEdit_step1_Cp_col.text()),
+             str(self.parent.ComboBox_step1_Cp_unit.currentText()))
+        )
+        # 来自tableview的size info
+        info_dict = {}
+        for row in range(self.table_view_file_model.rowCount()):
+            info_dict[self.table_view_file_model.item(row, 0).text()] = [
+                float(self.table_view_file_model.item(row, 1).text()),
+                float(self.table_view_file_model.item(row, 2).text()),
+                float(self.table_view_file_model.item(row, 3).text()),
+                float(self.table_view_file_model.item(row, 4).text()),
+                float(self.table_view_file_model.item(row, 5).text()),
+                float(self.table_view_file_model.item(row, 6).text()),
+                float(self.table_view_file_model.item(row, 7).text()),
+            ]
+        # 这里需要根据model构造p0和bounds参数
+        # 注意：由于有固定参数的功能，这里必须把被固定的参数剔除出p0和bounds，并加入到fixed_param_dict
         p0 = []
         bounds = ([], [])
+        self.fixed_param_dict = {}
         if self.model == 1:
-            p0.append(self.alpha)
-            p0.append(self.beta)
-            bounds[0].append(self.alpha_min)
-            bounds[0].append(self.beta_min)
-            bounds[1].append(self.alpha_max)
-            bounds[1].append(self.beta_max)
+            if self.parent.CheckBox_alpha_fix.isChecked():
+                self.fixed_param_dict['alpha'] = self.alpha
+            else:
+                p0.append(self.alpha)
+                bounds[0].append(self.alpha_min)
+                bounds[1].append(self.alpha_max)
+            if self.parent.CheckBox_beta_fix.isChecked():
+                self.fixed_param_dict['beta'] = self.beta
+            else:
+                p0.append(self.beta)
+                bounds[0].append(self.beta_min)
+                bounds[1].append(self.beta_max)
         elif self.model == 2:
-            p0.append(self.alpha)
-            bounds[0].append(self.alpha_min)
-            bounds[1].append(self.alpha_max)
+            if self.parent.CheckBox_alpha_fix.isChecked():
+                self.fixed_param_dict['alpha'] = self.alpha
+            else:
+                p0.append(self.alpha)
+                bounds[0].append(self.alpha_min)
+                bounds[1].append(self.alpha_max)
         elif self.model == 3:
-            p0.append(self.beta)
-            bounds[0].append(self.beta_min)
-            bounds[1].append(self.beta_max)
+            if self.parent.CheckBox_beta_fix.isChecked():
+                self.fixed_param_dict['beta'] = self.beta
+            else:
+                p0.append(self.beta)
+                bounds[0].append(self.beta_min)
+                bounds[1].append(self.beta_max)
         else:
             pass
-        p0.extend([self.tau, self.epsiloninf, self.deltaepsilon])
-        bounds[0].extend([self.tau_min, self.epsiloninf_min, self.deltaepsilon_min])
-        bounds[1].extend([self.tau_max, self.epsiloninf_max, self.deltaepsilon_max])
+
+        if self.parent.CheckBox_tau_fix.isChecked():
+            self.fixed_param_dict['tau'] = self.tau
+        else:
+            p0.append(self.tau)
+            bounds[0].append(self.tau_min)
+            bounds[1].append(self.tau_max)
+        if self.parent.CheckBox_epsiloninf_fix.isChecked():
+            self.fixed_param_dict['epsilon_inf'] = self.epsilon_inf
+        else:
+            p0.append(self.epsilon_inf)
+            bounds[0].append(self.epsilon_inf_min)
+            bounds[1].append(self.epsilon_inf_max)
+        if self.parent.CheckBox_deltaepsilon_fix.isChecked():
+            self.fixed_param_dict['delta_epsilon'] = self.delta_epsilon
+        else:
+            p0.append(self.delta_epsilon)
+            bounds[0].append(self.delta_epsilon_min)
+            bounds[1].append(self.delta_epsilon_max)
+        print("first_pos_info_tuple={},info_dict={},fixed_param_dict={}".format(first_pos_info_tuple, info_dict, self.fixed_param_dict))
         print('初始值', p0)
         print('边界', bounds)
-        self.list_view_results_model.clear()
+
         for i in range(self.file_path.__len__()):
             print(i, self.file_name[i])
-            self.result_dict[self.file_name[i]] = DielectricSimulator(self.model, self.file_path[i],
-                                                                      p0=p0,
-                                                                      bounds=bounds).simulate()
-            result = self.result_dict[self.file_name[i]]['popt']
+            my_simulator = DielectricSimulator(model=self.model,
+                                               first_pos_info_tuple=first_pos_info_tuple,
+                                               info_dict=info_dict,
+                                               fixed_param_dict=self.fixed_param_dict,
+                                               p0=p0, bounds=bounds)
 
-            item = QtGui.QStandardItem(" #{}\nAlpha={},Beta={}Tau={}\nEpsilon_Inf={}Delta_Epsilon={}"
-                                       .format(self.file_name[i]
-                                               , {1: result[0], 2: result[0], 3: 1.0, 4: 1.0}[self.model]
-                                               , {1: result[1], 2: 1.0, 3: result[0], 4: 1.0}[self.model]
-                                               , result[-3], result[-2], result[-1]))
+            self.result_dict[self.file_name[i]] = my_simulator.simulate(self.file_name[i],self.file_path[i])
+            param_dict = self.get_param_dict_from_popt(popt=self.result_dict[self.file_name[i]]['popt'],fixed_param_dict=self.fixed_param_dict)
+            item = QtGui.QStandardItem(" {}, Model={},\nalpha={},beta={},tau={}\nepsilon_inf={}delta_epsilon={}"
+                                       .format(self.file_name[i],
+                                               str(self.model),
+                                               param_dict.get('alpha'),
+                                               param_dict.get('beta'),
+                                               param_dict.get('tau'),
+                                               param_dict.get('epsilon_inf'),
+                                               param_dict.get('delta_epsilon')))
             item.setCheckable(True)
             self.list_view_results_model.appendRow(item)
         print('结果', self.result_dict)
         # 拟合完成，可以选择背底，以及绘图了
         self.parent.CheckBox_All.setEnabled(True)
         self.parent.PushButton_plot.setEnabled(True)
-        if self.list_view_results_model.rowCount() > 1:
-            self.parent.CheckBox_reference.setEnabled(True)
-            # 加入combobox的每一项
-            for key in self.result_dict:
-                self.parent.ComboBox_reference.addItem(key)
 
     def on_CheckBox_All_clicked(self):
         check_state = QtCore.Qt.Checked if self.parent.CheckBox_All.isChecked() else QtCore.Qt.Unchecked
@@ -279,139 +600,128 @@ class ModalDielectric(object):
         for i in range(self.list_view_results_model.rowCount()):
             self.list_view_results_model.item(i).setCheckState(check_state)
 
-    def on_CheckBox_reference_clicked(self):
-        self.parent.ComboBox_reference.setEnabled(True if self.parent.CheckBox_reference.isChecked() else False)
-
     def on_PushButton_plot_clicked(self):
-        plot_data_dict = {}
-        for i in range(self.list_view_results_model.rowCount()):
-            item = self.list_view_results_model.item(i)
+        data_dict = self.data_process()
+        science_plot_data = SciencePlotData()
+        for row_index in range(self.list_view_results_model.rowCount()):
+            item = self.list_view_results_model.item(row_index)
             if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
-                plot_data_dict[item.text().split('\n')[0].replace(' #', '')] = {}
-        for i in range(self.file_name.__len__()):
-            if self.file_name[i] in plot_data_dict.keys():
-                freq_list, epsilon_raw_list = DielectricSimulator(self.model, self.file_path[i]).get_data()
-                plot_data = plot_data_dict[self.file_name[i]]
-                param_list = self.result_dict[self.file_name[i]]['popt']
-                plot_data['freq'] = freq_list
-                plot_data['epsilon_raw'] = epsilon_raw_list
-                if self.model == 1:
-                    plot_data['epsilon'] = func_Havriliak_Negami(freq_list, alpha=param_list[0], beta=param_list[1],
-                                                                 tau=param_list[2], epsilon_inf=param_list[3],
-                                                                 delta_epsilon=param_list[4])
-                elif self.model == 2:
-                    plot_data['epsilon'] = func_Cole_Cole(freq_list, alpha=param_list[0], tau=param_list[1],
-                                                          epsilon_inf=param_list[2], delta_epsilon=param_list[3])
-                elif self.model == 3:
-                    plot_data['epsilon'] = func_Cole_Davidson(freq_list, beta=param_list[0], tau=param_list[1],
-                                                              epsilon_inf=param_list[2], delta_epsilon=param_list[3])
-                elif self.model == 4:
-                    plot_data['epsilon'] = func_Debye(freq_list, tau=param_list[0], epsilon_inf=param_list[1],
-                                                      delta_epsilon=param_list[2])
-                else:
-                    pass
-        print('PLOT数据', plot_data_dict)
-        # 判断是否有delta图
-        delta_epsilon_exist = True if self.parent.CheckBox_reference.isChecked() else False
-        delta_epsilon_ref_file_name = self.parent.ComboBox_reference.currentText() if delta_epsilon_exist else ''
-        # 数据组装获取完成，开始绘图
-        self.fig_epsilon.clear()
-        ax_epsilon = self.fig_epsilon.add_subplot(111)
-        ax_epsilon.cla()
-        ax_epsilon.set_xscale('log')
-
-        self.fig_delta_epsilon.clear()
-        ax_delta_epsilon = self.fig_delta_epsilon.add_subplot(111)
-        ax_delta_epsilon.cla()
-        ax_delta_epsilon.set_xscale('log')
-
-        # 循环取出数据绘图
-        for key in plot_data_dict.keys():
-            color_scatter = '#'
-            color_plot = '#'
-            for _ in range(6):
-                random_num = random.randint(0, 7)
-                color_scatter += ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'][
-                    random_num * 2]
-                color_plot += ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'][random_num]
-            print(color_scatter, color_plot)
-            ax_epsilon.scatter(plot_data_dict[key]['freq'], plot_data_dict[key]['epsilon_raw'], c=color_scatter,
-                               label='#' + key + '_epsilon_raw')
-            ax_epsilon.plot(plot_data_dict[key]['freq'], plot_data_dict[key]['epsilon'], c=color_plot,
-                            label='#' + key + '_epsilon')
-            # 判断是否有ref,踢出ref自身
-            if delta_epsilon_exist:
-                print('Test!',key,delta_epsilon_ref_file_name,key==delta_epsilon_ref_file_name,key is delta_epsilon_ref_file_name)
-                if key != delta_epsilon_ref_file_name:
-                    # 注意: 这里有一个非常关键的问题之前由于epsilon被剪切过，这里会大小不一，那么同样需要切除ref的对应部分，否则矩阵不能相减
-                    # 注意：数据剪切部分一定在前端低频部分
-                    plot_data_delta_epsilon_raw = np.multiply(
-                        np.divide(
-                            np.subtract(
-                                plot_data_dict[key]['epsilon_raw'],
-                                plot_data_dict[delta_epsilon_ref_file_name]['epsilon_raw'][-len(plot_data_dict[key]['epsilon_raw']):]
-                            ),
-                            plot_data_dict[delta_epsilon_ref_file_name]['epsilon_raw'][-len(plot_data_dict[key]['epsilon_raw']):]
-                        ),
-                        100)
-                    plot_data_delta_epsilon = np.multiply(
-                        np.divide(
-                            np.subtract(
-                                plot_data_dict[key]['epsilon'],
-                                plot_data_dict[delta_epsilon_ref_file_name]['epsilon'][-len(plot_data_dict[key]['epsilon']):]
-                            ),
-                            plot_data_dict[delta_epsilon_ref_file_name]['epsilon'][-len(plot_data_dict[key]['epsilon_raw']):]
-                        ),
-                        100)
-                    ax_delta_epsilon.scatter(plot_data_dict[key]['freq'],
-                                             plot_data_delta_epsilon_raw,
-                                             c=color_scatter,label='#' + key + '_delta_epsilon_raw')
-                    ax_delta_epsilon.plot(plot_data_dict[key]['freq'], plot_data_delta_epsilon, c=color_plot,
-                                    label='#' + key + '_delta_epsilon')
-                    print('TEST!!!!',key)
-
-        ax_epsilon.legend(loc='upper right')
-        self.canvas_epsilon.draw()
-        if delta_epsilon_exist:
-            ax_delta_epsilon.legend(loc='upper right')
-            self.canvas_delta_epsilon.draw()
-        self.dialog_plot.open()
-
-    def save_results_as(self):
-        # TODO:仿照M进行改写
-        file_path, file_type = QtWidgets.QFileDialog.getSaveFileName(filter="Text Files (*.txt);;CSV (*.csv)")
-        print(file_path)
-        if file_type == 'Text Files (*.txt)':
-            with open(file_path, 'w') as file:
-                file.write(
-                    "Dielectric Relaxation Simulation Results by Simulator(v1.0alpha), developed by Cheng WANG\n")
-                file.write("Model:\t" + {1: 'Havriliak_Negami Model', 2: 'Cole_Cole Model', 3: 'Cole_Davidson Model',
-                                         4: 'Debye Model'}.get(self.model) + '\n')
-                file.write("#\tAlpha\tBeta\tTau\tEpsilon_Inf\tDelta_Epsilon\n")
-                for key in self.result_dict.keys():
-                    popt = self.result_dict[key]['popt']
-                    print(popt)
-                    file.write(key + '\t')
-                    if self.model == 1:
-                        file.write(str(popt[0]) + '\t' + str(popt[1]) + '\t')
-                    elif self.model == 2:
-                        file.write(str(popt[0]) + '\t1.0\t')
-                    elif self.model == 3:
-                        file.write('1.0\t' + str(popt[0]) + '\t')
-                    elif self.model == 4:
-                        file.write('1.0\t1.0\t')
-                    else:
-                        pass
-                    file.write(str(popt[-3]) + '\t' + str(popt[-2]) + '\t' + str(popt[-1]) + '\n')
-        elif file_type == 'CSV (*.csv)':
-            print(file_path, file_type)
-        else:
-            print("save_results_as,unknown file_type.")
+                print(item.text().split('\n')[0].split(',')[0])
+                data_name = item.text().split('\n')[0].split(',')[0].replace(' ','')
+                data_key = data_name + '-data'
+                data_list = data_dict[data_key] # data_list = [H_raw,M_raw,H,M,......]
+                science_plot_data.add_figure_info(figure_title=data_name,x_label='log(Frequency),f (Hz)',y_label='Relative permittivity,epsilon_r')
+                science_plot_data.add_plot_data(figure_title=data_name,x_data=np.log10(data_list[0].get_data()),y_data=data_list[1].get_data(),y_legend='raw')
+                science_plot_data.add_plot_data(figure_title=data_name,x_data=np.log10(data_list[0].get_data()),y_data=data_list[2].get_data(),y_legend='cal')
+        SciencePlot.sci_plot(science_plot_data)
 
     def on_PushButton_clearAll_clicked(self):
         self.list_view_results_model.clear()
-        self.parent.ComboBox_reference.clear()
-        self.parent.CheckBox_reference.setCheckState(QtCore.Qt.Unchecked)
-        self.parent.ComboBox_reference.setEnabled(False)
         print('结果已被清空')
 
+    def save_results_as(self):
+        filter_str = ScienceFileType.get_filter_str(ScienceFileType.XLSX, ScienceFileType.CSV, ScienceFileType.TXT, ScienceFileType.ALL)
+        file_path, file_type = QtWidgets.QFileDialog.getSaveFileName(filter=filter_str)
+        print("save_results_as:file_path:{},file_type:{}".format(file_path,file_type))
+        file_dic = file_path.rsplit('/',1)[0]
+        file_name = file_path.rsplit('/',1)[1].split('.')[0]
+        # 需要保存的文件有2个：1 数据表 2 特征参数表
+        write_file_type = ScienceFileType.get_by_description(file_type)
+        # 组装ScienceWriteData需要的数据
+        # data_dict是一个2层字典，例：#S999_data-Magnetization(kG)-[1,2,3],#S999_para-Coercivity(Oe)-[10000]
+        # 每一个样品的磁化的数据被分为两类：1. 用来画图的点坐标数据, 2. 由1的数据总结得到了磁性特征参数数据
+        # 表1的表头包括:
+        # 实验值： freq_raw 频率, epsilon_raw 相对介电率
+        # 计算值： epsilon_cal 相对介电率
+        # 表2的表头包括：
+        # t 膜厚, A 电极面积, H 磁场大小, Co Co的含量,
+        # DCB 偏置电压, OSC 交流电压, C.C. 补偿常数,
+        # alpha 参数, beta 参数, tau 弛豫时间, epsilon_inf 高频介电率, delta_epsilon 介电率变化
+        data_dict = self.data_process()
+        write_data = ScienceData(file_dic=file_dic, file_name=file_name, file_type=write_file_type.value, data_dict=data_dict)
+        ScienceWriter.write_file(write_data)
+
+    def data_process(self):
+        # result_dict转write_data
+        data_dict = {}
+        print(self.result_dict)
+        for sample_name, sample_content in self.result_dict.items():
+            print(sample_name)
+            name_para = sample_name+'-para'
+            name_data = sample_name+'-data'
+            # 表1的表头包括:
+            # 实验值： freq_raw 频率, epsilon_raw 相对介电率
+            # 计算值： epsilon_cal 相对介电率
+            freq_raw = sample_content['freq_raw'].get_data() #Hz
+            epsilon_raw = sample_content['epsilon_raw'].get_data() #1
+            epsilon_cal = sample_content['epsilon_cal'].get_data() #1
+            # 表2的表头包括：
+            # t 膜厚, A 电极面积, H 磁场大小, Co Co的含量,
+            # DCB 偏置电压, OSC 交流电压, C.C. 补偿常数,
+            # alpha 参数, beta 参数, tau 弛豫时间, epsilon_inf 高频介电率, delta_epsilon 介电率变化
+            t = sample_content['t'].get_data()[0] #m
+            a = sample_content['A'].get_data()[0] #m^2
+            h = sample_content['H'].get_data()[0] #Oe
+            co = sample_content['Co'].get_data()[0] #at.%
+            dcb = sample_content['DCB'].get_data()[0] #V
+            osc = sample_content['OSC'].get_data()[0] #V
+            cc = sample_content['C.C.'].get_data()[0] #1
+            param_dict = self.get_param_dict_from_popt(popt=sample_content['popt'],fixed_param_dict=self.fixed_param_dict)
+            alpha = param_dict.get('alpha')
+            beta = param_dict.get('beta')
+            tau = param_dict.get('tau')
+            epsilon_inf = param_dict.get('epsilon_inf')
+            delta_epsilon = param_dict.get('delta_epsilon')
+
+            data_dict.update({
+                name_para: [
+                    PhysicalQuantity('t',ScienceUnit.Length.m.value,[t]),
+                    PhysicalQuantity('A',ScienceUnit.Area.m2.value,[a]),
+                    PhysicalQuantity('H',ScienceUnit.Magnetization.Oe.value,[h]),
+                    PhysicalQuantity('Co',ScienceUnit.AtomicContent.at.value,[co]),
+                    PhysicalQuantity('DCB',ScienceUnit.Voltage.V.value,[dcb]),
+                    PhysicalQuantity('OSC',ScienceUnit.Voltage.V.value,[osc]),
+                    PhysicalQuantity('C.C.',ScienceUnit.Dimensionless.DN.value,[cc]),
+                    PhysicalQuantity('alpha',ScienceUnit.Dimensionless.DN.value,[alpha]),
+                    PhysicalQuantity('beta',ScienceUnit.Dimensionless.DN.value,[beta]),
+                    PhysicalQuantity('tau',ScienceUnit.Time.s.value,[tau]),
+                    PhysicalQuantity('epsilon_inf',ScienceUnit.Dimensionless.DN.value,[epsilon_inf]),
+                    PhysicalQuantity('delta_epsilon',ScienceUnit.Dimensionless.DN.value,[delta_epsilon])
+                ],
+                name_data: [
+                    PhysicalQuantity('freq_raw',ScienceUnit.Frequency.Hz.value,freq_raw),
+                    PhysicalQuantity('epsilon_raw',ScienceUnit.Dimensionless.DN.value,epsilon_raw),
+                    PhysicalQuantity('epsilon_cal',ScienceUnit.Dimensionless.DN.value,epsilon_cal)
+                ]
+            })
+        print(data_dict)
+        return data_dict
+
+    def get_param_dict_from_popt(self,popt:list,fixed_param_dict:dict):
+        result = popt.copy()
+        param_dict = {}
+        if 'alpha' in fixed_param_dict.keys():
+            param_dict['alpha'] = fixed_param_dict.get('alpha')
+        elif self.model in [3,4]:
+            param_dict['alpha'] = 1.
+        else:
+            param_dict['alpha'] = result.pop(0)
+        if 'beta' in fixed_param_dict.keys():
+            param_dict['beta'] = fixed_param_dict.get('beta')
+        elif self.model in [2,4]:
+            param_dict['beta'] = 1.
+        else:
+            param_dict['beta'] = result.pop(0)
+        if 'tau' in fixed_param_dict.keys():
+            param_dict['tau'] = fixed_param_dict.get('tau')
+        else:
+            param_dict['tau'] = result.pop(0)
+        if 'epsilon_inf' in fixed_param_dict.keys():
+            param_dict['epsilon_inf'] = fixed_param_dict.get('epsilon_inf')
+        else:
+            param_dict['epsilon_inf'] = result.pop(0)
+        if 'delta_epsilon' in fixed_param_dict.keys():
+            param_dict['delta_epsilon'] = fixed_param_dict.get('delta_epsilon')
+        else:
+            param_dict['delta_epsilon'] = result.pop(0)
+        return param_dict

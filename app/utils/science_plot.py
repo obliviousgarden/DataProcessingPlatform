@@ -60,8 +60,14 @@ class SciencePlot:
         elif count in [7, 8, 9]:
             row_count = 3
             col_count = 3
+        elif count in [10, 11, 12]:
+            row_count = 3
+            col_count = 4
+        elif count in [13, 14, 15, 16]:
+            row_count = 4
+            col_count = 3
         else:
-            print("SciencePlot.sci_plot: Too many sub-figures.")
+            print("SciencePlot.sci_plot: Too many (>16) sub-figures.")
         i = 0
         for figure_title in data.figure_titles():
             i = i + 1

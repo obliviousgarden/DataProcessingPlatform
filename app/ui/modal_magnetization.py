@@ -46,10 +46,12 @@ class ModalMagnetization(object):
         self.j_min = 1.
         self.j_max = 1.e5
         # 颗粒尺寸分布的标准差(1)
-        self.sigma_min = 0.00001
-        self.sigma_max = 1.00000
+        self.sigma_min = 0.
+        self.sigma_max = 5.
         # 轨道量子数的朗德因子(1)
         self.g_j = sci_const.Lande_g_Factor(3 / 2, 3, 9 / 2)  # Co2+ ion
+        # self.g_j = 1.60  # calculated
+        # self.g_j = 1.72  #observed
         # 温度(K)
         self.temp = 300.
         # 初始化参数
@@ -129,7 +131,7 @@ class ModalMagnetization(object):
         self.parent.PushButton_simulate_M.clicked.connect(self.on_PushButton_simulate_M_clicked)
         self.parent.PushButton_plot_M.clicked.connect(self.on_PushButton_plot_M_clicked)
         self.parent.PushButton_clearall_M.clicked.connect(self.on_PushButton_clearall_M_clicked)
-        # 设定ListView内的Model，并禁止编辑
+        # 设定TableView内的Model，并禁止编辑
         self.parent.TableView_file_M.setModel(self.table_view_file_model)
         self.parent.TableView_file_M.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Black))
         self.parent.TableView_file_M.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
@@ -352,8 +354,7 @@ class ModalMagnetization(object):
         print('dir:', dir_)
         if dir_ != '':
             self.table_view_file_model.clear()
-            self.table_view_file_model.setHorizontalHeaderLabels(
-                ['file_name', 'length(mm)', 'width(mm)', 'thickness(nm)'])
+            self.resetTableViewHeaderItems(self.table_view_file_model)
             self.file_name = os.listdir(dir_)
             for i in range(self.file_name.__len__()):
                 self.file_path.append(dir_ + '/' + self.file_name[i])
@@ -419,11 +420,11 @@ class ModalMagnetization(object):
         self.list_view_results_model.clear()
         # 需要的额外参数：M以及H 的 第一个数据位置 和 单位，试料的尺寸 长宽高
         first_pos_info_tuple = (
-            (float(self.parent.LineEdit_step1_M_H_row.text()),
-             float(self.parent.LineEdit_step1_M_H_col.text()),
+            (int(self.parent.LineEdit_step1_M_H_row.text()),
+             int(self.parent.LineEdit_step1_M_H_col.text()),
              str(self.parent.ComboBoxFormLayout_step1_M_H_unit.currentText())),
-            (float(self.parent.LineEdit_step1_M_M_row.text()),
-             float(self.parent.LineEdit_step1_M_M_col.text()),
+            (int(self.parent.LineEdit_step1_M_M_row.text()),
+             int(self.parent.LineEdit_step1_M_M_col.text()),
              str(self.parent.ComboBoxFormLayout_step1_M_M_unit.currentText()))
         )
         # 来自tableview的BG以及size info
@@ -497,13 +498,14 @@ class ModalMagnetization(object):
                                                        , result[0], result[1], result[2], result[3], result[4]))
                 else:
                     # print(result[0],result[1])
-                    D_m = np.power(self.g_j*sci_const.miu_B*result[0]*6./(np.pi*result[1]),1/3)
+                    # # FIXME: value of g_j
+                    D_m = np.power(self.g_j*sci_const.miu_B*result[1]*6./(np.pi*result[0]),1/3)
                     if distribution_flag:
                         sigma = result[2]
                     else:
                         sigma = 0.
 
-                    item = QtGui.QStandardItem("{}, Model={},\nM_S={} A/m,\nJ={},D_m={} nm, sigma={}."
+                    item = QtGui.QStandardItem("{}, Model={},\nM_S={} A/m,\nJ={},D_m={} m, sigma={}."
                                                .format(self.file_name[i]
                                                        , {1: "Jiles_Atherton_Model", 2: "Brillouin_Model",
                                                           3: "Langevin_Model", 4: "Takacs_Model"}[self.model]

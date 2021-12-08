@@ -129,7 +129,7 @@ class ScienceWriter:
 
 
 class ScienceReader:
-    # 接收fill_name或者file_name_list返回data_dict
+    # 接收fill_name或者file_name_list返回data_d ict
     @staticmethod
     def read_file(file_dic: str, file_full_name_list: list) -> (list, bool):
         is_si_to_cgs = False

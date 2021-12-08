@@ -52,3 +52,7 @@ def n_to_epsilon(n, k):
     epsilon_2 = np.imag(epsilon)
     return epsilon_1, epsilon_2
 
+
+if __name__=="__main__":
+    print(np.power(27,1/3))
+
