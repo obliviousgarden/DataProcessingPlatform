@@ -17,7 +17,7 @@ matplotlib.use("Qt5Agg")  # 声明使用QT5
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from dielectric_simulator import DielectricSimulator
 
-# TODO: denpendent on 功能
+# TODO: dependent on 功能
 
 class ModalDielectric(object):
 
@@ -59,7 +59,8 @@ class ModalDielectric(object):
         self.resetTableViewHeaderItems(tableviewmodel=self.table_view_file_model)
         self.list_view_results_model = QtGui.QStandardItemModel()
         # file_name为键
-        self.result_dict = {}
+        self.result_dict = {} # 存放结果
+        self.dependent_dict = {} # 存放dependent功能需要的数据
         # plot相关(需要考虑下修改，这里实际上是对UI的初始化)
         self.dialog_plot = QtWidgets.QDialog()
         self.tab_plot = QtWidgets.QTabWidget(self.dialog_plot)
@@ -145,6 +146,7 @@ class ModalDielectric(object):
         self.layout_plot_delta_epsilon.addWidget(self.canvas_delta_epsilon)
         self.tab_plot_delta_epsilon.setLayout(self.layout_plot_delta_epsilon)
         # Checkbox
+        self.parent.GroupBox_dependent.clicked.connect(self.on_GroupBox_dependent_clicked)
         self.parent.CheckBox_All.clicked.connect(self.on_CheckBox_All_clicked)
 
         # 初始化没有数据所以直接禁用
@@ -600,6 +602,12 @@ class ModalDielectric(object):
         for i in range(self.list_view_results_model.rowCount()):
             self.list_view_results_model.item(i).setCheckState(check_state)
 
+    def on_GroupBox_dependent_clicked(self):
+        if self.parent.GroupBox_dependent.isChecked():
+            self.parent.RadioButton_dependent_H.click()
+        else:
+            self.dependent = None
+
     def on_PushButton_plot_clicked(self):
         data_dict = self.data_process()
         science_plot_data = SciencePlotData()
@@ -614,6 +622,44 @@ class ModalDielectric(object):
                 science_plot_data.add_plot_data(figure_title=data_name,x_data=np.log10(data_list[0].get_data()),y_data=data_list[1].get_data(),y_legend='raw')
                 science_plot_data.add_plot_data(figure_title=data_name,x_data=np.log10(data_list[0].get_data()),y_data=data_list[2].get_data(),y_legend='cal')
         SciencePlot.sci_plot(science_plot_data)
+        if self.dependent is not None:
+            science_plot_data_para = SciencePlotData()
+            science_plot_absolute_data_data = SciencePlotData()
+            science_plot_relative_data_data = SciencePlotData()
+            para_list = data_dict['para-dependent-on-'+self.dependent]
+            absolute_data_list = data_dict['absolute-data-dependent-on-'+self.dependent]
+            relative_data_list = data_dict['relative-data-dependent-on-'+self.dependent]
+            para_x_label = None
+            para_x_data = None
+            for para_content in para_list:
+                if para_content.get_name() == self.dependent:
+                    para_x_label = para_content.get_name_with_unit()
+                    para_x_data = para_content.get_data()
+            for para_content in para_list:
+                if para_content.get_name() != self.dependent:
+                    science_plot_data_para.add_figure_info(figure_title=para_content.get_name(),x_label=para_x_label,y_label=para_content.get_name_with_unit())
+                    science_plot_data_para.add_plot_data(figure_title=para_content.get_name(),x_data=para_x_data,y_data=para_content.get_data(),y_legend=para_content.get_name())
+            SciencePlot.sci_plot(science_plot_data_para)
+
+            data_x_label = absolute_data_list[0].get_name()
+            data_x_data = absolute_data_list[0].get_data()
+            for index in range(int((absolute_data_list.__len__()-1)/2)):
+                absolute_data_content_raw = absolute_data_list[1 + index*2]
+                absolute_data_content_cal = absolute_data_list[2 + index*2]
+                relative_data_content_raw = relative_data_list[1 + index*2]
+                relative_data_content_cal = relative_data_list[2 + index*2]
+                absolute_figure_title = 'absolute change' + absolute_data_content_raw.get_name()
+                relative_figure_title = 'relative change' + relative_data_content_raw.get_name()
+                science_plot_absolute_data_data.add_figure_info(figure_title=absolute_figure_title,x_label='LOG'+data_x_label,y_label=absolute_data_content_raw.get_name_with_unit())
+                science_plot_absolute_data_data.add_plot_data(figure_title=absolute_figure_title,x_data=np.log10(data_x_data),y_data=absolute_data_content_raw.get_data(),y_legend=absolute_data_content_raw.get_name())
+                science_plot_absolute_data_data.add_plot_data(figure_title=absolute_figure_title,x_data=np.log10(data_x_data),y_data=absolute_data_content_cal.get_data(),y_legend=absolute_data_content_cal.get_name())
+                science_plot_relative_data_data.add_figure_info(figure_title=relative_figure_title,x_label='LOG'+data_x_label,y_label=relative_data_content_raw.get_name_with_unit())
+                science_plot_relative_data_data.add_plot_data(figure_title=relative_figure_title,x_data=np.log10(data_x_data),y_data=relative_data_content_raw.get_data(),y_legend=relative_data_content_raw.get_name())
+                science_plot_relative_data_data.add_plot_data(figure_title=relative_figure_title,x_data=np.log10(data_x_data),y_data=relative_data_content_cal.get_data(),y_legend=relative_data_content_cal.get_name())
+
+            SciencePlot.sci_plot(science_plot_absolute_data_data)
+            SciencePlot.sci_plot(science_plot_relative_data_data)
+
 
     def on_PushButton_clearAll_clicked(self):
         self.list_view_results_model.clear()
@@ -642,7 +688,7 @@ class ModalDielectric(object):
         ScienceWriter.write_file(write_data)
 
     def data_process(self):
-        # result_dict转write_data
+        # result_dict转write_data,并且判断dependent,并进行计算和结果补充
         data_dict = {}
         print(self.result_dict)
         for sample_name, sample_content in self.result_dict.items():
@@ -693,6 +739,116 @@ class ModalDielectric(object):
                     PhysicalQuantity('epsilon_raw',ScienceUnit.Dimensionless.DN.value,epsilon_raw),
                     PhysicalQuantity('epsilon_cal',ScienceUnit.Dimensionless.DN.value,epsilon_cal)
                 ]
+            })
+        if self.dependent is not None:
+            print('Dependent on {}'.format(self.dependent))
+            name_dependent_para = 'para-dependent-on-' + self.dependent
+            name_dependent_absolute_data = 'absolute-data-dependent-on-' + self.dependent
+            name_dependent_relative_data = 'relative-data-dependent-on-' + self.dependent
+            # 1 找到被参照的对象，对应参数的最小值，并通过此参数从小到大进行排序
+            dependent_result_list = []
+            for sample_name, sample_content in self.result_dict.items():
+                content_dict = sample_content.copy()
+                content_dict['sample_name'] = sample_name
+                if self.dependent == 'H':
+                    content_dict['dependent_physical_quantity'] = sample_content['H']
+                    content_dict['dependent_value'] = sample_content['H'].get_data()[0]
+                elif self.dependent == 'Co':
+                    content_dict['dependent_physical_quantity'] = sample_content['Co']
+                    content_dict['dependent_value'] = sample_content['Co'].get_data()[0]
+                elif self.dependent == 'DCB':
+                    content_dict['dependent_physical_quantity'] = sample_content.get('DCB')
+                    content_dict['dependent_value'] = sample_content['DCB'].get_data()[0]
+                else:
+                    content_dict['dependent_physical_quantity'] = PhysicalQuantity('dependent on unknown',ScienceUnit.Unknown.unkn.value,[0.])
+                    content_dict['dependent_value'] = 0.
+
+                dependent_result_list.append(content_dict)
+            dependent_result_list.sort(key=lambda dependent_result: dependent_result['dependent_value'])
+
+            t_list = []
+            a_list = []
+            h_list = []
+            co_list = []
+            dcb_list = []
+            osc_list = []
+            cc_list = []
+            alpha_list = []
+            beta_list = []
+            tau_list = []
+            epsilon_inf_list = []
+            delta_epsilon_list = []
+            reference_result = dependent_result_list[0]
+            dependent_absolute_change_list = []
+            dependent_relative_change_list = []
+            for index in range(dependent_result_list.__len__()):
+                dependent_result = dependent_result_list[index]
+                t_list.append(dependent_result['t'].get_data()[0])
+                a_list.append(dependent_result['A'].get_data()[0])
+                h_list.append(dependent_result['H'].get_data()[0])
+                co_list.append(dependent_result['Co'].get_data()[0])
+                dcb_list.append(dependent_result['DCB'].get_data()[0])
+                osc_list.append(dependent_result['OSC'].get_data()[0])
+                cc_list.append(dependent_result['C.C.'].get_data()[0])
+                param_dict = self.get_param_dict_from_popt(popt=dependent_result['popt'],fixed_param_dict=self.fixed_param_dict)
+                alpha_list.append(param_dict.get('alpha'))
+                beta_list.append(param_dict.get('beta'))
+                tau_list.append(param_dict.get('tau'))
+                epsilon_inf_list.append(param_dict.get('epsilon_inf'))
+                delta_epsilon_list.append(param_dict.get('delta_epsilon'))
+
+                suffix_str = '_at_' + self.dependent + '='
+                dependent_value_str = '%.5g' %  dependent_result['dependent_value']
+                suffix_str = suffix_str + dependent_value_str + dependent_result['dependent_physical_quantity'].get_unit().get_symbol()
+                if index == 0:
+                    dependent_absolute_change_list.append(PhysicalQuantity('freq_raw'+suffix_str,
+                                                                           ScienceUnit.Frequency.Hz.value,
+                                                                           dependent_result['freq_raw'].get_data()))
+                    dependent_absolute_change_list.append(PhysicalQuantity('ref_epsilon_raw'+suffix_str,
+                                                                           ScienceUnit.Dimensionless.DN.value,
+                                                                           dependent_result['epsilon_raw'].get_data()))
+                    dependent_absolute_change_list.append(PhysicalQuantity('ref_epsilon_cal'+suffix_str,
+                                                                           ScienceUnit.Dimensionless.DN.value,
+                                                                           dependent_result['epsilon_cal'].get_data()))
+                    dependent_relative_change_list.append(PhysicalQuantity('freq_raw'+suffix_str,
+                                                                           ScienceUnit.Frequency.Hz.value,
+                                                                           dependent_result['freq_raw'].get_data()))
+                    dependent_relative_change_list.append(PhysicalQuantity('ref_epsilon_raw'+suffix_str,
+                                                                           ScienceUnit.Dimensionless.DN.value,
+                                                                           dependent_result['epsilon_raw'].get_data()))
+                    dependent_relative_change_list.append(PhysicalQuantity('ref_epsilon_cal'+suffix_str,
+                                                                           ScienceUnit.Dimensionless.DN.value,
+                                                                           dependent_result['epsilon_cal'].get_data()))
+                else:
+                    dependent_absolute_change_list.append(PhysicalQuantity('delta_epsilon_raw'+suffix_str,
+                                                                           ScienceUnit.Dimensionless.DN.value,
+                                                                           np.subtract(dependent_result['epsilon_raw'].get_data(), reference_result['epsilon_raw'].get_data())))
+                    dependent_absolute_change_list.append(PhysicalQuantity('delta_epsilon_cal'+suffix_str,
+                                                                           ScienceUnit.Dimensionless.DN.value,
+                                                                           np.subtract(dependent_result['epsilon_cal'].get_data(), reference_result['epsilon_cal'].get_data())))
+                    dependent_relative_change_list.append(PhysicalQuantity('delta_epsilon_raw'+suffix_str,
+                                                                           ScienceUnit.Dimensionless.percent.value,
+                                                                           np.multiply(np.divide(np.subtract(dependent_result['epsilon_raw'].get_data(), reference_result['epsilon_raw'].get_data()), reference_result['epsilon_raw'].get_data()),100)))
+                    dependent_relative_change_list.append(PhysicalQuantity('delta_epsilon_cal'+suffix_str,
+                                                                           ScienceUnit.Dimensionless.percent.value,
+                                                                           np.multiply(np.divide(np.subtract(dependent_result['epsilon_cal'].get_data(), reference_result['epsilon_cal'].get_data()), reference_result['epsilon_cal'].get_data()),100)))
+            data_dict.update({
+                name_dependent_para: [
+                    PhysicalQuantity('t',ScienceUnit.Length.m.value,t_list),
+                    PhysicalQuantity('A',ScienceUnit.Area.m2.value,a_list),
+                    PhysicalQuantity('H',ScienceUnit.Magnetization.Oe.value,h_list),
+                    PhysicalQuantity('Co',ScienceUnit.AtomicContent.at.value,co_list),
+                    PhysicalQuantity('DCB',ScienceUnit.Voltage.V.value,dcb_list),
+                    PhysicalQuantity('OSC',ScienceUnit.Voltage.V.value,osc_list),
+                    PhysicalQuantity('C.C.',ScienceUnit.Dimensionless.DN.value,cc_list),
+                    PhysicalQuantity('alpha',ScienceUnit.Dimensionless.DN.value,alpha_list),
+                    PhysicalQuantity('beta',ScienceUnit.Dimensionless.DN.value,beta_list),
+                    PhysicalQuantity('tau',ScienceUnit.Time.s.value,tau_list),
+                    PhysicalQuantity('epsilon_inf',ScienceUnit.Dimensionless.DN.value,epsilon_inf_list),
+                    PhysicalQuantity('delta_epsilon',ScienceUnit.Dimensionless.DN.value,delta_epsilon_list)
+                ],
+                name_dependent_absolute_data: dependent_absolute_change_list,
+                name_dependent_relative_data: dependent_relative_change_list,
             })
         print(data_dict)
         return data_dict

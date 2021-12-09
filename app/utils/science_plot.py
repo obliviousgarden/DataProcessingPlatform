@@ -69,6 +69,7 @@ class SciencePlot:
         else:
             print("SciencePlot.sci_plot: Too many (>16) sub-figures.")
         i = 0
+        plt.figure()
         for figure_title in data.figure_titles():
             i = i + 1
             ax = plt.subplot(row_count, col_count, i)
@@ -96,4 +97,5 @@ if __name__ == "__main__":
     plot_data.add_figure_info(figure_title='title-2', x_label='x_label_2', y_label='y_label_2')
     plot_data.add_plot_data(figure_title='title-2', x_data=x1_list, y_data=y2_list, y_legend='y_legend_2')
     plot_data.add_plot_data(figure_title='title-2', x_data=x1_list, y_data=y3_list, y_legend='y_legend_3')
+    SciencePlot.sci_plot(plot_data)
     SciencePlot.sci_plot(plot_data)

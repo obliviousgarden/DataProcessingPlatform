@@ -92,6 +92,7 @@ class ScienceUnit(Enum):
     @unique
     class Dimensionless(Enum):
         DN = Unit(index=0, symbol="1", ratio=1., description="Dimensionless Number, no unit")
+        percent = Unit(index=1, symbol="%", ratio=100., description="Percent Number, no unit")
 
     @unique
     class AtomicContent(Enum):
