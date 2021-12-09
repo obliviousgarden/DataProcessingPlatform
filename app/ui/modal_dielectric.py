@@ -17,7 +17,6 @@ matplotlib.use("Qt5Agg")  # 声明使用QT5
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from dielectric_simulator import DielectricSimulator
 
-# TODO: dependent on 功能
 
 class ModalDielectric(object):
 
