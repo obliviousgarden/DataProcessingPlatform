@@ -167,7 +167,7 @@ class ModalDielectric(object):
     def resetTableViewHeaderItems(self, tableviewmodel: QtGui.QStandardItemModel):
         table_header_item_0 = QtGui.QStandardItem('file_name')
         table_header_item_0.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Black))
-        table_header_item_1 = QtGui.QStandardItem('thickness(nm)')
+        table_header_item_1 = QtGui.QStandardItem('thickness(m)')
         table_header_item_1.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Black))
         table_header_item_2 = QtGui.QStandardItem('area(m^2)')
         table_header_item_2.setFont(QtGui.QFont("Times", 12, QtGui.QFont.Black))
@@ -344,7 +344,7 @@ class ModalDielectric(object):
             area_item.setEditable(True)
             area_item.setSelectable(False)
             if 'Oe' in self.file_name[i]:
-                h_value = re.findall(".*-(.*)Oe.*",self.file_name[i])[0]
+                h_value = re.findall(r'.*-(.*)Oe.*',self.file_name[i])[0]
                 if 'k' in h_value:
                     h_value = float(h_value.replace('k',''))*1000
                 h_value = float(h_value)
@@ -354,21 +354,21 @@ class ModalDielectric(object):
             h_item.setEditable(True)
             h_item.setSelectable(False)
             if 'Co' in self.file_name[i]:
-                co_value = float(re.findall(".*-Co(.*).*",self.file_name[i])[0].split('-')[0])
+                co_value = float(re.findall(r'.*-Co(.*).*',self.file_name[i])[0].split('-')[0])
             else:
                 co_value = 0.
             co_item = QtGui.QStandardItem('%.5g' % co_value)
             co_item.setEditable(True)
             co_item.setSelectable(False)
             if 'DCB' in self.file_name[i]:
-                dcb_value = float(re.findall(".*-DCB(.*).*",self.file_name[i])[0].split('-')[0])
+                dcb_value = float(re.findall(r'.*-DCB(.*).*',self.file_name[i])[0].split('-')[0])
             else:
                 dcb_value = 0.
             dcb_item = QtGui.QStandardItem('%.5g' % dcb_value)
             dcb_item.setEditable(True)
             dcb_item.setSelectable(False)
             if 'V' in self.file_name[i]:
-                ocs_value = float(re.findall(".*-(.*)V.*",self.file_name[i])[0])
+                ocs_value = float(re.findall(r'.*-(.*)V.*',self.file_name[i])[0])
             else:
                 ocs_value = 0.
             ocs_item = QtGui.QStandardItem('%.5g' % ocs_value)
@@ -418,7 +418,8 @@ class ModalDielectric(object):
                 area_item.setEditable(True)
                 area_item.setSelectable(False)
                 if 'Oe' in self.file_name[i]:
-                    h_value = re.findall(".*-(.*)Oe.*",self.file_name[i])[0]
+                    # h_value = re.findall(r'.*-(.*)Oe.*|.* (.*)Oe.*',self.file_name[i])[0][0]
+                    h_value = re.findall(r'.*-(.*)Oe.*',self.file_name[i])[0]
                     if 'k' in h_value:
                         h_value = float(h_value.replace('k',''))*1000
                     h_value = float(h_value)
@@ -428,21 +429,24 @@ class ModalDielectric(object):
                 h_item.setEditable(True)
                 h_item.setSelectable(False)
                 if 'Co' in self.file_name[i]:
-                    co_value = float(re.findall(".*-Co(.*).*",self.file_name[i])[0].split('-')[0])
+                    # co_value = float(re.findall(r'.*-Co(.*).*|.* Co(.*).*',self.file_name[i])[0][0].split('-')[0])
+                    co_value = float(re.findall(r'.*-Co(.*).*',self.file_name[i])[0].split('-')[0])
                 else:
                     co_value = 0.
                 co_item = QtGui.QStandardItem('%.5g' % co_value)
                 co_item.setEditable(True)
                 co_item.setSelectable(False)
                 if 'DCB' in self.file_name[i]:
-                    dcb_value = float(re.findall(".*-DCB(.*).*",self.file_name[i])[0].split('-')[0])
+                    # dcb_value = float(re.findall(r'.*-DCB(.*).*|.* DCB(.*).*',self.file_name[i])[0][0].split('-')[0])
+                    dcb_value = float(re.findall(r'.*-DCB(.*).*',self.file_name[i])[0].split('-')[0])
                 else:
                     dcb_value = 0.
                 dcb_item = QtGui.QStandardItem('%.5g' % dcb_value)
                 dcb_item.setEditable(True)
                 dcb_item.setSelectable(False)
                 if 'V' in self.file_name[i]:
-                    ocs_value = float(re.findall(".*-(.*)V.*",self.file_name[i])[0])
+                    # ocs_value = float(re.findall(r'.*-(.*)V.*|.* (.*)V.*',self.file_name[i])[0][0])
+                    ocs_value = float(re.findall(r'.*-(.*)V.*',self.file_name[i])[0])
                 else:
                     ocs_value = 0.
                 ocs_item = QtGui.QStandardItem('%.5g' % ocs_value)
@@ -590,6 +594,16 @@ class ModalDielectric(object):
                                                param_dict.get('delta_epsilon')))
             item.setCheckable(True)
             self.list_view_results_model.appendRow(item)
+        # 注意：由于去除了低频的噪声，导致矩阵的尺寸不同，这里需要再裁剪一次统一数据
+        data_point_num = 0
+        for file_name, result_content in self.result_dict.items():
+            list_size = result_content['freq_raw'].get_data().__len__()
+            if data_point_num == 0 or data_point_num > list_size:
+                data_point_num = list_size
+        for file_name, result_content in self.result_dict.items():
+            result_content['freq_raw'] = PhysicalQuantity(result_content['freq_raw'].get_name(),result_content['freq_raw'].get_unit(),result_content['freq_raw'].get_data()[-data_point_num:])
+            result_content['epsilon_raw'] = PhysicalQuantity(result_content['epsilon_raw'].get_name(),result_content['epsilon_raw'].get_unit(),result_content['epsilon_raw'].get_data()[-data_point_num:])
+            result_content['epsilon_cal'] = PhysicalQuantity(result_content['epsilon_cal'].get_name(),result_content['epsilon_cal'].get_unit(),result_content['epsilon_cal'].get_data()[-data_point_num:])
         print('结果', self.result_dict)
         # 拟合完成，可以选择背底，以及绘图了
         self.parent.CheckBox_All.setEnabled(True)
@@ -668,23 +682,24 @@ class ModalDielectric(object):
         filter_str = ScienceFileType.get_filter_str(ScienceFileType.XLSX, ScienceFileType.CSV, ScienceFileType.TXT, ScienceFileType.ALL)
         file_path, file_type = QtWidgets.QFileDialog.getSaveFileName(filter=filter_str)
         print("save_results_as:file_path:{},file_type:{}".format(file_path,file_type))
-        file_dic = file_path.rsplit('/',1)[0]
-        file_name = file_path.rsplit('/',1)[1].split('.')[0]
-        # 需要保存的文件有2个：1 数据表 2 特征参数表
-        write_file_type = ScienceFileType.get_by_description(file_type)
-        # 组装ScienceWriteData需要的数据
-        # data_dict是一个2层字典，例：#S999_data-Magnetization(kG)-[1,2,3],#S999_para-Coercivity(Oe)-[10000]
-        # 每一个样品的磁化的数据被分为两类：1. 用来画图的点坐标数据, 2. 由1的数据总结得到了磁性特征参数数据
-        # 表1的表头包括:
-        # 实验值： freq_raw 频率, epsilon_raw 相对介电率
-        # 计算值： epsilon_cal 相对介电率
-        # 表2的表头包括：
-        # t 膜厚, A 电极面积, H 磁场大小, Co Co的含量,
-        # DCB 偏置电压, OSC 交流电压, C.C. 补偿常数,
-        # alpha 参数, beta 参数, tau 弛豫时间, epsilon_inf 高频介电率, delta_epsilon 介电率变化
-        data_dict = self.data_process()
-        write_data = ScienceData(file_dic=file_dic, file_name=file_name, file_type=write_file_type.value, data_dict=data_dict)
-        ScienceWriter.write_file(write_data)
+        if file_path != '':
+            file_dic = file_path.rsplit('/',1)[0]
+            file_name = file_path.rsplit('/',1)[1].split('.')[0]
+            # 需要保存的文件有2个：1 数据表 2 特征参数表
+            write_file_type = ScienceFileType.get_by_description(file_type)
+            # 组装ScienceWriteData需要的数据
+            # data_dict是一个2层字典，例：#S999_data-Magnetization(kG)-[1,2,3],#S999_para-Coercivity(Oe)-[10000]
+            # 每一个样品的磁化的数据被分为两类：1. 用来画图的点坐标数据, 2. 由1的数据总结得到了磁性特征参数数据
+            # 表1的表头包括:
+            # 实验值： freq_raw 频率, epsilon_raw 相对介电率
+            # 计算值： epsilon_cal 相对介电率
+            # 表2的表头包括：
+            # t 膜厚, A 电极面积, H 磁场大小, Co Co的含量,
+            # DCB 偏置电压, OSC 交流电压, C.C. 补偿常数,
+            # alpha 参数, beta 参数, tau 弛豫时间, epsilon_inf 高频介电率, delta_epsilon 介电率变化
+            data_dict = self.data_process()
+            write_data = ScienceData(file_dic=file_dic, file_name=file_name, file_type=write_file_type.value, data_dict=data_dict)
+            ScienceWriter.write_file(write_data)
 
     def data_process(self):
         # result_dict转write_data,并且判断dependent,并进行计算和结果补充
