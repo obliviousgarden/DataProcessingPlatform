@@ -344,31 +344,65 @@ class ModalDielectric(object):
             area_item.setEditable(True)
             area_item.setSelectable(False)
             if 'Oe' in self.file_name[i]:
-                h_value = re.findall(r'.*-(.*)Oe.*',self.file_name[i])[0]
-                if 'k' in h_value:
-                    h_value = float(h_value.replace('k',''))*1000
-                h_value = float(h_value)
+                # 对文件名称的处理逻辑：匹配‘-’和‘Oe’之间的内容，用空格切断成字符串数组，去除空字符串的元素：如果最后1个元素包含数字，那么信息都在最后一个元素里处理，否则，最后一个纯字符是倍数，倒数第二个是纯数字的数
+                res_list = re.findall(r'.*-(.*)Oe.*',self.file_name[i])[0].split(' ')
+                while '' in res_list:
+                    res_list.remove('')
+                if re.match(r'\d',res_list[-1]):
+                    if 'k' in res_list[-1]:
+                        h_value = float(res_list[-1].replace('k',''))*1000
+                    else:
+                        h_value = float(res_list[-1].replace('k',''))
+                elif res_list.__len__() > 1:
+                    if res_list[-1] == 'k':
+                        h_value = float(res_list[-2])*1000
+                    else:
+                        h_value = float(res_list[-2])
+                else:
+                    h_value = 0.
             else:
                 h_value = 0.
             h_item = QtGui.QStandardItem('%.5g' % h_value)
             h_item.setEditable(True)
             h_item.setSelectable(False)
             if 'Co' in self.file_name[i]:
-                co_value = float(re.findall(r'.*-Co(.*).*',self.file_name[i])[0].split('-')[0])
+                res_list = re.findall(r'.*[- ]Co(.*).*',self.file_name[i])[0].split(' ')
+                while '' in res_list:
+                    res_list.remove('')
+                print("result:{}".format(res_list))
+                co_value = float(res_list[-1])
             else:
                 co_value = 0.
             co_item = QtGui.QStandardItem('%.5g' % co_value)
             co_item.setEditable(True)
             co_item.setSelectable(False)
             if 'DCB' in self.file_name[i]:
-                dcb_value = float(re.findall(r'.*-DCB(.*).*',self.file_name[i])[0].split('-')[0])
+                res_list = re.findall(r'.*[- ]DCB(.*).*',self.file_name[i])[0].split(' ')
+                while '' in res_list:
+                    res_list.remove('')
+                print("result:{}".format(res_list))
+                dcb_value = float(res_list[-1])
             else:
                 dcb_value = 0.
             dcb_item = QtGui.QStandardItem('%.5g' % dcb_value)
             dcb_item.setEditable(True)
             dcb_item.setSelectable(False)
             if 'V' in self.file_name[i]:
-                ocs_value = float(re.findall(r'.*-(.*)V.*',self.file_name[i])[0])
+                res_list = re.findall(r'.*-(.*)V.*',self.file_name[i])[0].split(' ')
+                while '' in res_list:
+                    res_list.remove('')
+                if re.match(r'\d',res_list[-1]):
+                    if 'k' in res_list[-1]:
+                        ocs_value = float(res_list[-1].replace('k',''))*1000
+                    else:
+                        ocs_value = float(res_list[-1].replace('k',''))
+                elif res_list.__len__() > 1:
+                    if res_list[-1] == 'k':
+                        ocs_value = float(res_list[-2])*1000
+                    else:
+                        ocs_value = float(res_list[-2])
+                else:
+                    ocs_value = 0.
             else:
                 ocs_value = 0.
             ocs_item = QtGui.QStandardItem('%.5g' % ocs_value)
@@ -418,35 +452,65 @@ class ModalDielectric(object):
                 area_item.setEditable(True)
                 area_item.setSelectable(False)
                 if 'Oe' in self.file_name[i]:
-                    # h_value = re.findall(r'.*-(.*)Oe.*|.* (.*)Oe.*',self.file_name[i])[0][0]
-                    h_value = re.findall(r'.*-(.*)Oe.*',self.file_name[i])[0]
-                    if 'k' in h_value:
-                        h_value = float(h_value.replace('k',''))*1000
-                    h_value = float(h_value)
+                    # 对文件名称的处理逻辑：匹配‘-’和‘Oe’之间的内容，用空格切断成字符串数组，去除空字符串的元素：如果最后1个元素包含数字，那么信息都在最后一个元素里处理，否则，最后一个纯字符是倍数，倒数第二个是纯数字的数
+                    res_list = re.findall(r'.*-(.*)Oe.*',self.file_name[i])[0].split(' ')
+                    while '' in res_list:
+                        res_list.remove('')
+                    if re.match(r'\d',res_list[-1]):
+                        if 'k' in res_list[-1]:
+                            h_value = float(res_list[-1].replace('k',''))*1000
+                        else:
+                            h_value = float(res_list[-1].replace('k',''))
+                    elif res_list.__len__() > 1:
+                        if res_list[-1] == 'k':
+                            h_value = float(res_list[-2])*1000
+                        else:
+                            h_value = float(res_list[-2])
+                    else:
+                        h_value = 0.
                 else:
                     h_value = 0.
                 h_item = QtGui.QStandardItem('%.5g' % h_value)
                 h_item.setEditable(True)
                 h_item.setSelectable(False)
                 if 'Co' in self.file_name[i]:
-                    # co_value = float(re.findall(r'.*-Co(.*).*|.* Co(.*).*',self.file_name[i])[0][0].split('-')[0])
-                    co_value = float(re.findall(r'.*-Co(.*).*',self.file_name[i])[0].split('-')[0])
+                    res_list = re.findall(r'.*[- ]Co(.*).*',self.file_name[i])[0].split(' ')
+                    while '' in res_list:
+                        res_list.remove('')
+                    print("result:{}".format(res_list))
+                    co_value = float(res_list[-1])
                 else:
                     co_value = 0.
                 co_item = QtGui.QStandardItem('%.5g' % co_value)
                 co_item.setEditable(True)
                 co_item.setSelectable(False)
                 if 'DCB' in self.file_name[i]:
-                    # dcb_value = float(re.findall(r'.*-DCB(.*).*|.* DCB(.*).*',self.file_name[i])[0][0].split('-')[0])
-                    dcb_value = float(re.findall(r'.*-DCB(.*).*',self.file_name[i])[0].split('-')[0])
+                    res_list = re.findall(r'.*[- ]DCB(.*).*',self.file_name[i])[0].split(' ')
+                    while '' in res_list:
+                        res_list.remove('')
+                    print("result:{}".format(res_list))
+                    dcb_value = float(res_list[-1])
                 else:
                     dcb_value = 0.
                 dcb_item = QtGui.QStandardItem('%.5g' % dcb_value)
                 dcb_item.setEditable(True)
                 dcb_item.setSelectable(False)
                 if 'V' in self.file_name[i]:
-                    # ocs_value = float(re.findall(r'.*-(.*)V.*|.* (.*)V.*',self.file_name[i])[0][0])
-                    ocs_value = float(re.findall(r'.*-(.*)V.*',self.file_name[i])[0])
+                    res_list = re.findall(r'.*-(.*)V.*',self.file_name[i])[0].split(' ')
+                    while '' in res_list:
+                        res_list.remove('')
+                    if re.match(r'\d',res_list[-1]):
+                        if 'k' in res_list[-1]:
+                            ocs_value = float(res_list[-1].replace('k',''))*1000
+                        else:
+                            ocs_value = float(res_list[-1].replace('k',''))
+                    elif res_list.__len__() > 1:
+                        if res_list[-1] == 'k':
+                            ocs_value = float(res_list[-2])*1000
+                        else:
+                            ocs_value = float(res_list[-2])
+                    else:
+                        ocs_value = 0.
                 else:
                     ocs_value = 0.
                 ocs_item = QtGui.QStandardItem('%.5g' % ocs_value)
@@ -895,3 +959,34 @@ class ModalDielectric(object):
         else:
             param_dict['delta_epsilon'] = result.pop(0)
         return param_dict
+
+
+if __name__ == "__main__":
+    test_str_list = [
+        "#123-DCB1.11",
+        "#123-4-DCB1.11",
+        "#123-4 DCB1.11",
+        "#123-4-DCB 1.11",
+        "#123-4 DCB1.11",
+    ]
+    for test_str in test_str_list:
+        # 对文件名称的处理逻辑：匹配‘-’和‘Oe’之间的内容，用空格切断成字符串数组，去除空字符串的元素：如果最后1个元素包含数字，那么信息都在最后一个元素里处理，否则，最后一个纯字符是倍数，倒数第二个是纯数字的数
+        res_list = re.findall(r'.*[- ]DCB(.*).*',test_str)[0].split(' ')
+        while '' in res_list:
+            res_list.remove('')
+        print("result:{}".format(res_list))
+        # if re.match(r'\d',res_list[-1]):
+        #     if 'k' in res_list[-1]:
+        #         h_value = float(res_list[-1].replace('k',''))*1000
+        #     else:
+        #         h_value = float(res_list[-1].replace('k',''))
+        # elif res_list.__len__() > 1:
+        #     if res_list[-1] == 'k':
+        #         h_value = float(res_list[-2])*1000
+        #     else:
+        #         h_value = float(res_list[-2])
+        # else:
+        #     h_value = 0
+        #
+        # print(h_value)
+
