@@ -6,7 +6,7 @@ from app.utils.science_base import PhysicalQuantity
 
 
 class DielectricSimulator:
-    def __init__(self, model, first_pos_info_tuple=(), info_dict=None, fixed_param_dict=None, p0=None, bounds=()):
+    def __init__(self, model, first_pos_info_tuple=(), info_dict=None, fixed_param_dict=None, noise_remove_flag=True, p0=None, bounds=()):
         if fixed_param_dict is None:
             fixed_param_dict = {}
         if info_dict is None:
@@ -22,6 +22,8 @@ class DielectricSimulator:
         self.info_dict = info_dict
         # 接受被固定的参数信息fixed_param_dict
         self.fixed_param_dict = fixed_param_dict
+        # 接收是否去除噪声的flag
+        self.noise_remove_flag = noise_remove_flag
 
     def open_file(self,path):
         try:
@@ -55,13 +57,17 @@ class DielectricSimulator:
         freq_list = f_list
         # epsilon_r = Cp * thickness / (epsilon_0 * area)
         epsilon_list = np.multiply(np.divide(np.multiply(cp_list,thickness),sci_const.epsilon_0*area),cc)
-        # 接下来用这种方法来切割掉曲线前端可能会出现的噪声，噪声的判断是数据二阶导数大于0的情况
-        d2_epsilon_list = np.gradient(np.gradient(epsilon_list))
         start_pos = 0
-        for i in range(d2_epsilon_list.size):
-            if d2_epsilon_list[i] >= 1:
-                start_pos = i
-        print('横轴切割完毕开始点是{}'.format(start_pos))
+        if self.noise_remove_flag:
+            # 接下来用这种方法来切割掉曲线前端可能会出现的噪声，噪声的判断是数据二阶导数大于0的情况
+            d2_epsilon_list = np.gradient(np.gradient(epsilon_list))
+            start_pos = 0
+            for i in range(d2_epsilon_list.size):
+                if d2_epsilon_list[i] >= 1:
+                    start_pos = i
+            print('横轴切割完毕开始点是{}'.format(start_pos))
+        else:
+            print('不去除噪声，横轴开始点是{}'.format(start_pos))
         return freq_list[start_pos:], epsilon_list[start_pos:], thickness, area, h, co, dcb, osc, cc
 
     def simulate(self,file_name:str, file_path:str):

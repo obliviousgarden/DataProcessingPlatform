@@ -27,6 +27,7 @@ class ModalDielectric(object):
         self.model = 1
         self.device = None
         self.dependent = None
+        self.noise_remove_flag = True
 
         self.alpha_min = 0.0
         self.alpha_max = 1.0
@@ -114,6 +115,10 @@ class ModalDielectric(object):
         self.parent.RadioButton_dependent_H.clicked.connect(self.on_RadioButton_dependent_clicked)
         self.parent.RadioButton_dependent_Co.clicked.connect(self.on_RadioButton_dependent_clicked)
         self.parent.RadioButton_dependent_DCB.clicked.connect(self.on_RadioButton_dependent_clicked)
+        self.parent.RadioButton_dependent_H.click()
+        self.parent.RadioButton_noise_remove.clicked.connect(self.on_RadioButton_noise_clicked)
+        self.parent.RadioButton_noise_keep.clicked.connect(self.on_RadioButton_noise_clicked)
+        self.parent.RadioButton_noise_remove.click()
 
 
         # # 设定PushButton
@@ -311,6 +316,15 @@ class ModalDielectric(object):
         else:
             print("Unknown Dependent.")
             self.dependent = None
+
+    def on_RadioButton_noise_clicked(self):
+        if self.parent.RadioButton_noise_remove.isChecked():
+            self.noise_remove_flag = True
+        elif self.parent.RadioButton_noise_keep.isChecked():
+            self.noise_remove_flag = False
+        else:
+            print("Unknown Noise")
+            self.dependent = True
 
     def on_PushButton_file_clicked(self):
         self.file_name = []
@@ -644,6 +658,7 @@ class ModalDielectric(object):
                                                first_pos_info_tuple=first_pos_info_tuple,
                                                info_dict=info_dict,
                                                fixed_param_dict=self.fixed_param_dict,
+                                               noise_remove_flag=self.noise_remove_flag,
                                                p0=p0, bounds=bounds)
 
             self.result_dict[self.file_name[i]] = my_simulator.simulate(self.file_name[i],self.file_path[i])

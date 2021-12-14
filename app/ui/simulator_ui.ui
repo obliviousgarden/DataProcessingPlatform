@@ -7,8 +7,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1080</width>
-    <height>864</height>
+    <width>850</width>
+    <height>850</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,8 +19,8 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>1080</width>
-    <height>720</height>
+    <width>850</width>
+    <height>850</height>
    </size>
   </property>
   <property name="maximumSize">
@@ -57,6 +57,12 @@
    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0">
     <item>
      <widget class="QTabWidget" name="tabs">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
       <property name="font">
        <font>
         <family>Times New Roman</family>
@@ -68,7 +74,7 @@
        <bool>false</bool>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tabDielectric">
        <attribute name="title">
@@ -543,7 +549,41 @@
               <property name="title">
                <string>STEP.2 Parameters</string>
               </property>
-              <layout class="QVBoxLayout" name="verticalLayout_6" stretch="0,0">
+              <layout class="QVBoxLayout" name="verticalLayout_6" stretch="0,0,0">
+               <item>
+                <widget class="QGroupBox" name="GroupBox_step2_noise">
+                 <property name="font">
+                  <font>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                 <property name="title">
+                  <string>Noise processing at low frequency</string>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_5">
+                  <property name="topMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>0</number>
+                  </property>
+                  <item>
+                   <widget class="QRadioButton" name="RadioButton_noise_remove">
+                    <property name="text">
+                     <string>Remove</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QRadioButton" name="RadioButton_noise_keep">
+                    <property name="text">
+                     <string>Keep</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
                <item>
                 <layout class="QHBoxLayout" name="HorizontalLayout_step2" stretch="0,1,0">
                  <property name="sizeConstraint">
@@ -1217,6 +1257,12 @@
                     <string>VSM Device</string>
                    </property>
                    <layout class="QHBoxLayout" name="horizontalLayout_2">
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
                     <item>
                      <widget class="QRadioButton" name="radioButton_M_device_fris">
                       <property name="text">
@@ -3005,7 +3051,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1080</width>
+     <width>850</width>
      <height>26</height>
     </rect>
    </property>
