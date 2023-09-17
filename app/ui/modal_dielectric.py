@@ -359,7 +359,7 @@ class ModalDielectric(object):
             area_item.setSelectable(False)
             if 'Oe' in self.file_name[i]:
                 # 对文件名称的处理逻辑：匹配‘-’和‘Oe’之间的内容，用空格切断成字符串数组，去除空字符串的元素：如果最后1个元素包含数字，那么信息都在最后一个元素里处理，否则，最后一个纯字符是倍数，倒数第二个是纯数字的数
-                res_list = re.findall(r'.*-(.*)Oe.*',self.file_name[i])[0].split(' ')
+                res_list = re.findall(r'.*[-_ ](.*)Oe.*',self.file_name[i])[0].split(' ')
                 while '' in res_list:
                     res_list.remove('')
                 if re.match(r'\d',res_list[-1]):
@@ -380,7 +380,7 @@ class ModalDielectric(object):
             h_item.setEditable(True)
             h_item.setSelectable(False)
             if 'Co' in self.file_name[i]:
-                res_list = re.findall(r'.*[- ]Co(.*).*',self.file_name[i])[0].split(' ')
+                res_list = re.findall(r'.*[-_ ]Co(.*).*',self.file_name[i])[0].split(' ')
                 while '' in res_list:
                     res_list.remove('')
                 print("result:{}".format(res_list))
@@ -391,7 +391,7 @@ class ModalDielectric(object):
             co_item.setEditable(True)
             co_item.setSelectable(False)
             if 'DCB' in self.file_name[i]:
-                res_list = re.findall(r'.*[- ]DCB(.*).*',self.file_name[i])[0].split(' ')
+                res_list = re.findall(r'.*[-_ ]DCB(.*).*',self.file_name[i])[0].split(' ')
                 while '' in res_list:
                     res_list.remove('')
                 print("result:{}".format(res_list))
@@ -402,12 +402,14 @@ class ModalDielectric(object):
             dcb_item.setEditable(True)
             dcb_item.setSelectable(False)
             if 'V' in self.file_name[i]:
-                res_list = re.findall(r'.*-(.*)V.*',self.file_name[i])[0].split(' ')
+                res_list = re.findall(r'.*[-_ ](.*)V.*',self.file_name[i])[0].split(' ')
                 while '' in res_list:
                     res_list.remove('')
                 if re.match(r'\d',res_list[-1]):
                     if 'k' in res_list[-1]:
                         ocs_value = float(res_list[-1].replace('k',''))*1000
+                    elif 'm' in res_list[-1]:
+                        ocs_value = float(res_list[-1].replace('m',''))/1000
                     else:
                         ocs_value = float(res_list[-1].replace('k',''))
                 elif res_list.__len__() > 1:

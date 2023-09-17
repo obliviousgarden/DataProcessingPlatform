@@ -19,12 +19,12 @@ class FaradaySimulator:
         self.effective_medium_model = effective_medium_model
 
         # 接受并解析第1个数据点的位置信息及其单位信息
-        (self.wl_unit_m, self.start_row_m, self.wl_start_rol_m, self.n_start_rol_m,
-         self.k_start_rol_m) = first_pos_info_tuple_dict.get('metal').get('nk')
+        (self.wl_unit_m, self.start_row_m, self.wl_start_rol_m, self.n_start_rol_m,self.k_start_rol_m) = first_pos_info_tuple_dict.get('metal').get('nk')
         (self.wl_unit_epsilon_1_prime_m, self.start_row_epsilon_1_prime_m, self.wl_start_rol_epsilon_1_prime_m, self.e_start_rol_epsilon_1_prime_m) = first_pos_info_tuple_dict.get('metal').get('epsilon_1_prime')
         (self.wl_unit_epsilon_2_prime_m, self.start_row_epsilon_2_prime_m, self.wl_start_rol_epsilon_2_prime_m, self.e_start_rol_epsilon_2_prime_m) = first_pos_info_tuple_dict.get('metal').get('epsilon_2_prime')
-        (self.wl_unit_d, self.start_row_d, self.wl_start_rol_d, self.n_start_rol_d,
-         self.k_start_rol_d) = first_pos_info_tuple_dict.get('dielectric').get('nk')
+        (self.wl_unit_d, self.start_row_d, self.wl_start_rol_d, self.n_start_rol_d,self.k_start_rol_d) = first_pos_info_tuple_dict.get('dielectric').get('nk')
+        (self.wl_unit_epsilon_1_prime_d, self.start_row_epsilon_1_prime_d, self.wl_start_rol_epsilon_1_prime_d, self.e_start_rol_epsilon_1_prime_d) = first_pos_info_tuple_dict.get('dielectric').get('epsilon_1_prime')
+        (self.wl_unit_epsilon_2_prime_d, self.start_row_epsilon_2_prime_d, self.wl_start_rol_epsilon_2_prime_d, self.e_start_rol_epsilon_2_prime_d) = first_pos_info_tuple_dict.get('dielectric').get('epsilon_2_prime')
         (self.wl_unit_theta_on_wl, self.start_row_theta_on_wl, self.wl_start_rol,
          self.theta_start_rol) = first_pos_info_tuple_dict.get('theta_on_wl')
         # 频率/波长范围
@@ -75,7 +75,6 @@ class FaradaySimulator:
                                                             start_row=self.start_row_m,
                                                             x_start_col=self.wl_start_rol_m,
                                                             y_start_col_list=[self.n_start_rol_m, self.k_start_rol_m])
-
         wl_list_epsilon_1_prime_m, [e_list_epsilon_1_prime_m] = self.iterate_data(file_path=file_path_dict.get('metal').get('epsilon_1_prime'),
                                                             start_row=self.start_row_epsilon_1_prime_m,
                                                             x_start_col=self.wl_start_rol_epsilon_1_prime_m,
@@ -89,56 +88,57 @@ class FaradaySimulator:
                                                             start_row=self.start_row_d,
                                                             x_start_col=self.wl_start_rol_d,
                                                             y_start_col_list=[self.n_start_rol_d, self.k_start_rol_d])
+        wl_list_epsilon_1_prime_d, [e_list_epsilon_1_prime_d] = self.iterate_data(file_path=file_path_dict.get('dielectric').get('epsilon_1_prime'),
+                                                                                  start_row=self.start_row_epsilon_1_prime_d,
+                                                                                  x_start_col=self.wl_start_rol_epsilon_1_prime_d,
+                                                                                  y_start_col_list=[self.e_start_rol_epsilon_1_prime_d])
+        wl_list_epsilon_2_prime_d, [e_list_epsilon_2_prime_d] = self.iterate_data(file_path=file_path_dict.get('dielectric').get('epsilon_2_prime'),
+                                                                                  start_row=self.start_row_epsilon_2_prime_d,
+                                                                                  x_start_col=self.wl_start_rol_epsilon_2_prime_d,
+                                                                                  y_start_col_list=[self.e_start_rol_epsilon_2_prime_d])
+
         wl_list, [theta_list] = self.iterate_data(file_path=file_path_dict.get('theta_on_wl'),
                                                   start_row=self.start_row_theta_on_wl,
                                                   x_start_col=self.wl_start_rol,
                                                   y_start_col_list=[self.theta_start_rol])
         # 2 波长的单位变换到um
-        wl_to_unit = ScienceUnit.Length.um
-        wl_from_unit_m = ScienceUnit.get_from_symbol(ScienceUnit.Length, self.wl_unit_m)
-        wl_from_unit_epsilon_1_prime_m = ScienceUnit.get_from_symbol(ScienceUnit.Length, self.wl_unit_epsilon_1_prime_m)
-        wl_from_unit_epsilon_2_prime_m = ScienceUnit.get_from_symbol(ScienceUnit.Length, self.wl_unit_epsilon_2_prime_m)
-        wl_from_unit_d = ScienceUnit.get_from_symbol(ScienceUnit.Length, self.wl_unit_d)
-        wl_from_unit_theta_on_wl = ScienceUnit.get_from_symbol(ScienceUnit.Length, self.wl_unit_theta_on_wl)
-        if wl_from_unit_m != wl_to_unit:
-            for index in range(wl_list_m.__len__()):
-                wl_list_m[index] = ScienceUnitConverter.convert(from_unit_class=wl_from_unit_m.__class__,
-                                                    to_unit_class=wl_to_unit.__class__, from_unit=wl_from_unit_m.value,
-                                                    to_unit=wl_to_unit.value, value=wl_list_m[index])
-        if wl_from_unit_epsilon_1_prime_m != wl_to_unit:
-            for index in range(wl_list_m.__len__()):
-                wl_list_epsilon_1_prime_m[index] = ScienceUnitConverter.convert(from_unit_class=wl_from_unit_epsilon_1_prime_m.__class__,
-                                                                to_unit_class=wl_to_unit.__class__, from_unit=wl_from_unit_epsilon_1_prime_m.value,
-                                                                to_unit=wl_to_unit.value, value=wl_list_epsilon_1_prime_m[index])
-        if wl_from_unit_epsilon_2_prime_m != wl_to_unit:
-            for index in range(wl_list_m.__len__()):
-                wl_list_epsilon_2_prime_m[index] = ScienceUnitConverter.convert(from_unit_class=wl_from_unit_epsilon_2_prime_m.__class__,
-                                                                to_unit_class=wl_to_unit.__class__, from_unit=wl_from_unit_epsilon_2_prime_m.value,
-                                                                to_unit=wl_to_unit.value, value=wl_list_epsilon_2_prime_m[index])
-        if wl_from_unit_d != wl_to_unit:
-            for index in range(wl_list_m.__len__()):
-                wl_list_d[index] = ScienceUnitConverter.convert(from_unit_class=wl_from_unit_d.__class__,
-                                                    to_unit_class=wl_to_unit.__class__, from_unit=wl_from_unit_d.value,
-                                                    to_unit=wl_to_unit.value, value=wl_list_d[index])
-        if wl_from_unit_theta_on_wl != wl_to_unit:
-            for index in range(wl_list.__len__()):
-                wl_list[index] = ScienceUnitConverter.convert(from_unit_class=wl_from_unit_theta_on_wl.__class__,
-                                                    to_unit_class=wl_to_unit.__class__, from_unit=wl_from_unit_theta_on_wl.value,
-                                                    to_unit=wl_to_unit.value, value=wl_list[index])
+        wl_to_unit = ScienceUnit.Length.um.value
+        wl_from_unit_m = ScienceUnit.get_from_symbol(self.wl_unit_m)
+        wl_from_unit_epsilon_1_prime_m = ScienceUnit.get_from_symbol(self.wl_unit_epsilon_1_prime_m)
+        wl_from_unit_epsilon_2_prime_m = ScienceUnit.get_from_symbol(self.wl_unit_epsilon_2_prime_m)
+
+        wl_from_unit_d = ScienceUnit.get_from_symbol(self.wl_unit_d)
+        wl_from_unit_epsilon_1_prime_d = ScienceUnit.get_from_symbol(self.wl_unit_epsilon_1_prime_d)
+        wl_from_unit_epsilon_2_prime_d = ScienceUnit.get_from_symbol(self.wl_unit_epsilon_2_prime_d)
+
+        wl_from_unit_theta_on_wl = ScienceUnit.get_from_symbol(self.wl_unit_theta_on_wl)
+        if wl_from_unit_m.get_description() != wl_to_unit.get_description():
+            wl_list_m = science_unit_convert(from_list=wl_list_m, from_unit=wl_from_unit_m,to_unit=wl_to_unit)
+        if wl_from_unit_epsilon_1_prime_m.get_description() != wl_to_unit.get_description():
+            wl_list_epsilon_1_prime_m = science_unit_convert(from_list=wl_list_epsilon_1_prime_m, from_unit=wl_from_unit_epsilon_1_prime_m,to_unit=wl_to_unit)
+        if wl_from_unit_epsilon_2_prime_m.get_description() != wl_to_unit.get_description():
+            wl_list_epsilon_2_prime_m = science_unit_convert(from_list=wl_list_epsilon_2_prime_m, from_unit=wl_from_unit_epsilon_2_prime_m,to_unit=wl_to_unit)
+        if wl_from_unit_d.get_description() != wl_to_unit.get_description():
+            wl_list_d = science_unit_convert(from_list=wl_list_d, from_unit=wl_from_unit_d,to_unit=wl_to_unit)
+        if wl_from_unit_epsilon_1_prime_d.get_description() != wl_to_unit.get_description():
+            wl_list_epsilon_1_prime_d = science_unit_convert(from_list=wl_list_epsilon_1_prime_d, from_unit=wl_from_unit_epsilon_1_prime_d,to_unit=wl_to_unit)
+        if wl_from_unit_epsilon_2_prime_d.get_description() != wl_to_unit.get_description():
+            wl_list_epsilon_2_prime_d = science_unit_convert(from_list=wl_list_epsilon_2_prime_d, from_unit=wl_from_unit_epsilon_2_prime_d,to_unit=wl_to_unit)
+        if wl_from_unit_theta_on_wl.get_description() != wl_to_unit.get_description():
+            wl_list = science_unit_convert(from_list=wl_list, from_unit=wl_from_unit_theta_on_wl,to_unit=wl_to_unit)
         # 3 wl_bound单位变换,截取需要数据
-        wl_from_bound_unit = ScienceUnit.get_from_symbol(ScienceUnit.Length, self.wl_bound_unit)
-        self.wl_lower_bound = ScienceUnitConverter.convert(from_unit_class=wl_from_bound_unit.__class__,
-                                                           to_unit_class=wl_to_unit.__class__, from_unit=wl_from_bound_unit.value,
-                                                           to_unit=wl_to_unit.value, value=self.wl_lower_bound)
-        self.wl_upper_bound = ScienceUnitConverter.convert(from_unit_class=wl_from_bound_unit.__class__,
-                                                           to_unit_class=wl_to_unit.__class__, from_unit=wl_from_bound_unit.value,
-                                                           to_unit=wl_to_unit.value, value=self.wl_upper_bound)
+        wl_from_bound_unit = ScienceUnit.get_from_symbol(self.wl_bound_unit)
+        [self.wl_lower_bound] = science_unit_convert(from_list=[self.wl_lower_bound], from_unit=wl_from_bound_unit,to_unit=wl_to_unit)
+        [self.wl_upper_bound] = science_unit_convert(from_list=[self.wl_upper_bound], from_unit=wl_from_bound_unit,to_unit=wl_to_unit)
+
 
         wl_lower_index,wl_upper_index = self.found_bound_index(wl_list,self.wl_lower_bound,self.wl_upper_bound)
         wl_lower_index_m,wl_upper_index_m = self.found_bound_index(wl_list_m,self.wl_lower_bound,self.wl_upper_bound)
         wl_lower_index_epsilon_1_prime_m,wl_upper_index_epsilon_1_prime_m = self.found_bound_index(wl_list_epsilon_1_prime_m,self.wl_lower_bound,self.wl_upper_bound)
         wl_lower_index_epsilon_2_prime_m,wl_upper_index_epsilon_2_prime_m = self.found_bound_index(wl_list_epsilon_2_prime_m,self.wl_lower_bound,self.wl_upper_bound)
         wl_lower_index_d,wl_upper_index_d = self.found_bound_index(wl_list_d,self.wl_lower_bound,self.wl_upper_bound)
+        wl_lower_index_epsilon_1_prime_d,wl_upper_index_epsilon_1_prime_d = self.found_bound_index(wl_list_epsilon_1_prime_d,self.wl_lower_bound,self.wl_upper_bound)
+        wl_lower_index_epsilon_2_prime_d,wl_upper_index_epsilon_2_prime_d = self.found_bound_index(wl_list_epsilon_2_prime_d,self.wl_lower_bound,self.wl_upper_bound)
         self.bound_valid = True
         if self.bound_valid:
             # 注意：list[a:b]是不包含b索引对应的内容的所以需要+1
@@ -146,12 +146,16 @@ class FaradaySimulator:
                    (wl_list_epsilon_1_prime_m[wl_lower_index_epsilon_1_prime_m:wl_upper_index_epsilon_1_prime_m+1], e_list_epsilon_1_prime_m[wl_lower_index_epsilon_1_prime_m:wl_upper_index_epsilon_1_prime_m+1]), \
                    (wl_list_epsilon_2_prime_m[wl_lower_index_epsilon_2_prime_m:wl_upper_index_epsilon_2_prime_m+1], e_list_epsilon_2_prime_m[wl_lower_index_epsilon_2_prime_m:wl_upper_index_epsilon_2_prime_m+1]), \
                    (wl_list_d[wl_lower_index_d:wl_upper_index_d+1], n_list_d[wl_lower_index_d:wl_upper_index_d+1], k_list_d[wl_lower_index_d:wl_upper_index_d+1]), \
+                   (wl_list_epsilon_1_prime_d[wl_lower_index_epsilon_1_prime_d:wl_upper_index_epsilon_1_prime_d+1], e_list_epsilon_1_prime_d[wl_lower_index_epsilon_1_prime_d:wl_upper_index_epsilon_1_prime_d+1]), \
+                   (wl_list_epsilon_2_prime_d[wl_lower_index_epsilon_2_prime_d:wl_upper_index_epsilon_2_prime_d+1], e_list_epsilon_2_prime_d[wl_lower_index_epsilon_2_prime_d:wl_upper_index_epsilon_2_prime_d+1]), \
                    (wl_list[wl_lower_index:wl_upper_index+1], theta_list[wl_lower_index:wl_upper_index+1])
         else:
             return (wl_list_m, n_list_m, k_list_m), \
                    (wl_list_epsilon_1_prime_m, e_list_epsilon_1_prime_m), \
                    (wl_list_epsilon_2_prime_m, e_list_epsilon_2_prime_m), \
                    (wl_list_d, n_list_d, k_list_d), \
+                   (wl_list_epsilon_1_prime_d, e_list_epsilon_1_prime_d), \
+                   (wl_list_epsilon_2_prime_d, e_list_epsilon_2_prime_d), \
                    (wl_list, theta_list)
 
     @staticmethod
@@ -169,9 +173,6 @@ class FaradaySimulator:
                 pass
         return lower_index,upper_index
 
-
-
-
     def simulate(self, file_name_dict: dict, file_path_dict: dict):
         # ROUTE A:
         # 1 实验复折射率M,D-->计算复折射率M,D
@@ -179,19 +180,21 @@ class FaradaySimulator:
         # 3 计算复介电常数M,D-->有效介质近似-->计算复介电常数EFF
         # 4 计算复介电常数EFF-->计算FARADAY
         print('开始模拟')
-        (wl_raw_m, n_raw_m, k_raw_m), (wl_raw_epsilon_1_prime_m, epsilon_1_prime_raw_m), (wl_raw_epsilon_2_prime_m, epsilon_2_prime_raw_m), (wl_raw_d, n_raw_d, k_raw_d), (wl_raw, theta_raw) = self.get_data(file_path_dict=file_path_dict)
+        (wl_raw_m, n_raw_m, k_raw_m), (wl_raw_epsilon_1_prime_m, epsilon_1_prime_raw_m), (wl_raw_epsilon_2_prime_m, epsilon_2_prime_raw_m), (wl_raw_d, n_raw_d, k_raw_d), (wl_raw_epsilon_1_prime_d, epsilon_1_prime_raw_d), (wl_raw_epsilon_2_prime_d, epsilon_2_prime_raw_d), (wl_raw, theta_raw) = self.get_data(file_path_dict=file_path_dict)
         print('获取数据完成')
         print('Metal:[wl(um),n,k]\n{}\n'.format(np.dstack((wl_raw_m,n_raw_m,k_raw_m))))
         print('Dielectric:[wl(um),n,k]\n{}\n'.format(np.dstack((wl_raw_d,n_raw_d,k_raw_d))))
         print('Theta_F on Wavelength:[wl(um),theta_F]\n{}\n'.format(np.dstack((wl_raw,theta_raw))))
-        print('开始复折射率转复介电常数')
-        epsilon_1_raw_m,epsilon_2_raw_m = sci_const.n_to_epsilon(n_raw_m,k_raw_m)
-        epsilon_1_raw_d,epsilon_2_raw_d = sci_const.n_to_epsilon(n_raw_d,k_raw_d)
-        print('获取复介电常数完成')
+        print('开始复折射率转复介电常数epsilon_xx')
+        epsilon_1_raw_m,epsilon_2_raw_m = sci_const.n_to_epsilon(n_raw_m,k_raw_m) # epsilon_xx[ Co ] =  epsilon_1_m + i * epsilon_2_m
+        epsilon_1_raw_d,epsilon_2_raw_d = sci_const.n_to_epsilon(n_raw_d,k_raw_d) # epsilon_xx[ SrF2 ] =  epsilon_1_d + i * epsilon_2_d
+        print('获取复介电常数epsilon_xx完成')
         print('Metal:[wl(um),epsilon_1,epsilon_2]\n{}\n'.format(np.dstack((wl_raw_m,epsilon_1_raw_m,epsilon_2_raw_m))))
         print('Metal:[wl(um),epsilon_1_prime]\n{}\n'.format(np.dstack((wl_raw_epsilon_1_prime_m,epsilon_1_prime_raw_m))))
         print('Metal:[wl(um),epsilon_2_prime]\n{}\n'.format(np.dstack((wl_raw_epsilon_2_prime_m,epsilon_2_prime_raw_m))))
         print('Dielectric:[wl(um),epsilon_1,epsilon_2]\n{}\n'.format(np.dstack((wl_raw_d,epsilon_1_raw_d,epsilon_2_raw_d))))
+        print('Dielectric:[wl(um),epsilon_1_prime]\n{}\n'.format(np.dstack((wl_raw_epsilon_1_prime_d,epsilon_1_prime_raw_d))))
+        print('Dielectric:[wl(um),epsilon_2_prime]\n{}\n'.format(np.dstack((wl_raw_epsilon_2_prime_d,epsilon_2_prime_raw_d))))
         print('由于Theta_F on Wavelength点数，所以开始在wl_bound的范围上插值')
         wl_list = np.linspace(self.wl_lower_bound,self.wl_upper_bound,100)
         # 插值方式 "nearest","zero","slinear","quadratic","cubic" slinear > cubic > quadratic
@@ -202,19 +205,17 @@ class FaradaySimulator:
         interpolate_func_epsilon_2_prime_m = interpolate.interp1d(wl_raw_epsilon_2_prime_m,epsilon_2_prime_raw_m,kind="slinear")
         interpolate_func_epsilon_1_d = interpolate.interp1d(wl_raw_d,epsilon_1_raw_d,kind="slinear")
         interpolate_func_epsilon_2_d = interpolate.interp1d(wl_raw_d,epsilon_2_raw_d,kind="slinear")
+        interpolate_func_epsilon_1_prime_d = interpolate.interp1d(wl_raw_epsilon_1_prime_d,epsilon_1_prime_raw_d,kind="slinear")
+        interpolate_func_epsilon_2_prime_d = interpolate.interp1d(wl_raw_epsilon_2_prime_d,epsilon_2_prime_raw_d,kind="slinear")
         theta_list = interpolate_func(wl_list)
-        if False:
-            plot_data = SciencePlotData()
-            plot_data.add_figure_info(figure_title='Theta_F on Wavelength', x_label='Wavelength(um)', y_label='Theta(deg./um)')
-            plot_data.add_plot_data(figure_title='Theta_F on Wavelength', x_data=wl_raw, y_data=theta_raw, y_legend='raw')
-            plot_data.add_plot_data(figure_title='Theta_F on Wavelength', x_data=wl_list, y_data=theta_list, y_legend='interpolate')
-            SciencePlot.sci_plot(plot_data)
         epsilon_1_list_m = interpolate_func_epsilon_1_m(wl_list)
         epsilon_2_list_m = interpolate_func_epsilon_2_m(wl_list)
         epsilon_prime_1_list_m = interpolate_func_epsilon_1_prime_m(wl_list)
         epsilon_prime_2_list_m = interpolate_func_epsilon_2_prime_m(wl_list)
         epsilon_1_list_d = interpolate_func_epsilon_1_d(wl_list)
         epsilon_2_list_d = interpolate_func_epsilon_2_d(wl_list)
+        epsilon_prime_1_list_d = interpolate_func_epsilon_1_prime_d(wl_list)
+        epsilon_prime_2_list_d = interpolate_func_epsilon_2_prime_d(wl_list)
 
         if False:
             plot_data = SciencePlotData()
@@ -239,15 +240,25 @@ class FaradaySimulator:
             plot_data.add_figure_info(figure_title='Dielectric: Epsilon 2 on Wavelength', x_label='Wavelength(um)', y_label='Epsilon 2')
             plot_data.add_plot_data(figure_title='Dielectric: Epsilon 2 on Wavelength', x_data=wl_raw_d, y_data=epsilon_2_raw_d, y_legend='raw')
             plot_data.add_plot_data(figure_title='Dielectric: Epsilon 2 on Wavelength', x_data=wl_list, y_data=epsilon_2_list_d, y_legend='interpolate')
+
+            plot_data.add_figure_info(figure_title='Dielectric: Epsilon Prime 1 on Wavelength', x_label='Wavelength(um)', y_label='Epsilon Prime 1')
+            plot_data.add_plot_data(figure_title='Dielectric: Epsilon Prime 1 on Wavelength', x_data=wl_raw_epsilon_1_prime_d, y_data=wl_raw_epsilon_1_prime_d, y_legend='raw')
+            plot_data.add_plot_data(figure_title='Dielectric: Epsilon Prime 1 on Wavelength', x_data=wl_list, y_data=epsilon_prime_1_list_d, y_legend='interpolate')
+            plot_data.add_figure_info(figure_title='Dielectric: Epsilon Prime 2 on Wavelength', x_label='Wavelength(um)', y_label='Epsilon Prime 2')
+            plot_data.add_plot_data(figure_title='Dielectric: Epsilon Prime 2 on Wavelength', x_data=wl_raw_epsilon_2_prime_d, y_data=wl_raw_epsilon_2_prime_d, y_legend='raw')
+            plot_data.add_plot_data(figure_title='Dielectric: Epsilon Prime 2 on Wavelength', x_data=wl_list, y_data=epsilon_prime_2_list_d, y_legend='interpolate')
+
             SciencePlot.sci_plot(plot_data)
 
 
         print('插值结束')
         print('开始利用FARADAY模型进行拟合')
         epsilon_xx_list_m = np.add(epsilon_1_list_m,np.multiply(epsilon_2_list_m,1j))
-        epsilon_xy_list_m = np.add(epsilon_prime_2_list_m,np.multiply(epsilon_prime_1_list_m,1j))
+        epsilon_xy_list_m = np.add(epsilon_prime_1_list_m,np.multiply(epsilon_prime_2_list_m,1j))
         epsilon_xx_list_d = np.add(epsilon_1_list_d,np.multiply(epsilon_2_list_d,1j))
-        ema_model = EffectiveMediumModel(epsilon_xx_list_m,epsilon_xy_list_m,epsilon_xx_list_d)
+        epsilon_xy_list_d = np.add(epsilon_prime_1_list_d,np.multiply(epsilon_prime_2_list_d,1j))
+        ema_model = EffectiveMediumModel(epsilon_xx_list_m,epsilon_xy_list_m,epsilon_xx_list_d,epsilon_xy_list_d)
+
         faraday_model = FaradayModel({1: ema_model.maxwell_garnett,
                                       2: ema_model.bruggeman,
                                       3: ema_model.belyaev}.get(self.effective_medium_model))
@@ -275,7 +286,7 @@ class FaradaySimulator:
             plot_data.add_plot_data(figure_title='Faraday on Wavelength', x_data=wl_list, y_data=theta_list, y_legend='Co-Sr-F,Exp.')
             plot_data.add_plot_data(figure_title='Faraday on Wavelength', x_data=wl_list, y_data=theta_cal, y_legend='Co-Sr-F,Cal.,c_m='+str(popt[0]))
             # plot_data.add_plot_data(figure_title='Faraday on Wavelength', x_data=wl_list, y_data=theta_Co, y_legend='Co,Cal.,c_m='+str(1.0))
-            plot_data.add_plot_data(figure_title='Faraday on Wavelength', x_data=wl_list, y_data=theta_SrF2, y_legend='SrF2,Cal.,c_m='+str(0.0))
+            # plot_data.add_plot_data(figure_title='Faraday on Wavelength', x_data=wl_list, y_data=theta_SrF2, y_legend='SrF2,Cal.,c_m='+str(0.0))
             SciencePlot.sci_plot(plot_data)
 
         print('模拟完成')
@@ -307,7 +318,7 @@ class FaradaySimulator:
 
 
 class EffectiveMediumModel:
-    def __init__(self,epsilon_xx_list_m,epsilon_xy_list_m,epsilon_xx_list_d,epsilon_xy_list_d=None):
+    def __init__(self,epsilon_xx_list_m,epsilon_xy_list_m,epsilon_xx_list_d,epsilon_xy_list_d):
         print('EffectiveMediumModel.__init__')
         self.epsilon_xx_m = epsilon_xx_list_m
         self.epsilon_xy_m = epsilon_xy_list_m
@@ -319,16 +330,11 @@ class EffectiveMediumModel:
         term_xx_2 = np.multiply(1.-c_m,self.epsilon_xx_m)
         term_xx_3 = np.multiply(2.+c_m,self.epsilon_xx_d)
         epsilon_xx_eff = np.multiply(self.epsilon_xx_d,np.add(1.,np.divide(term_xx_1,np.add(term_xx_2,term_xx_3))))
-        if self.epsilon_xy_d == None:
-            term_xy_1 = np.multiply(3.*c_m,np.multiply(self.epsilon_xy_m,self.epsilon_xx_d))
-            term_xy_2 = np.multiply(1.-c_m,self.epsilon_xx_m)
-            term_xy_3 = np.multiply(2.+c_m,self.epsilon_xx_d)
-            epsilon_xy_eff = np.divide(term_xy_1,np.add(term_xy_2,term_xy_3))
-        else:
-            term_xy_1 = np.multiply(3.*c_m,np.multiply(self.epsilon_xx_d,np.subtract(self.epsilon_xy_m,self.epsilon_xy_d)))
-            term_xy_2 = np.multiply(1.-c_m,self.epsilon_xx_m)
-            term_xy_3 = np.multiply(2.+c_m,self.epsilon_xx_d)
-            epsilon_xy_eff = np.add(self.epsilon_xy_d,np.divide(term_xy_1,np.add(term_xy_2,term_xy_3)))
+
+        term_xy_1 = np.multiply(3.*c_m,np.subtract(self.epsilon_xy_m,self.epsilon_xy_d))
+        term_xy_2 = np.multiply(1.-c_m,self.epsilon_xy_m)
+        term_xy_3 = np.multiply(2.+c_m,self.epsilon_xy_d)
+        epsilon_xy_eff = np.multiply(self.epsilon_xy_d,np.add(1.,np.divide(term_xy_1,np.add(term_xy_2,term_xy_3))))
         if False:
             x = np.linspace(0, 1, epsilon_xx_eff.__len__())
             plot_data = SciencePlotData()
@@ -383,6 +389,7 @@ class EffectiveMediumModel:
                                 4.)
         return [epsilon_eff,[]]
 
+
 class FaradayModel:
     def __init__(self,effective_medium_func):
         self.effective_medium_func = effective_medium_func
@@ -394,22 +401,24 @@ class FaradayModel:
 
     def epsilon(self, wl, c_m):
         [epsilon_xx_eff,epsilon_xy_eff] = self.effective_medium_func(c_m)
-        term_1 = np.divide(np.pi,wl)
-        term_2 = np.add(epsilon_xx_eff,np.multiply(epsilon_xy_eff,1.j))
-        term_3 = np.subtract(epsilon_xx_eff,np.multiply(epsilon_xy_eff,1.j))
-        # delta_n = np.imag(np.divide(epsilon_xy_eff,np.sqrt(epsilon_xx_eff)))
-        # delta_n = np.subtract(np.sqrt(term_2),np.sqrt(term_3))
-        delta_n = np.subtract(np.sqrt(term_3),np.sqrt(term_2))
-        complex_theta_f = np.multiply(np.multiply(delta_n,term_1),180./np.pi)
-        # complex_theta_f = np.multiply(np.multiply(delta_n,term_1),1.)
-        real_theta_f = np.real(complex_theta_f)  # deg./um
-        # imag_theta_f = np.imag(complex_theta_f)  # deg./um
-        if False:
-            plot_data = SciencePlotData()
-            plot_data.add_figure_info(figure_title='Faraday on Wavelength', x_label='Wavelength(um)', y_label='Theta(deg./um)')
-            plot_data.add_plot_data(figure_title='Faraday on Wavelength', x_data=wl, y_data=real_theta_f, y_legend='Effective,c_m='+str(c_m))
-            SciencePlot.sci_plot(plot_data)
-        return real_theta_f
+        term_1 = np.divide(np.pi,wl) # um*-1
+        term_2 = np.imag(np.divide(epsilon_xy_eff,np.sqrt(epsilon_xx_eff)))
+        theta_f_rad = np.multiply(term_1,term_2) # rad./um
+        theta_f_deg = np.multiply(theta_f_rad,180./np.pi) # deg./um
+        theta_f = theta_f_deg
+
+        # term_1 = np.divide(np.pi,wl)
+        # term_2 = np.add(epsilon_xx_eff,np.multiply(epsilon_xy_eff,1.j))
+        # term_3 = np.subtract(epsilon_xx_eff,np.multiply(epsilon_xy_eff,1.j))
+        # # delta_n = np.imag(np.divide(epsilon_xy_eff,np.sqrt(epsilon_xx_eff)))
+        # # delta_n = np.subtract(np.sqrt(term_2),np.sqrt(term_3))
+        # delta_n = np.subtract(np.sqrt(term_3),np.sqrt(term_2))
+        # complex_theta_f = np.multiply(np.multiply(delta_n,term_1),180./np.pi)
+        # # complex_theta_f = np.multiply(np.multiply(delta_n,term_1),1.)
+        # real_theta_f = np.real(complex_theta_f)  # deg./um
+        # # imag_theta_f = np.imag(complex_theta_f)  # deg./um
+
+        return theta_f
 
     def epsilon_xx(self, wl, c_m):
         [epsilon_xx_eff,epsilon_xy_eff] = self.effective_medium_func(c_m)
@@ -440,15 +449,19 @@ if __name__ == '__main__':
     # 2. Bruggeman's Model
     # 3. Belyaev's Model
 
-    file_path_nk_m = "D:\\PycharmProjects\\AIProcessingPlatform\\app\\ui\\Co_1.csv"
-    file_path_epsilon_1_prime_m = "D:\\PycharmProjects\\AIProcessingPlatform\\app\\ui\\Co-epsilon_1'.csv" # epsilon_xy
-    file_path_epsilon_2_prime_m = "D:\\PycharmProjects\\AIProcessingPlatform\\app\\ui\\Co-epsilon_2'.csv" # epsilon_xy
-    file_path_nk_d = "D:\\PycharmProjects\\AIProcessingPlatform\\app\\ui\\SrF2.csv"
+    file_path_nk_m = "D:\\PycharmProjects\\AIProcessingPlatform\\app\\ui\\Co_1.csv" # Complex[ epsilon_xx ] of Co
+    file_path_epsilon_1_prime_m = "D:\\PycharmProjects\\AIProcessingPlatform\\app\\ui\\Co-epsilon_1'.csv" # Re[ epsilon_xy ] of Co
+    file_path_epsilon_2_prime_m = "D:\\PycharmProjects\\AIProcessingPlatform\\app\\ui\\Co-epsilon_2'.csv" # Im[ epsilon_xy ] of Co
+    file_path_nk_d = "D:\\PycharmProjects\\AIProcessingPlatform\\app\\ui\\SrF2.csv" # Complex[ epsilon_xx ] of SrF2
+    file_path_epsilon_1_prime_d = "D:\\PycharmProjects\\AIProcessingPlatform\\app\\ui\SrF2-epsilon_1'.csv" # Re[ epsilon_xy ] of SrF2
+    file_path_epsilon_2_prime_d = "D:\\PycharmProjects\\AIProcessingPlatform\\app\\ui\\SrF2-epsilon_2'.csv" # Im[ epsilon_xy ] of SrF2
 
     first_pos_info_tuple_nk_m = ('um', 3, 1, 4, 5)
     first_pos_info_tuple_nk_epsilon_1_prime_m = ('um', 2, 3, 4)
     first_pos_info_tuple_nk_epsilon_2_prime_m = ('um', 2, 3, 4)
     first_pos_info_tuple_nk_d = ('um', 3, 1, 4, 5)
+    first_pos_info_tuple_nk_epsilon_1_prime_d = ('um', 2, 1, 2)
+    first_pos_info_tuple_nk_epsilon_2_prime_d = ('um', 2, 1, 2)
     wl_bound = ('nm', 405., 1550.)
 
     file_path_theta_on_wl = "D:\\PycharmProjects\\AIProcessingPlatform\\app\\ui\\theta-wavelength.csv"
@@ -468,8 +481,8 @@ if __name__ == '__main__':
 
     # c_m(vol%), d(um)
     # p0 = [0.4718]
-    p0 = [0.1]
-    bounds = ([0.],
+    p0 = [0.5]
+    bounds = ([0.1],
               [1.])
 
     # FIXME:暂时这样以后把循环放开
@@ -484,13 +497,16 @@ if __name__ == '__main__':
                     'epsilon_1_prime':first_pos_info_tuple_nk_epsilon_1_prime_m,
                     'epsilon_2_prime':first_pos_info_tuple_nk_epsilon_2_prime_m},
                 'dielectric': {
-                    'nk':first_pos_info_tuple_nk_d},
+                    'nk':first_pos_info_tuple_nk_d,
+                    'epsilon_1_prime':first_pos_info_tuple_nk_epsilon_1_prime_d,
+                    'epsilon_2_prime':first_pos_info_tuple_nk_epsilon_2_prime_d},
                 'theta_on_wl': first_pos_info_tuple_theta_on_wl
             },
             wl_bound=wl_bound,
             p0=p0,
             bounds=bounds
         )
+
         faraday_simulator.simulate(file_name_dict={'metal': 'Co',
                                                    'dielectric': 'SrF2',
                                                    'theta_on_wl': 'Co-SrF2-'+key+'at.%'},
@@ -500,5 +516,7 @@ if __name__ == '__main__':
                                            'epsilon_1_prime':file_path_epsilon_1_prime_m,
                                            'epsilon_2_prime':file_path_epsilon_2_prime_m},
                                        'dielectric': {
-                                           'nk':file_path_nk_d},
+                                           'nk':file_path_nk_d,
+                                           'epsilon_1_prime':file_path_epsilon_1_prime_d,
+                                           'epsilon_2_prime':file_path_epsilon_2_prime_d},
                                        'theta_on_wl': file_path_theta_on_wl})

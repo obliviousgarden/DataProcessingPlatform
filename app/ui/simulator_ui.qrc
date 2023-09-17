@@ -6,6 +6,7 @@
     <file>source/formula_m_b.png</file>
     <file>source/formula_m_l.png</file>
     <file>source/formula_m_t.png</file>
+    <file>source/formula_m_l_2.png</file>
   </qresource>
   <qresource prefix="Icon">
     <file>simulator.ico</file>

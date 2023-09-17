@@ -166,7 +166,6 @@ class ScienceUnit(Enum):
         return unit_list
 
 def science_unit_convert(from_list:list,from_unit:Unit,to_unit:Unit)->list:
-    # FIXME:ScienceUnit 转为 Unit
     # print(from_list,from_unit,to_unit)
     # print(ScienceUnit.classify_unit(from_unit),ScienceUnit.classify_unit(to_unit),ScienceUnit.classify_unit(from_unit)==ScienceUnit.classify_unit(to_unit))
     for index in range(from_list.__len__()):

@@ -10,7 +10,7 @@ from app.utils.science_unit import ScienceUnit,science_unit_convert
 from app.utils.science_base import PhysicalQuantity
 from scipy import interpolate
 from joblib import Parallel, delayed
-from numba import cfunc
+# from numba import cfunc
 
 
 class MagnetizationSimulator:
@@ -93,18 +93,25 @@ class MagnetizationSimulator:
         # 这里定义一个有4个数组的元组，按照顺序分别代表 H下降，H正 H下降，H负 H上升，H负 H上升，H正
         trend_break_index = 0
         sign_break_index = []
-        for i in range(h_list.size):
+
+        # FIXME: 此处变为了取中间位置的值，如果来回的横轴密度不同则有可能出问题
+        for i in range(h_list.size-4):
             # 这里后方需要进行两次判断的理由是因为实际的H控制有一定的误差，不是一直单调变化的
             if (h_list[0] > h_list[1] and h_list[i] < h_list[i + 1] and h_list[i + 1] < h_list[i + 2] and h_list[i + 2] < h_list[i + 3]) or (
                     h_list[0] < h_list[1] and h_list[i] > h_list[i + 1] and  h_list[i + 1] > h_list[i + 2] and h_list[i + 2] > h_list[i + 3]):
                 trend_break_index = i
                 break
+        # if trend_break_index == 0:
+        #     trend_break_index = int(h_list.size/2)
         # 注意！此处判断H方向翻转的条件：i+1为0 i和i+2符号相反 OR i+1不为0 i和i+1符号相反
-        for i in range(h_list.size):
+        # 注意！此处判断H方向翻转的条件：i+1为0 i和i+2符号相反 OR i+1不为0 i和i+1符号相反
+        for i in range(h_list.size-3):
             if len(sign_break_index) == 2:
                 break
             elif (h_list[i] * h_list[i + 2] < 0 and h_list[i + 1] == 0) or (h_list[i + 1] * h_list[i + 2] < 0):
                 sign_break_index.append(i + 1)
+        # if len(sign_break_index) < 2:
+        #     sign_break_index = [int(h_list.size/4),int(3*h_list.size/4)]
         h1_list = []
         h2_list = []
         h3_list = []
@@ -163,15 +170,24 @@ class MagnetizationSimulator:
         print('开始模拟')
         h_raw, m_raw, m_0_list, break_index_list, length, width, thickness = self.get_data(file_name,file_path)
         print('获取数据完毕', h_raw, m_raw)
-        # 模型 1:Jiles-Atherton, 模型 2:Brillouin, 模型 3:Langevin, 模型 4:Takacs
+        m_max = np.max(m_raw)
+        n = 1
+        # 模型 1:Jiles-Atherton, 模型 2:Brillouin, 模型 3:Langevin, 模型 4:Takacs, 模型 5:Langevin-2
         if self.model == 4:
             print('Takecs模型暂时不可用')
             return {'popt': [], 'pcov': [], 'perr': []}
+        elif self.model == 5:
+            n = self.p0.pop()
+            self.bounds[0].pop()
+            self.bounds[1].pop()
+            print(n)
+
         popt, pcov = curve_fit(
             {1: Jiles_Atherton_Model(m_0_list=m_0_list, break_index_list=break_index_list).func_Jiles_Atherton,
              2: Brillouin_Model(g_j=self.g_j, temp=self.temp, distribution=self.distribution_flag).func_Brillouin,
              3: Langevin_Model(g_j=self.g_j, temp=self.temp, distribution=self.distribution_flag).func_Langevin,
-             4: Takacs_Model(g_j=self.g_j, temp=self.temp, break_index_list=break_index_list).func_Takacs}.get(self.model)
+             4: Takacs_Model(g_j=self.g_j, temp=self.temp, break_index_list=break_index_list).func_Takacs,
+             5: Langevin_Model_2(g_j=self.g_j, temp=self.temp, m_max=m_max, n=n).func_Langevin_2}.get(self.model)
             , h_raw
             , m_raw
             , p0=self.p0
@@ -198,8 +214,9 @@ class MagnetizationSimulator:
                 m_cal = Langevin_Model(g_j=self.g_j, temp=self.temp, distribution=self.distribution_flag).func_Langevin(h_raw, popt[0], popt[1])
         elif self.model == 4:
             # 模型暂时被封住了
-            m_cal = Takacs_Model(g_j=self.g_j, temp=self.temp, break_index_list=break_index_list).func_Takacs(h_raw, popt[0],
-                                                                                                    popt[1])
+            m_cal = Takacs_Model(g_j=self.g_j, temp=self.temp, break_index_list=break_index_list).func_Takacs(h_raw, popt[0], popt[1])
+        elif self.model == 5:
+            m_cal = Langevin_Model_2(g_j=self.g_j, temp=self.temp, m_max=m_max, n=n).func_Langevin_2(h_raw, popt[0], popt[1])
 
         ax1 = plt.subplot(2, 1, 1)
         ax2 = plt.subplot(2, 1, 2)
@@ -235,7 +252,10 @@ class MagnetizationSimulator:
         plt.show()
 
         if self.distribution_flag:
-            sigma = popt[2]
+            if self.model == 5:
+                sigma = popt[0]
+            else:
+                sigma = popt[2]
         else:
             sigma = 0.
 
@@ -481,6 +501,7 @@ class Langevin_Model:
         dm = np.multiply(np.multiply(m_s, l_x), f_y)
         return dm
 
+
 class Takacs_Model:
     def __init__(self, g_j, temp, break_index_list):
         self.g_j = g_j
@@ -506,10 +527,68 @@ class Takacs_Model:
         return m
 
 
+class Langevin_Model_2:
+    def __init__(self, g_j, temp, m_max, n):
+        self.g_j = g_j
+        self.temp = temp
+        self.m_max = m_max
+        self.n = n
+
+    def func_Langevin_2(self, h, sigma, dm):
+        # 参数含义:
+        # h External Magnetic Field
+        # m_s Saturation Magnetization
+        # j Total Angular Momentum
+        # temp Temperature
+        # sigma Standard Deviation of the Diameter Distribution (OPTIONAL)
+        # Dm Average Value of the Diameter Distribution (OPTIONAL)
+        # print(time.asctime(time.localtime(time.time())))
+
+        print("g_j={0},temp={1},M_max={2}A/m,N={3},sigma={4},Dm={5}m.".format(self.g_j, self.temp, self.m_max, self.n, sigma, dm))
+        # 此处和Model-3的积分计算不同，此处是累加
+        # 通过Dm的上下限和细度N 划分出d的1×N的矩阵
+        # d = np.linspace(1.e-14,1.e-8,self.n).reshape(1,self.n)
+        # x = np.divide(d,dm)
+        # lndf_x = lognorm.pdf(x, np.log(sigma))
+        # lndf_d = np.multiply(x,lndf_x)
+        # d = np.linspace(10.,100.,self.n).reshape(1,self.n)
+        # x = np.divide(d,dm)
+        # lndf_x = lognorm.pdf(x, sigma)
+        # lndf_d = np.multiply(x,lndf_x)
+        d = np.linspace(1.e-10,1.e-8,self.n).reshape(1,self.n)
+        x = np.divide(d,dm)
+        s = np.log(sigma)
+        lndf_x = lognorm.pdf(x,s)
+        lndf_d = np.multiply(x,lndf_x)
+        # M_Co = 1349486.25  # A/m, calculated value, g_j = 1.60
+        # m_Co = 1450697.72  # A/m, observed value, g_j = 1.72
+        # m_Co = 145069.772  # A/m, observed value, g_j = 1.72
+        m_Co = self.m_max
+        alpha_term_1 = np.divide(np.multiply(m_Co,h),np.multiply(sci_const.k_B,self.temp)).reshape(np.size(h),1)
+        # for i in range(self.n):
+        #     alpha_term_2_i = np.multiply(4.*np.pi/3.,np.power(np.divide(d[i],2),3))
+        #     alpha_i = np.multiply(alpha_term_1, alpha_term_2_i)
+        alpha_term_2 = np.multiply(4.*np.pi/3.,np.power(np.divide(d,2.),3.))
+        alpha = np.multiply(alpha_term_1, alpha_term_2)
+        l_alpha = np.subtract(np.reciprocal(np.tanh(alpha)),
+                              np.reciprocal(alpha))
+        m_term_1 = np.multiply(4.*np.pi/3.,np.power(np.divide(d,2.),3.))
+        m_term_2 = np.multiply(lndf_d,l_alpha)
+        m = np.multiply(m_Co,np.multiply(m_term_1,m_term_2))
+        m_sum = np.sum(np.transpose(m), axis=0)
+        magnification = self.m_max / np.max(m_sum)
+        m_sum = np.multiply(m_sum, magnification)
+        return m_sum
+
+
+
 if __name__ == '__main__':
-    x = [0,1,2,3,4,5,6,7,8,9,10]
-    f = lognorm.pdf(x, 0.2, loc=0, scale= 5)
-    print(x,f)
+    # a=[[1,2,3],[2,2,2]]
+    # print(np.sum(a,axis=0))
+
+    # x = [0,1,2,3,4,5,6,7,8,9,10]
+    # f = lognorm.pdf(x, 0.2, loc=0, scale= 5)
+    # print(x,f)
     # print(np.vsplit(test_h_list,3))
     # print(np.dsplit(test_h_list,3))
     #  J-A Model
@@ -555,3 +634,20 @@ if __name__ == '__main__':
     #     bounds=([1e4,0.1], [1e20, 100])
     # )
     # magnetization_simulator.simulate(g_j=g_j,temp=300)
+
+    # L Model (new)
+    # m_s, j, sigma(OPTIONAL)
+    # g_j = sci_const.Lande_g_Factor(3 / 2, 3, 9 / 2)  # Co2+ ion
+    my_simulator = MagnetizationSimulator(model=5,
+                                          first_pos_info_tuple=((88, 10, 'Oersted(Oe)'), (88, 11, '*Magn.Moment(emu)')),
+                                          bg_file_path='D:\\PycharmProjects\\AIProcessingPlatform\\app\\ui\\datafortest\\#S328',
+                                          size_dict={'#S328': [5.0, 5.0, 1000.0]},
+                                          p0=[1.2, 8.e-9, 200],
+                                          bounds=([1.0, 1.e-10, 10], [2.0, 1.e-8, 1000]),
+                                          g_j=1.3341064347922666,
+                                          temp=300,
+                                          distribution_flag=True)
+    result_dict = my_simulator.simulate('#S328',
+                                                 'D:\\PycharmProjects\\AIProcessingPlatform\\app\\ui\\datafortest\\BG20220321')
+    print("111")
+

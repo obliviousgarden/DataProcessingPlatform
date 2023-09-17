@@ -1,7 +1,6 @@
 from app.utils.science_unit import Unit, ScienceUnit
 import numpy as np
 from app.utils import sci_const
-# TODO: 重写方法 Wavelength变为了Length
 
 class ScienceUnitConverter:
     def __init__(self):
