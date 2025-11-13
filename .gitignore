@@ -130,4 +130,4 @@ dmypy.json
 
 # Userdefined
 app/dataset/
-app/others/graphics_processing/id_photos/
+../Tools/tools/graphics_processing/id_photos/

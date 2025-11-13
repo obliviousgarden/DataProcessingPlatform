@@ -98,21 +98,21 @@ class ModalMagnetization(object):
 
     def setupUi(self):
         # 初始化参数UI
-        self.parent.Slider_ms.setValue(
-            (np.log10(self.ms) - np.log10(self.ms_min)) / (np.log10(self.ms_max / self.ms_min)) * 100.0)
-        self.parent.Slider_a.setValue(
-            (np.log10(self.a) - np.log10(self.a_min)) / (np.log10(self.a_max / self.a_min)) * 100.0)
-        self.parent.Slider_k.setValue(
-            (np.log10(self.k) - np.log10(self.k_min)) / (np.log10(self.k_max / self.k_min)) * 100.0)
-        self.parent.Slider_alfa.setValue((self.alfa - self.alfa_min) / (self.alfa_max - self.alfa_min) * 100.0)
-        self.parent.Slider_c.setValue((self.c - self.c_min) / (self.c_max - self.c_min) * 100.0)
-        self.parent.Slider_j.setValue(
-            (np.log10(self.j) - np.log10(self.j_min)) / (np.log10(self.j_max / self.j_min)) * 100.0)
-        self.parent.Slider_sigma.setValue((self.sigma - self.sigma_min) / (self.sigma_max - self.sigma_min) * 100.0)
-        self.parent.Slider_dm.setValue(
-            (np.log10(self.dm) - np.log10(self.dm_min)) / (np.log10(self.dm_max / self.dm_min)) * 100.0)
-        self.parent.Slider_n.setValue(
-            int((np.log10(self.n) - np.log10(self.n_min)) / (np.log10(self.n_max / self.n_min)) * 100.0))
+        self.parent.Slider_ms.setValue(int(
+            (np.log10(self.ms) - np.log10(self.ms_min)) / (np.log10(self.ms_max / self.ms_min)) * 100.0))
+        self.parent.Slider_a.setValue(int(
+            (np.log10(self.a) - np.log10(self.a_min)) / (np.log10(self.a_max / self.a_min)) * 100.0))
+        self.parent.Slider_k.setValue(int(
+            (np.log10(self.k) - np.log10(self.k_min)) / (np.log10(self.k_max / self.k_min)) * 100.0))
+        self.parent.Slider_alfa.setValue(int((self.alfa - self.alfa_min) / (self.alfa_max - self.alfa_min) * 100.0))
+        self.parent.Slider_c.setValue(int((self.c - self.c_min) / (self.c_max - self.c_min) * 100.0))
+        self.parent.Slider_j.setValue(int(
+            (np.log10(self.j) - np.log10(self.j_min)) / (np.log10(self.j_max / self.j_min)) * 100.0))
+        self.parent.Slider_sigma.setValue(int((self.sigma - self.sigma_min) / (self.sigma_max - self.sigma_min) * 100.0))
+        self.parent.Slider_dm.setValue(int(
+            (np.log10(self.dm) - np.log10(self.dm_min)) / (np.log10(self.dm_max / self.dm_min)) * 100.0))
+        self.parent.Slider_n.setValue(int(
+            int((np.log10(self.n) - np.log10(self.n_min)) / (np.log10(self.n_max / self.n_min)) * 100.0)))
 
         self.parent.lcdNumber_ms.display('%.1e' % self.ms)
         self.parent.lcdNumber_a.display('%.1e' % self.a)

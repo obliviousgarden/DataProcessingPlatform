@@ -1,4 +1,4 @@
-from aenum import Enum, unique, skip,EnumType
+from aenum import Enum, unique,skip,EnumType
 import numpy as np
 from app.utils import sci_const
 from app.utils.science_base import Unit

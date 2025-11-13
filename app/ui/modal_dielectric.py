@@ -86,14 +86,14 @@ class ModalDielectric(object):
     def setupUi(self):
         pass
         # 初始化参数UI
-        self.parent.Slider_alpha.setValue((self.alpha - self.alpha_min) / (self.alpha_max - self.alpha_min) * 100.0)
-        self.parent.Slider_beta.setValue((self.beta - self.beta_min) / (self.beta_max - self.beta_min) * 100.0)
-        self.parent.Slider_tau.setValue(
-            (np.log10(self.tau) - np.log10(self.tau_min)) / (np.log10(self.tau_max / self.tau_min)) * 100.0)
-        self.parent.Slider_epsiloninf.setValue(
-            (self.epsilon_inf - self.epsilon_inf_min) / (self.epsilon_inf_max - self.epsilon_inf_min) * 100.0)
-        self.parent.Slider_deltaepsilon.setValue(
-            (self.delta_epsilon - self.delta_epsilon_min) / (self.delta_epsilon_max - self.delta_epsilon_min) * 100.0)
+        self.parent.Slider_alpha.setValue(int((self.alpha - self.alpha_min) / (self.alpha_max - self.alpha_min) * 100.0))
+        self.parent.Slider_beta.setValue(int((self.beta - self.beta_min) / (self.beta_max - self.beta_min) * 100.0))
+        self.parent.Slider_tau.setValue(int(
+            (np.log10(self.tau) - np.log10(self.tau_min)) / (np.log10(self.tau_max / self.tau_min)) * 100.0))
+        self.parent.Slider_epsiloninf.setValue(int(
+            (self.epsilon_inf - self.epsilon_inf_min) / (self.epsilon_inf_max - self.epsilon_inf_min) * 100.0))
+        self.parent.Slider_deltaepsilon.setValue(int(
+            (self.delta_epsilon - self.delta_epsilon_min) / (self.delta_epsilon_max - self.delta_epsilon_min) * 100.0))
 
         self.parent.lcdNumber_alpha.display(str(self.alpha))
         self.parent.lcdNumber_beta.display(str(self.beta))
