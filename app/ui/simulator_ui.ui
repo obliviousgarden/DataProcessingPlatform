@@ -74,7 +74,7 @@
        <bool>false</bool>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tabDielectric">
        <attribute name="title">
@@ -834,28 +834,6 @@
                      </property>
                     </widget>
                    </item>
-                   <item row="3" column="1">
-                    <widget class="QSlider" name="Slider_epsiloninf">
-                     <property name="cursor">
-                      <cursorShape>ArrowCursor</cursorShape>
-                     </property>
-                     <property name="maximum">
-                      <number>100</number>
-                     </property>
-                     <property name="pageStep">
-                      <number>5</number>
-                     </property>
-                     <property name="value">
-                      <number>0</number>
-                     </property>
-                     <property name="orientation">
-                      <enum>Qt::Horizontal</enum>
-                     </property>
-                     <property name="tickPosition">
-                      <enum>QSlider::TicksAbove</enum>
-                     </property>
-                    </widget>
-                   </item>
                    <item row="4" column="0">
                     <widget class="QLCDNumber" name="lcdNumber_deltaepsilon">
                      <property name="font">
@@ -922,6 +900,28 @@
                      </property>
                      <property name="invertedControls">
                       <bool>false</bool>
+                     </property>
+                     <property name="tickPosition">
+                      <enum>QSlider::TicksAbove</enum>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="3" column="1">
+                    <widget class="QSlider" name="Slider_epsiloninf">
+                     <property name="cursor">
+                      <cursorShape>ArrowCursor</cursorShape>
+                     </property>
+                     <property name="maximum">
+                      <number>100</number>
+                     </property>
+                     <property name="pageStep">
+                      <number>5</number>
+                     </property>
+                     <property name="value">
+                      <number>0</number>
+                     </property>
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
                      </property>
                      <property name="tickPosition">
                       <enum>QSlider::TicksAbove</enum>
@@ -3184,7 +3184,7 @@
      <x>0</x>
      <y>0</y>
      <width>850</width>
-     <height>26</height>
+     <height>18</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -3274,7 +3274,6 @@
   <tabstop>Slider_alpha</tabstop>
   <tabstop>Slider_beta</tabstop>
   <tabstop>Slider_tau</tabstop>
-  <tabstop>Slider_epsiloninf</tabstop>
   <tabstop>Slider_deltaepsilon</tabstop>
   <tabstop>PushButton_simulate</tabstop>
   <tabstop>ListView_results</tabstop>

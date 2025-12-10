@@ -68,12 +68,12 @@ class ParametersRangeSettingDialog(Ui_ParametersRangeSettingDialog):
         self.tau_double_validator.setDecimals(2)
 
         self.epsiloninf_double_validator = QDoubleValidator()
-        self.epsiloninf_double_validator.setRange(0.0, 1000.0)
+        self.epsiloninf_double_validator.setRange(0.0, 500.0)
         self.epsiloninf_double_validator.setNotation(QDoubleValidator.StandardNotation)
         self.epsiloninf_double_validator.setDecimals(2)
 
         self.deltaepsilon_double_validator = QDoubleValidator()
-        self.deltaepsilon_double_validator.setRange(0.0, 10000.0)
+        self.deltaepsilon_double_validator.setRange(0.0, 1000.0)
         self.deltaepsilon_double_validator.setNotation(QDoubleValidator.StandardNotation)
         self.deltaepsilon_double_validator.setDecimals(2)
 

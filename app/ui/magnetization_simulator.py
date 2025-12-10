@@ -2,6 +2,8 @@ import time
 
 import numpy as np
 import matplotlib.pyplot as plt
+from numpy.polynomial.hermite import hermgauss
+from numpy.polynomial.laguerre import laggauss
 from scipy.optimize import curve_fit, least_squares
 from scipy.integrate import odeint, quad
 from scipy.stats import lognorm
@@ -443,6 +445,9 @@ class Langevin_Model:
         print("g_j={0},temp={1},m_s={2},j={3},distribution={4},D_m={5} m,sigma={6}".format(self.g_j, self.temp, m_s, j,
                                                                                  self.distribution,D_m, sigma))
         if self.distribution:
+            # TODO:把Tools中的Langevin Function的代码移植过来
+            print(f"Distribution is {self.distribution}")
+
             # 这里比较特殊，所有h被遍历
             start = time.time()
             m = []
@@ -459,8 +464,9 @@ class Langevin_Model:
                 h_sampling.append(np.max(h))
             m_sampling = []
             for var_h in h_sampling:
-                (var_m,abserr) = quad(self.func_Langevin_y,0,np.inf,args=(var_h,m_s,j,sigma),limlst=3)
+                # (var_m,abserr) = quad(self.func_Langevin_y,0,np.inf,args=(var_h,m_s,j,sigma),limlst=3)
                 # (var_m,abserr) = quad(self.func_Langevin_y,0,np.inf,args=(var_h,m_s,j,sigma))
+                var_m = self.fast_integral(var_h, m_s, j, sigma)
                 m_sampling.append(var_m)
             # 插值用函数
             interpolate_func = interpolate.interp1d(h_sampling,m_sampling,kind="slinear")
@@ -500,6 +506,22 @@ class Langevin_Model:
         f_y = lognorm.pdf(y, sigma)  # 这里已经进行了归一化，loc和scale使用默认的参数即可
         dm = np.multiply(np.multiply(m_s, l_x), f_y)
         return dm
+
+    def fast_integral(self, var_h, m_s, j, sigma, n=64):
+
+        # 取得 Gauss–Laguerre 节点与权重（0~∞）
+        x, w = laggauss(n)
+
+        # 你的原 integrand 是 func_Langevin_y(y, h, m_s, j, sigma)
+        # 这里直接在所有节点上计算 integrand
+        y = x  # Laguerre 的节点 y >= 0
+        f = self.func_Langevin_y(y, var_h, m_s, j, sigma)
+
+        # 积分 = Σ f(y_i) * w_i
+        return np.sum(f * w)
+
+
+
 
 
 class Takacs_Model:

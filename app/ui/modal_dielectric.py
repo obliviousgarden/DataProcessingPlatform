@@ -38,11 +38,11 @@ class ModalDielectric(object):
         self.tau_min = 1e-9
         self.tau_max = 1e-3
         self.tau_fix = False
-        self.epsilon_inf_min = 0.0
-        self.epsilon_inf_max = 50.0
+        self.epsilon_inf_min = 10.0
+        self.epsilon_inf_max = 60.0
         self.epsilon_inf_fix = False
-        self.delta_epsilon_min = 100.0
-        self.delta_epsilon_max = 1000.0
+        self.delta_epsilon_min = 300.0
+        self.delta_epsilon_max = 500.0
         self.delta_epsilon_fix = False
 
         self.alpha = self.alpha_max
