@@ -1,0 +1,39 @@
+message: "If you use this software, please cite it using the metadata below."
+
+title: "DataProcessingPlatform"
+version: 1.0.0
+
+authors:
+
+* family-names: "Wang"
+  given-names: "Cheng"
+  affiliation: "Frontier Research Institute for Interdisciplinary Sciences, Tohoku University"
+  orcid: "https://orcid.org/0000-0002-9850-5757"
+
+repository-code: "https://github.com/obliviousgarden/DataProcessingPlatform"
+
+abstract: >
+DataProcessingPlatform contains computational tools used for data analysis
+and theoretical simulations of the tunneling magneto-dielectric response
+in magnetic nanogranular films. The archived version accompanies the study
+"A compact formula for the maximum tunneling magneto-dielectric response
+in nanogranular films."
+
+keywords:
+
+* tunneling magneto-dielectric effect
+* nanogranular films
+* spin polarization
+* dielectric relaxation
+* numerical simulation
+
+preferred-citation:
+type: software
+title: "DataProcessingPlatform"
+version: 1.0.0
+authors:
+- family-names: "Wang"
+given-names: "Cheng"
+affiliation: "Frontier Research Institute for Interdisciplinary Sciences, Tohoku University"
+orcid: "https://orcid.org/0000-0002-9850-5757"
+repository-code: "https://github.com/obliviousgarden/DataProcessingPlatform"
