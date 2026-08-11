@@ -3,8 +3,6 @@ message: "If you use this software, please cite it using the metadata below."
 
 title: "DataProcessingPlatform"
 version: 1.0.0
-doi: "10.5281/zenodo.21885742"
-date-released: "2026-08-11"
 
 authors:
 
@@ -12,6 +10,10 @@ authors:
   given-names: "Cheng"
   affiliation: "Frontier Research Institute for Interdisciplinary Sciences, Tohoku University"
   orcid: "https://orcid.org/0000-0002-9850-5757"
+  title:obliviousgarden/DataProcessingPlatform: DataProcessingPlatform v1.0 – Code and Software used for the TMD study
+  version: v1.0_TMD
+  date-released: 2026-08-11
+  doi: "10.5281/zenodo.21885742"
 
 repository-code: "https://github.com/obliviousgarden/DataProcessingPlatform"
 
