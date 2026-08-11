@@ -1,26 +1,24 @@
-cff-version: 1.1.0
+cff-version: 1.2.0
 message: "If you use this software, please cite it using the metadata below."
 
 title: "DataProcessingPlatform"
-version: 1.0.0
+version: "v1.0_TMD"
+date-released: "2026-08-11"
+doi: "10.5281/zenodo.21885742"
 
 authors:
 
-- family-names: "Wang"
+* family-names: "Wang"
   given-names: "Cheng"
   affiliation: "Frontier Research Institute for Interdisciplinary Sciences, Tohoku University"
   orcid: "https://orcid.org/0000-0002-9850-5757"
-  title:obliviousgarden/DataProcessingPlatform: DataProcessingPlatform v1.0 – Code and Software used for the TMD study
-  version: v1.0_TMD
-  date-released: 2026-08-11
-  doi: "10.5281/zenodo.21885742"
 
 repository-code: "https://github.com/obliviousgarden/DataProcessingPlatform"
 
 abstract: >
 DataProcessingPlatform contains computational tools used for data analysis
 and theoretical simulations of the tunneling magneto-dielectric response
-in magnetic nanogranular films. The archived version accompanies the study
+in magnetic nanogranular films. This archived version accompanies the study
 "A compact formula for the maximum tunneling magneto-dielectric response
 in nanogranular films."
 
@@ -31,14 +29,3 @@ keywords:
 * spin polarization
 * dielectric relaxation
 * numerical simulation
-
-preferred-citation:
-type: software
-title: "DataProcessingPlatform"
-version: 1.0.0
-authors:
-- family-names: "Wang"
-given-names: "Cheng"
-affiliation: "Frontier Research Institute for Interdisciplinary Sciences, Tohoku University"
-orcid: "https://orcid.org/0000-0002-9850-5757"
-repository-code: "https://github.com/obliviousgarden/DataProcessingPlatform"
